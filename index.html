@@ -907,13 +907,16 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;body&gt;
 &lt;div id=&quot;packaging-capacity-dashboard&quot; aria-live=&quot;polite&quot;&gt;
   &lt;style&gt;
-    #packaging-capacity-dashboard { color: var(--foreground); font-size: var(--font-size-base); --soft-series:color-mix(in srgb, var(--blue) 52%, var(--background)); --soft-series-strong:color-mix(in srgb, var(--blue) 76%, var(--background)); --soft-reference:color-mix(in srgb, var(--orange) 78%, var(--background)); }
-    #packaging-capacity-dashboard .dashboard-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    #packaging-capacity-dashboard { color-scheme:light; color:CanvasText; background:Canvas; font-size:var(--font-size-base); --background:Canvas; --foreground:CanvasText; --card:color-mix(in srgb, CanvasText 4%, Canvas); --border:color-mix(in srgb, CanvasText 16%, Canvas); --muted-foreground:color-mix(in srgb, CanvasText 58%, Canvas); --soft-series:color-mix(in srgb, var(--blue) 42%, Canvas); --soft-series-strong:color-mix(in srgb, var(--blue) 68%, Canvas); --soft-reference:color-mix(in srgb, var(--orange) 76%, Canvas); }
+    #packaging-capacity-dashboard .dashboard-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
     #packaging-capacity-dashboard .dashboard-head h2 { margin:0; }
+    #packaging-capacity-dashboard .eyebrow { margin:0 0 4px; color:var(--muted-foreground); font-size:.85em; font-weight:500; letter-spacing:.06em; text-transform:uppercase; }
+    #packaging-capacity-dashboard .period { color:var(--muted-foreground); }
     #packaging-capacity-dashboard .viz-grid { margin-bottom:16px; }
+    #packaging-capacity-dashboard .chart-heading { margin:22px 0 4px; }
     #packaging-capacity-dashboard .chart-wrap { width:100%; min-height:350px; }
     #packaging-capacity-dashboard .chart-wrap svg { display:block; width:100%; height:auto; }
-    #packaging-capacity-dashboard .detail { margin-top:10px; min-height:1.4em; }
+    #packaging-capacity-dashboard .detail { margin-top:12px; min-height:1.4em; }
     #packaging-capacity-dashboard .guide { stroke:var(--border); stroke-width:1; }
     #packaging-capacity-dashboard .axis { stroke:var(--border); stroke-width:1; }
     #packaging-capacity-dashboard .average { stroke:var(--soft-reference); stroke-width:2; stroke-dasharray:6 4; }
@@ -927,14 +930,15 @@ html&gt;body{padding:0}&lt;/style&gt;
     #packaging-capacity-dashboard .scenario { margin-top:20px; }
     #packaging-capacity-dashboard .scenario h3 { margin-bottom:8px; }
     #packaging-capacity-dashboard .scenario output { display:block; margin-top:8px; color:var(--foreground); font-weight:500; }
+    #packaging-capacity-dashboard caption { color:var(--muted-foreground); padding:14px 0 6px; text-align:left; }
     #packaging-capacity-dashboard .chart-label { fill:var(--foreground); font-size:12px; }
     #packaging-capacity-dashboard .chart-muted { fill:var(--muted-foreground); font-size:12px; }
     #packaging-capacity-dashboard .axis-title { fill:var(--foreground); font-size:12px; }
     #packaging-capacity-dashboard .table-responsive { margin-top:20px; }
   &lt;/style&gt;
   &lt;div class=&quot;dashboard-head&quot;&gt;
-    &lt;h2&gt;包裝產能儀表板&lt;/h2&gt;
-    &lt;span class=&quot;text-muted&quot;&gt;12 批次｜以填列工時計算&lt;/span&gt;
+    &lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;Operations dashboard&lt;/p&gt;&lt;h2&gt;包裝產能與效率&lt;/h2&gt;&lt;/div&gt;
+    &lt;span class=&quot;period&quot;&gt;12 批次｜資料期間 11/25–7/28&lt;/span&gt;
   &lt;/div&gt;
   &lt;div class=&quot;viz-grid&quot; aria-label=&quot;整體摘要&quot;&gt;
     &lt;section class=&quot;card viz-stat&quot;&gt;&lt;div class=&quot;text-muted&quot;&gt;總包裝量&lt;/div&gt;&lt;div class=&quot;viz-stat-value&quot;&gt;53,713&lt;/div&gt;&lt;div class=&quot;text-muted&quot;&gt;瓶&lt;/div&gt;&lt;/section&gt;
@@ -947,6 +951,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;button class=&quot;btn&quot; id=&quot;view-output&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;瓶數與工時&lt;/button&gt;
     &lt;button class=&quot;btn&quot; id=&quot;view-scatter&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;工時與產出關係&lt;/button&gt;
   &lt;/div&gt;
+  &lt;h3 class=&quot;chart-heading&quot; id=&quot;chart-heading&quot;&gt;各批包裝產能&lt;/h3&gt;
   &lt;div class=&quot;chart-wrap&quot; id=&quot;chart-wrap&quot;&gt;&lt;/div&gt;
   &lt;p class=&quot;detail text-muted&quot; id=&quot;detail&quot;&gt;點選圖中任一批次，查看詳細數據。&lt;/p&gt;
   &lt;section class=&quot;scenario card&quot; aria-label=&quot;目標工時試算&quot;&gt;
@@ -957,6 +962,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;/section&gt;
   &lt;div class=&quot;table-responsive&quot;&gt;
     &lt;table class=&quot;table table-sm&quot; aria-label=&quot;包裝批次效率明細&quot;&gt;
+      &lt;caption&gt;批次效率明細&lt;/caption&gt;
       &lt;thead&gt;&lt;tr&gt;&lt;th&gt;日期&lt;/th&gt;&lt;th class=&quot;text-end&quot;&gt;工時&lt;/th&gt;&lt;th class=&quot;text-end&quot;&gt;瓶數&lt;/th&gt;&lt;th class=&quot;text-end&quot;&gt;產能&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
       &lt;tbody id=&quot;data-rows&quot;&gt;&lt;/tbody&gt;
     &lt;/table&gt;
@@ -981,6 +987,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const buttons = {rate:root.querySelector(&#x27;#view-rate&#x27;), trend:root.querySelector(&#x27;#view-trend&#x27;), output:root.querySelector(&#x27;#view-output&#x27;), scatter:root.querySelector(&#x27;#view-scatter&#x27;)};
       const detail = root.querySelector(&#x27;#detail&#x27;);
       const chartWrap = root.querySelector(&#x27;#chart-wrap&#x27;);
+      const chartHeading = root.querySelector(&#x27;#chart-heading&#x27;);
       const color = name =&gt; getComputedStyle(root).getPropertyValue(name).trim();
       function selected(d) { detail.textContent = `${d.date}：${fmt(d.bottles)} 瓶，${d.hours} 小時，產能 ${fmt(Math.round(d.rate))} 瓶／工時（相對平均 ${d.rate &gt;= average ? &#x27;+&#x27; : &#x27;&#x27;}${Math.round((d.rate / average - 1) * 100)}%）。`; }
       function baseSvg(title, desc) {
@@ -1025,7 +1032,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         g.selectAll(&#x27;circle&#x27;).data(data).join(&#x27;circle&#x27;).attr(&#x27;class&#x27;,&#x27;point&#x27;).attr(&#x27;tabindex&#x27;,0).attr(&#x27;r&#x27;,7).attr(&#x27;cx&#x27;,d=&gt;x(d.hours)).attr(&#x27;cy&#x27;,d=&gt;y(d.bottles)).attr(&#x27;aria-label&#x27;,d=&gt;`${d.date}，${d.hours}小時，${fmt(d.bottles)}瓶`).on(&#x27;click&#x27;,(_,d)=&gt;selected(d)).on(&#x27;keydown&#x27;,(e,d)=&gt;{if(e.key===&#x27;Enter&#x27;||e.key===&#x27; &#x27;){e.preventDefault();selected(d);}}).append(&#x27;title&#x27;).text(d=&gt;`${d.date}: ${fmt(d.bottles)} 瓶`);
         axisLabel(svg,&#x27;工時（小時）&#x27;,margin.left+iw/2,height-10,false); axisLabel(svg,&#x27;包裝瓶數&#x27;,17,margin.top+ih/2,true);
       }
-      function render() { if(mode===&#x27;rate&#x27;) rateChart(); else if(mode===&#x27;trend&#x27;) trendChart(); else if(mode===&#x27;output&#x27;) outputChart(); else scatterChart(); }
+      function render() { const headings={rate:&#x27;各批包裝產能&#x27;,trend:&#x27;產能效率趨勢&#x27;,output:&#x27;各批包裝瓶數&#x27;,scatter:&#x27;工時與產出關係&#x27;}; chartHeading.textContent=headings[mode]; if(mode===&#x27;rate&#x27;) rateChart(); else if(mode===&#x27;trend&#x27;) trendChart(); else if(mode===&#x27;output&#x27;) outputChart(); else scatterChart(); }
       Object.entries(buttons).forEach(([key,button]) =&gt; button.addEventListener(&#x27;click&#x27;,() =&gt; { mode=key; Object.entries(buttons).forEach(([k,b])=&gt;{b.setAttribute(&#x27;aria-pressed&#x27;,String(k===key)); b.classList.toggle(&#x27;btn-primary&#x27;,k===key);}); render(); }));
       const target = root.querySelector(&#x27;#target-bottles&#x27;), targetValue=root.querySelector(&#x27;#target-value&#x27;), scenarioOutput=root.querySelector(&#x27;#scenario-output&#x27;);
       function updateScenario() { const bottles=Number(target.value), hours=bottles/average; targetValue.textContent=fmt(bottles); scenarioOutput.textContent=`依目前平均產能，預計需要 ${hours.toFixed(1)} 小時。`; }
@@ -1279,3 +1286,4 @@ html&gt;body{padding:0}&lt;/style&gt;
 "></iframe>
 </body>
 </html>
+
