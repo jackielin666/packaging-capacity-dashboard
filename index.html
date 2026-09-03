@@ -262,7 +262,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
         <thead><tr>
           <th>品號</th><th class="n">生產天數</th><th class="n">包裝量</th>
           <th class="n opt">批次</th><th class="n">平均產能</th><th class="n opt">每千瓶工時</th>
-          <th class="n">近三月 vs 平常</th><th>狀態</th>
+          <th class="n">近 3 個生產月 vs 平常</th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
       </table>
@@ -631,10 +631,15 @@ function analyse(batches) {
     }
     const months = [...byMonth.entries()].sort()
       .map(([m, [b, h]]) => ({ m, b, h: +h.toFixed(2), rate: Math.round(b / h) }));
+    // 「近期」一律以該品項自己最後 N 個「有生產的月份」為準。
+    // 用月曆月份會失真 —— 接單式生產下很多品項不是每月都做，
+    // 例如 A1040 八月沒生產，用月曆月只涵蓋兩個月，會算出 -8% 的假警訊。
     const last3 = months.slice(-DECLINE_MONTHS);
     const declining = months.length >= DECLINE_MONTHS
       && last3.every(x => x.rate < med * DECLINE);
-    const recentRates = list.filter(x => recent3.has(x.m)).map(x => x.b / x.h);
+    const belowCount = last3.filter(x => x.rate < med * DECLINE).length;
+    const ownRecent = new Set(last3.map(x => x.m));
+    const recentRates = list.filter(x => ownRecent.has(x.m)).map(x => x.b / x.h);
     const vsUsual = recentRates.length ? mean(recentRates) / med - 1 : null;
 
     const cv = Math.round(100 * stdev(rates) / mean(rates));
@@ -647,6 +652,10 @@ function analyse(batches) {
     else if (recentOutliers.length) {
       status = 'alert'; statusWhy = `近三月 ${recentOutliers.length} 批離群`;
     } else if (cv > CV_WATCH) { status = 'watch'; statusWhy = `批次落差 ${cv}%`; }
+    // 只有在近期整體確實偏低時才這樣寫 —— 否則會出現「+2.5% 卻說偏低」的反向矛盾
+    else if (belowCount && vsUsual !== null && vsUsual < 0) {
+      statusWhy = `近期偏低，但未連續（${belowCount}/${last3.length} 個月）`;
+    }
 
     skus.push({
       sku, b: Math.round(B), h: +H.toFixed(1), d: days, n: list.length,
@@ -657,7 +666,7 @@ function analyse(batches) {
       intensity: +(overallRate / rate).toFixed(2),
       hShare: +(100 * H / totalH).toFixed(2), bShare: +(100 * B / totalB).toFixed(2),
       shortN: short.length, shortH: +short.reduce((a, x) => a + x.h, 0).toFixed(1),
-      status, statusWhy, declining, vsUsual, months, outliers, laggards,
+      status, statusWhy, declining, belowCount, vsUsual, months, outliers, laggards,
       recentOutlierN: recentOutliers.length,
     });
   }
@@ -750,7 +759,9 @@ function buildAlerts(skus, meta) {
 
 global.PackingEngine = {
   supported, readXlsx, toBatches, analyse, guessStartYear,
-  thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES },
+  thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES,
+    // 箭頭轉紅／轉綠的門檻，刻意與 DECLINE 同一個數字，避免「箭頭紅、狀態正常」
+    ARROW: Math.round((1 - DECLINE) * 100) / 100 },
   isOutlier: (batch, sku) => { const r = batch.b / batch.h;
     return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
 };
@@ -1045,10 +1056,12 @@ function renderOverview() {
   $('toggleAll').textContent = showAll ? `只看前 ${TOP_N} 支` : `顯示全部 ${skus.length} 支`;
 
   $('tbOverview').innerHTML = list.map(s => {
+    // 轉色門檻刻意與燈號的「變慢」門檻同一個數字，否則會出現「箭頭紅、狀態正常」
+    const lim = Math.round(E.thresholds.ARROW * 100);
     const d = s.vsUsual;
     const pct = d == null ? null : Math.round(d * 100);
-    const cls = pct == null ? 'flat' : pct <= -5 ? 'dn' : pct >= 5 ? 'up' : 'flat';
-    const arrow = pct == null ? '—' : pct <= -5 ? '▼' : pct >= 5 ? '▲' : '▬';
+    const cls = pct == null ? 'flat' : pct <= -lim ? 'dn' : pct >= lim ? 'up' : 'flat';
+    const arrow = pct == null ? '—' : pct <= -lim ? '▼' : pct >= lim ? '▲' : '▬';
     return `<tr class="clickable" data-goto="${s.sku}">
       <td class="sku">${s.sku}</td>
       <td class="n" data-l="生產天數">${s.d}</td>
@@ -1056,7 +1069,7 @@ function renderOverview() {
       <td class="n opt" data-l="批次">${s.n}</td>
       <td class="n" data-l="平均產能">${fmt(s.rate)}</td>
       <td class="n opt" data-l="每千瓶工時">${s.hPer1k.toFixed(2)}</td>
-      <td class="n delta ${cls}" data-l="近三月 vs 平常">${arrow}${pct == null ? '' : ' ' + (pct > 0 ? '+' : '') + pct + '%'}</td>
+      <td class="n delta ${cls}" data-l="近 3 個生產月 vs 平常">${arrow}${pct == null ? '' : ' ' + (pct > 0 ? '+' : '') + pct + '%'}</td>
       <td class="st"><div class="lamp ${s.status}"><b>${LAMP[s.status]}</b>
         <span class="why">${s.statusWhy}</span></div></td></tr>`;
   }).join('');
@@ -1064,12 +1077,17 @@ function renderOverview() {
   const t = E.thresholds, c = {};
   state.R.skus.forEach(s => c[s.status] = (c[s.status] || 0) + 1);
   const dot = cls => `<span class="lamp ${cls}" style="display:inline-flex"></span>`;
+  const lim = Math.round(t.ARROW * 100);
   $('lampLegend').innerHTML =
-    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）最近 3 個生產月都比自己平常慢 10% 以上，
+    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）最近 3 個生產月都比自己平常慢 ${lim}% 以上，
      或最近三個月出現離群批次　·　
      ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）批次之間落差偏大（變異係數 &gt; ${t.CV_WATCH}%）　·　
      ${dot('ok')} <b>正常</b>（${c.ok || 0} 支）　·　
-     ${dot('thin')} <b>批次太少</b>（${c.thin || 0} 支）全年不到 ${t.MIN_BATCHES} 批，不做判定`;
+     ${dot('thin')} <b>批次太少</b>（${c.thin || 0} 支）全年不到 ${t.MIN_BATCHES} 批，不做判定
+     <br><span style="color:var(--ink-3)">
+     「近 3 個生產月」是<b>該品項自己有生產的月份</b>，不是月曆月份 ——
+     很多品項不是每月都做，用月曆月份會失真。箭頭在 ±${lim}% 以內顯示為灰色，
+     與燈號用同一個門檻，所以不會出現「箭頭紅、狀態正常」而沒有說明的情況。</span>`;
 }
 $('tabFreq').onclick = () => { tab = 'freq'; syncTabs(); };
 $('tabVol').onclick = () => { tab = 'vol'; syncTabs(); };

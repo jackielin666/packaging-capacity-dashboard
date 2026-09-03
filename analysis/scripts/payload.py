@@ -74,7 +74,9 @@ def build(rows):
         med = st.median(rates)
         last3 = month_rates[-3:]
         declining = len(month_rates) >= 3 and all(x["rate"] < med * 0.9 for x in last3)
-        recent = {m["m"] for m in month_rates[-3:]}
+        # 「近期」以該品項自己最後 3 個有生產的月份為準，不是月曆月份 ——
+        # 接單式生產下很多品項不是每月都做，用月曆月份會失真
+        recent = {m["m"] for m in last3}
         recent_rates = [r["b"] / r["h"] for r in batches if r["month"] in recent]
         vs_usual = (st.mean(recent_rates) / med - 1) if recent_rates else None
 

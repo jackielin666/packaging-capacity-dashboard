@@ -278,10 +278,15 @@ function analyse(batches) {
     }
     const months = [...byMonth.entries()].sort()
       .map(([m, [b, h]]) => ({ m, b, h: +h.toFixed(2), rate: Math.round(b / h) }));
+    // 「近期」一律以該品項自己最後 N 個「有生產的月份」為準。
+    // 用月曆月份會失真 —— 接單式生產下很多品項不是每月都做，
+    // 例如 A1040 八月沒生產，用月曆月只涵蓋兩個月，會算出 -8% 的假警訊。
     const last3 = months.slice(-DECLINE_MONTHS);
     const declining = months.length >= DECLINE_MONTHS
       && last3.every(x => x.rate < med * DECLINE);
-    const recentRates = list.filter(x => recent3.has(x.m)).map(x => x.b / x.h);
+    const belowCount = last3.filter(x => x.rate < med * DECLINE).length;
+    const ownRecent = new Set(last3.map(x => x.m));
+    const recentRates = list.filter(x => ownRecent.has(x.m)).map(x => x.b / x.h);
     const vsUsual = recentRates.length ? mean(recentRates) / med - 1 : null;
 
     const cv = Math.round(100 * stdev(rates) / mean(rates));
@@ -294,6 +299,10 @@ function analyse(batches) {
     else if (recentOutliers.length) {
       status = 'alert'; statusWhy = `近三月 ${recentOutliers.length} 批離群`;
     } else if (cv > CV_WATCH) { status = 'watch'; statusWhy = `批次落差 ${cv}%`; }
+    // 只有在近期整體確實偏低時才這樣寫 —— 否則會出現「+2.5% 卻說偏低」的反向矛盾
+    else if (belowCount && vsUsual !== null && vsUsual < 0) {
+      statusWhy = `近期偏低，但未連續（${belowCount}/${last3.length} 個月）`;
+    }
 
     skus.push({
       sku, b: Math.round(B), h: +H.toFixed(1), d: days, n: list.length,
@@ -304,7 +313,7 @@ function analyse(batches) {
       intensity: +(overallRate / rate).toFixed(2),
       hShare: +(100 * H / totalH).toFixed(2), bShare: +(100 * B / totalB).toFixed(2),
       shortN: short.length, shortH: +short.reduce((a, x) => a + x.h, 0).toFixed(1),
-      status, statusWhy, declining, vsUsual, months, outliers, laggards,
+      status, statusWhy, declining, belowCount, vsUsual, months, outliers, laggards,
       recentOutlierN: recentOutliers.length,
     });
   }
@@ -397,7 +406,9 @@ function buildAlerts(skus, meta) {
 
 global.PackingEngine = {
   supported, readXlsx, toBatches, analyse, guessStartYear,
-  thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES },
+  thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES,
+    // 箭頭轉紅／轉綠的門檻，刻意與 DECLINE 同一個數字，避免「箭頭紅、狀態正常」
+    ARROW: Math.round((1 - DECLINE) * 100) / 100 },
   isOutlier: (batch, sku) => { const r = batch.b / batch.h;
     return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
 };
