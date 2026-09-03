@@ -14,6 +14,7 @@
 用法： python3 payload.py [rows.json路徑] [輸出路徑]
 """
 import json
+import math
 import statistics as st
 import sys
 from collections import defaultdict
@@ -29,7 +30,17 @@ MIN_HOURS = 20.0           # 變異規則的最小工時
 
 
 def percentile75(values):
-    return st.quantiles(values, n=4)[2] if len(values) > 3 else max(values)
+    """第 75 百分位，線性內插。
+
+    與 rules.js 用同一種定義 —— statistics.quantiles 預設是 exclusive 法，
+    算出來會偏高，兩邊的 P75 目標與可省工時就對不起來。
+    """
+    s = sorted(values)
+    if len(s) == 1:
+        return s[0]
+    pos = (len(s) - 1) * 0.75
+    lo, hi = math.floor(pos), math.ceil(pos)
+    return s[lo] if lo == hi else s[lo] + (s[hi] - s[lo]) * (pos - lo)
 
 
 def build(rows):
@@ -52,8 +63,24 @@ def build(rows):
         days = {b["date"] for b in batches}
         h_share = 100 * H / total_h
         intensity = overall_rate / rate
+        # 品項層級：每月產能、是否連續 3 個月低於自己的中位數
+        by_month = defaultdict(lambda: [0.0, 0.0])
+        for r in batches:
+            e = by_month[r["month"]]
+            e[0] += r["b"]
+            e[1] += r["h"]
+        month_rates = [{"m": m, "rate": round(b / h)}
+                       for m, (b, h) in sorted(by_month.items())]
+        med = st.median(rates)
+        last3 = month_rates[-3:]
+        declining = len(month_rates) >= 3 and all(x["rate"] < med * 0.9 for x in last3)
+        recent = {m["m"] for m in month_rates[-3:]}
+        recent_rates = [r["b"] / r["h"] for r in batches if r["month"] in recent]
+        vs_usual = (st.mean(recent_rates) / med - 1) if recent_rates else None
+
         skus.append({
             "sku": sku,
+            "declining": declining, "vsUsual": vs_usual, "months": month_rates,
             "b": round(B),
             "h": round(H, 1),
             "d": len(days),
@@ -154,96 +181,48 @@ def build(rows):
 
 
 def alerts(skus, months, meta, focus):
-    """六條偵測規則 —— 每月重跑就能自動列出踩線項目。"""
+    """兩條全廠層級的規則，與 rules.js 一致。
+
+    其餘提醒（批次落差、零星批次、集中度）改在儀表板點進單一品項時才出現；
+    「批次過碎」整條移除 —— 接單式生產，批量由訂單與排程決定，不是包裝可控。
+    """
     out = []
 
-    hogs = [s for s in skus
-            if s["intensity"] > INTENSITY_HIGH and s["hShare"] >= HOUR_SHARE_HIGH]
-    if hogs:
+    heavy = sorted(
+        (s for s in skus
+         if s["intensity"] > INTENSITY_HIGH and s["hShare"] >= HOUR_SHARE_HIGH),
+        key=lambda s: -s["hShare"])
+    if heavy:
         out.append({
-            "id": "intensity",
-            "level": "high",
-            "title": "資源佔用偏高的品項",
-            "rule": f"相對工時強度指數 > {INTENSITY_HIGH} 且 工時佔比 ≥ {HOUR_SHARE_HIGH}%",
-            "why": "產量佔比小、工時佔比大。先確認是瓶型使然還是排程造成，"
-                   "再決定要合批還是調線。",
+            "id": "heavy", "level": "info", "owner": "業務 / 生管",
+            "title": "吃工時但產量不高的品項",
+            "rule": f"每千瓶工時高於全廠平均 {INTENSITY_HIGH} 倍，"
+                    f"且占全廠工時 {HOUR_SHARE_HIGH}% 以上",
+            "why": "這不是包裝作業的問題 —— 瓶型與接單方式決定了它就是慢。"
+                   "提供給業務與生管參考：接單與排程時，這類品項的工時成本要先估進去。"
+                   f"（全廠另有 {meta['shortN']} 批未滿 1 小時，合計 {meta['shortH']} 小時"
+                   f"＝總工時的 {round(100 * meta['shortH'] / meta['hours'])}%。）",
             "items": [{"sku": s["sku"],
-                       "value": f"指數 {s['intensity']}　工時佔比 {s['hShare']}%",
-                       "detail": f"{s['hPer1k']} h/千瓶　{s['n']} 批 / {s['d']} 天"}
-                      for s in sorted(hogs, key=lambda s: -s["hShare"])],
+                       "value": f"每千瓶 {s['hPer1k']} 小時，是全廠平均的 {s['intensity']} 倍",
+                       "detail": f"只做了全廠 {s['bShare']}% 的瓶數，"
+                                 f"卻用掉 {s['hShare']}% 的工時"}
+                      for s in heavy],
         })
 
-    frag = [s for s in skus if s["shortShare"] > FRAGMENT_SHARE and s["hShare"] >= 1.0]
-    if frag:
+    declining = [s for s in skus if s.get("declining")]
+    declining.sort(key=lambda s: s["vsUsual"])
+    if declining:
         out.append({
-            "id": "fragment",
-            "level": "high",
-            "title": "批次過碎，有合批機會",
-            "rule": f"單批 < {SHORT_BATCH_H:g} 小時的批次佔比 > {FRAGMENT_SHARE}%（且工時佔比 ≥ 1%）",
-            "why": "零星批次的準備與換線成本無法攤提。改善方向是合批，不是要求線上加快。",
+            "id": "declining", "level": "high", "owner": "包裝單位",
+            "title": "連續 3 個月比自己平常慢的品項",
+            "rule": "最近 3 個有生產的月份，月產能全部低於該品項自己的中位數 10% 以上",
+            "why": "跟自己比，不受瓶型差異影響，所以這是真的變慢了。",
             "items": [{"sku": s["sku"],
-                       "value": f"{s['shortN']}/{s['n']} 批未滿 1 小時（{s['shortShare']}%）",
-                       "detail": f"這些批次合計 {s['shortH']} h，佔該品項 "
-                                 f"{round(100 * s['shortH'] / s['h'])}% 工時"}
-                      for s in sorted(frag, key=lambda s: -s["shortH"])],
+                       "value": f"近期比平常慢 {round(-100 * s['vsUsual'])}%",
+                       "detail": "平常 {:,} → 最近 {} 瓶/工時".format(
+                           s["med"], " / ".join(f"{m['rate']:,}" for m in s["months"][-3:]))}
+                      for s in declining],
         })
-
-    tail = months[-3:]
-    if all(m["index"] < 100 for m in tail):
-        out.append({
-            "id": "trend",
-            "level": "high",
-            "title": "效率指數連續 3 個月低於基準",
-            "rule": "扣除產品組合影響後的效率指數連續 3 個月 < 100",
-            "why": "指數已排除「低速品項變多」的影響，因此這是真實的效率退步，"
-                   "不是產品組合造成的錯覺。",
-            "items": [{"sku": m["m"],
-                       "value": f"指數 {m['index']}",
-                       "detail": f"實際 {m['rate']:,} vs 組合預期 {m['expected']:,} 瓶/工時"}
-                      for m in tail],
-        })
-
-    varied = [s for s in skus
-              if s["cv"] > CV_HIGH and s["n"] >= MIN_BATCHES and s["h"] >= MIN_HOURS]
-    if varied:
-        out.append({
-            "id": "variance",
-            "level": "mid",
-            "title": "同品項批次落差過大",
-            "rule": f"批次產能變異係數 CV > {CV_HIGH}%（樣本 ≥ {MIN_BATCHES} 批、"
-                    f"工時 ≥ {MIN_HOURS:g} h）",
-            "why": "同一支產品、同一條線，批次之間差三成以上就是管理落差，"
-                   "不是產品特性。這是最直接的改善標的。",
-            "items": [{"sku": s["sku"],
-                       "value": f"CV {s['cv']}%　可省 {s['save']} h",
-                       "detail": f"中位 {s['med']:,} → P75 目標 {s['p75']:,} 瓶/工時"}
-                      for s in sorted(varied, key=lambda s: -s["save"])[:12]],
-        })
-
-    out.append({
-        "id": "fragment_total",
-        "level": "mid",
-        "title": "零星批次的整體成本",
-        "rule": f"全廠單批 < {SHORT_BATCH_H:g} 小時的批次數與工時合計",
-        "why": "這是「批次過碎」在全廠層級的總帳，可用來評估合批專案的效益上限。",
-        "items": [{"sku": "全廠合計",
-                   "value": f"{meta['shortN']} 批（{meta['shortShare']}%）",
-                   "detail": f"合計 {meta['shortH']} h，佔總工時 "
-                             f"{round(100 * meta['shortH'] / meta['hours'])}%"}],
-    })
-
-    out.append({
-        "id": "pareto",
-        "level": "info",
-        "title": "產出集中度",
-        "rule": "Pareto 累積曲線",
-        "why": "分析與改善資源不需要平均分配到 109 支產品上。",
-        "items": [{"sku": f"前 {meta['paretoN']} 支",
-                   "value": f"佔 80% 包裝量",
-                   "detail": f"共 {meta['skuCount']} 支品項；"
-                             f"重點 {len(focus)} 支佔 {meta['focusBShare']}% 量、"
-                             f"{meta['focusHShare']}% 工時"}],
-    })
     return out
 
 
