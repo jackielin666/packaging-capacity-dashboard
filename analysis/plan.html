@@ -4,46 +4,29 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
 <style>
 :root{
-  --paper:#F2F3F0; --surface:#FCFCFB; --surface-2:#E8EAE5; --sunk:#EDEFEA;
+  --paper:#F2F3F0; --surface:#FCFCFB; --sunk:#EDEFEA;
   --ink:#171C1A; --ink-2:#414A46; --ink-3:#6E7772;
   --rule:#D5D9D2; --rule-2:#C3C8BF;
   --accent:#0A8877; --signal:#C2571A; --cool:#3F6FA8;
   --accent-wash:rgba(10,136,119,.10); --signal-wash:rgba(194,87,26,.10);
 }
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-  --paper:#131513; --surface:#1B1D1A; --surface-2:#242721; --sunk:#191B18;
-  --ink:#EDEFEA; --ink-2:#B6BDB6; --ink-3:#868E88;
-  --rule:#31352E; --rule-2:#3E433B;
-  --accent:#2FA795; --signal:#CE6E33; --cool:#5F92CE;
-  --accent-wash:rgba(47,167,149,.14); --signal-wash:rgba(206,110,51,.14);
-}}
-:root[data-theme="dark"]{
-  --paper:#131513; --surface:#1B1D1A; --surface-2:#242721; --sunk:#191B18;
-  --ink:#EDEFEA; --ink-2:#B6BDB6; --ink-3:#868E88;
-  --rule:#31352E; --rule-2:#3E433B;
-  --accent:#2FA795; --signal:#CE6E33; --cool:#5F92CE;
-  --accent-wash:rgba(47,167,149,.14); --signal-wash:rgba(206,110,51,.14);
-}
 *{box-sizing:border-box}
-body{
-  background:var(--paper); color:var(--ink);
+body{background:var(--paper);color:var(--ink);
   font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
-}
+  font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1060px;margin:0 auto;padding:0 28px 96px}
-.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:"Noto Serif TC",serif;text-wrap:balance;margin:0}
 
-/* ---------- masthead ---------- */
-.mast{border-bottom:2px solid var(--ink);padding:52px 0 22px;margin-bottom:0}
+.mast{border-bottom:2px solid var(--ink);padding:52px 0 22px}
 .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--ink-3)}
-.mast h1{font-size:clamp(30px,4.6vw,46px);font-weight:700;line-height:1.2;margin:14px 0 12px;letter-spacing:-.01em}
+.mast h1{font-size:clamp(30px,4.6vw,46px);font-weight:700;line-height:1.2;margin:14px 0 12px;
+  letter-spacing:-.01em}
 .lede{color:var(--ink-2);max-width:64ch;font-size:16px}
 .mast-meta{display:flex;flex-wrap:wrap;gap:6px 26px;margin-top:20px;font-size:12.5px;color:var(--ink-3)}
 .mast-meta b{color:var(--ink-2);font-weight:500}
 
-/* ---------- kpi band ---------- */
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--rule);
   background:var(--surface)}
 .kpi{padding:20px 18px 22px;border-left:1px solid var(--rule)}
@@ -55,7 +38,6 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;text-wrap:balance;margin:0}
 .kpi .u{font-size:12px;color:var(--ink-3);margin-left:3px}
 .kpi.hl .v{color:var(--accent)}
 
-/* ---------- sections ---------- */
 section{padding:56px 0 8px;border-top:1px solid var(--rule)}
 section:first-of-type{border-top:0}
 .sec-head{display:flex;gap:18px;align-items:baseline;margin-bottom:8px}
@@ -65,11 +47,8 @@ section:first-of-type{border-top:0}
 .sec-sub{color:var(--ink-2);max-width:66ch;margin:0 0 30px 40px}
 .body{margin-left:40px}
 @media(max-width:720px){.sec-sub,.body{margin-left:0}}
-
 p{margin:0 0 14px}
-.tight{margin-bottom:6px}
 
-/* ---------- tables ---------- */
 .tw{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);border-radius:3px}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
@@ -77,28 +56,29 @@ th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.07em;tex
   border-bottom:1px solid var(--rule-2);white-space:nowrap;background:var(--sunk)}
 td{padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
 tbody tr:last-child td{border-bottom:0}
-td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
 td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
 tbody tr:hover{background:var(--sunk)}
 .tfoot td{background:var(--sunk);font-weight:500;border-top:1px solid var(--rule-2)}
 
-/* ---------- chart ---------- */
 .fig{margin:26px 0 34px}
 .fig-t{font-size:14px;font-weight:700;font-family:"Noto Serif TC",serif;margin-bottom:2px}
 .fig-s{font-size:12.5px;color:var(--ink-3);margin-bottom:14px}
-.fig-n{font-size:12px;color:var(--ink-3);margin-top:10px;max-width:70ch}
-.chart{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:18px 16px 10px;position:relative}
+.fig-n{font-size:12px;color:var(--ink-3);margin-top:10px;max-width:74ch}
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:18px 16px 10px;position:relative}
 svg{display:block;width:100%;height:auto;overflow:visible}
 .legend{display:flex;gap:20px;margin:0 0 12px 2px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
-.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px;vertical-align:-1px}
-.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .09s;
-  background:var(--ink);color:var(--paper);padding:8px 11px;border-radius:4px;font-size:12px;
-  line-height:1.55;white-space:nowrap;z-index:5;transform:translate(-50%,-118%)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px;
+  vertical-align:-1px}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .09s;background:var(--ink);
+  color:var(--paper);padding:8px 11px;border-radius:4px;font-size:12px;line-height:1.55;
+  white-space:nowrap;z-index:5;transform:translate(-50%,-118%)}
 .tip b{font-family:"IBM Plex Mono",monospace;font-weight:600}
 
-/* ---------- callouts / lists ---------- */
-.callout{border-left:3px solid var(--accent);background:var(--accent-wash);
-  padding:16px 20px;margin:22px 0;border-radius:0 3px 3px 0}
+.callout{border-left:3px solid var(--accent);background:var(--accent-wash);padding:16px 20px;
+  margin:22px 0;border-radius:0 3px 3px 0}
 .callout.warn{border-left-color:var(--signal);background:var(--signal-wash)}
 .callout p:last-child{margin-bottom:0}
 .callout .ct{font-weight:700;font-family:"Noto Serif TC",serif;margin-bottom:6px;font-size:15px}
@@ -116,15 +96,16 @@ ul.clean li.no::before{background:var(--signal)}
 .grid2 > div + div{border-left:1px solid var(--rule)}
 .grid2 h3{font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:9px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
-@media(max-width:720px){.grid2{grid-template-columns:1fr}.grid2>div+div{border-left:0;border-top:1px solid var(--rule)}
-  .kpis{grid-template-columns:repeat(2,1fr)}.kpi{border-top:1px solid var(--rule)}
-  .kpi:nth-child(odd){border-left:0}}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}
+  .grid2>div+div{border-left:0;border-top:1px solid var(--rule)}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi{border-top:1px solid var(--rule)}.kpi:nth-child(odd){border-left:0}}
 
-.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;
-  padding:2px 8px;border-radius:11px;border:1px solid currentColor;text-transform:uppercase}
-.pill.rec{color:var(--accent)}
-.pill.mid{color:var(--cool)}
-.pill.low{color:var(--ink-3)}
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.06em;padding:2px 8px;border-radius:11px;border:1px solid currentColor;
+  text-transform:uppercase}
+.pill.rec{color:var(--accent)}.pill.mid{color:var(--cool)}.pill.low{color:var(--ink-3)}
+.yes{color:var(--accent);font-weight:600}.no{color:var(--signal);font-weight:600}
 
 ol.steps{counter-reset:s;list-style:none;padding:0;margin:0}
 ol.steps li{counter-increment:s;position:relative;padding:0 0 20px 46px;
@@ -137,399 +118,481 @@ ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;le
 ol.steps li b{display:block;font-size:14.5px;margin-bottom:2px}
 ol.steps li span{color:var(--ink-2);font-size:13.5px}
 
-footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--rule);
-  font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--rule);font-size:12px;
+  color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 
 <div class="wrap">
 
 <header class="mast">
-  <div class="eyebrow">包裝工時記錄表 · 2025/10 – 2026/08 · 122 工作表</div>
+  <div class="eyebrow">包裝工時記錄表 · 2025/10 – 2026/08 · 122 工作表 · 第二版</div>
   <h1>包裝產能分析執行規劃</h1>
-  <p class="lede">資料結構已確認、全表已解析完成。這份文件回答三件事：這批資料能算出什麼、哪十支產品最值得先做、以及明天該選哪一種運作模式往下走。</p>
+  <p class="lede">補登資料已全部驗證，資料異常歸零。這份文件記錄分析前提、關鍵發現，以及儀表板要做成什麼樣子 —— 它同時是每月更新的作業依據。</p>
   <div class="mast-meta">
     <span>來源檔　<b>包裝工時記錄表_2026.08.28.xlsx</b></span>
     <span>解析範圍　<b>全部 122 個工作表</b></span>
-    <span>製作日　<b>2026-09-02</b></span>
+    <span>版本　<b>v2　2026-09-03</b></span>
   </div>
 </header>
 
 <div class="kpis">
   <div class="kpi"><div class="k">有效紀錄</div><div class="v">1,571<span class="u">筆</span></div></div>
   <div class="kpi"><div class="k">品項數</div><div class="v">109<span class="u">支</span></div></div>
-  <div class="kpi"><div class="k">總包裝量</div><div class="v">213.3<span class="u">萬瓶</span></div></div>
-  <div class="kpi"><div class="k">總工時</div><div class="v">2,752<span class="u">小時</span></div></div>
-  <div class="kpi hl"><div class="k">整體平均產能</div><div class="v">775<span class="u">瓶/工時</span></div></div>
+  <div class="kpi"><div class="k">總包裝量</div><div class="v">214.0<span class="u">萬瓶</span></div></div>
+  <div class="kpi"><div class="k">總工時</div><div class="v">2,755<span class="u">小時</span></div></div>
+  <div class="kpi hl"><div class="k">整體平均產能</div><div class="v">777<span class="u">瓶/工時</span></div></div>
 </div>
 
-<!-- ============ 01 ============ -->
+<!-- 01 -->
 <section>
-  <div class="sec-head"><div class="sec-num">01</div><h2>資料結構確認</h2></div>
-  <p class="sec-sub">122 個工作表格式完全一致，欄位無一例外。這是很好的起點 —— 代表可以一次性程式化解析，不需要人工整理。</p>
+  <div class="sec-head"><div class="sec-num">01</div><h2>分析前提與資料狀態</h2></div>
+  <p class="sec-sub">以下九項已確認，後續所有計算都建立在這些前提上。若任何一項有變，數字要重算。</p>
   <div class="body">
 
   <div class="tw">
     <table>
-      <thead><tr><th style="width:12%">欄位</th><th style="width:16%">實際型態</th><th style="width:30%">範例值</th><th>判讀與處理方式</th></tr></thead>
+      <thead><tr><th style="width:15%">項目</th><th>結論</th></tr></thead>
       <tbody>
-        <tr><td class="sku">包裝日期</td><td>文字</td><td class="mono">10月2日</td><td><b>沒有年份。</b>109 個工作表全部依 10月→8月 順序排列，零筆違反，可安全推定為 2025/10 – 2026/08 同一期間。</td></tr>
-        <tr><td class="sku">起始時間</td><td>時間</td><td class="mono">15:00</td><td>正常。</td></tr>
-        <tr><td class="sku">結束時間</td><td>時間</td><td class="mono">18:30</td><td>2 筆空白，導致工時算成負數。</td></tr>
-        <tr><td class="sku">工時</td><td>小數</td><td class="mono">3.5000000000000013</td><td><b>＝結束−起始的掛鐘時間，不是人工時。</b>1,569 筆完全吻合，僅 3 筆例外。浮點雜訊須四捨五入到 2 位。</td></tr>
-        <tr><td class="sku">瓶數</td><td>整數</td><td class="mono">5,832</td><td>6 筆空白。</td></tr>
+        <tr><td><b>年份跨度</b></td><td>2025-10-01 ~ 2026-08-26。日期欄無年份，但 109 個工作表全部依 10月→8月 排序、零筆違反，據此還原並經確認無誤。</td></tr>
+        <tr><td><b>工時定義</b></td><td>（結束 − 起始）÷ 60，<b>掛鐘小時</b>。1,569 筆與起訖時間完全吻合。<b>不是人工時</b>。</td></tr>
+        <tr><td><b>作業人數</b></td><td>假設每次生產人數固定，<b>不新增欄位</b>。因此所有「效率」數字代表線體速率，不代表人均產出。</td></tr>
+        <tr><td><b>不良瓶數</b></td><td>比例小，不納入本次分析範圍。</td></tr>
+        <tr><td><b>分析名單</b></td><td>包裝量前 10 ∪ 包裝天數前 10 ＝ <b>14 支</b>，涵蓋 72.0% 包裝量、59.6% 工時。</td></tr>
+        <tr><td><b>短批次</b></td><td><b>全部納入計算</b>，不排除。僅在散佈圖上以空心點標記供判讀。</td></tr>
+        <tr><td><b>混包紀錄</b></td><td>D0310 於 5月16日 兩筆瓶數欄為 <span class="mono">A200/B209</span>、<span class="mono">A300/B208</span>，屬同批混包兩種規格，<b>加總處理</b>（409、508 瓶）。</td></tr>
+        <tr><td><b>空白工作表</b></td><td>13 個（C3010、C3090、D0115、D0121、D0122、D0132-1、D0242、D0292、D0296、D1410、D2610、D2813、D9922）—— 建檔但整年沒生產。</td></tr>
+        <tr><td><b>資料異常</b></td><td><b>0 筆。</b>原先 11 筆（2 筆負工時、6 筆瓶數空白、3 筆工時與起訖不符）已於第二版全部補登完成並驗證通過。</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h3 style="font-size:15px;margin:34px 0 12px">資料品質稽核結果</h3>
-  <ul class="clean">
-    <li><b>1,571 筆有效紀錄</b>，分佈在 109 個有資料的工作表；另有 13 個空白工作表（C3010、C3090、D0115、D0121、D0122、D0132-1、D0242、D0292、D0296、D1410、D2610、D2813、D9922）—— 建檔了但整年沒生產。</li>
-    <li>6,924 個空白列是 Excel 預留格，程式已自動略過，不影響統計。</li>
-    <li class="no"><b>A1040 工作表的日期被 Excel 存成真日期（2026-11-25 之類），與其他表格式不同。</b>已特別處理；但這代表輸入方式不統一，長期會出事。</li>
-    <li class="no"><b>2 筆工時為負數</b>（B2011 / 1月13日、D0230 / 3月12日）—— 忘了填結束時間。</li>
-    <li class="no"><b>6 筆有工時但瓶數空白</b>（B2011、C1020、D0114 ×2、D0310 ×2）—— 工時被計入但產出掛零，會低估產能。</li>
-    <li class="no"><b>3 筆工時與起訖時間對不上</b>（A1050 / 10月7日、D0231 / 12月2日、D0630 / 11月21日）—— 手動覆寫過。</li>
-  </ul>
-
-  <div class="callout warn">
-    <div class="ct">這 11 筆佔比 0.7%，不影響結論，但暴露一個結構性問題</div>
-    <p>目前是「人工填 Excel、無任何檢核」。同樣的錯誤明年還會再發生 109 次。第 04 節的模式選擇，本質上就是在決定要不要把這個洞補起來。</p>
+  <div class="callout">
+    <div class="ct">補登驗證結果 —— 7 筆全數對上</div>
+    <p class="mono" style="font-size:12.5px;line-height:2">
+      D0114　1月22日　1.58 h　540 瓶　✔<br>
+      B2011　1月22日　1.75 h　2,848 瓶　✔<br>
+      D0230　3月12日　2.17 h　443 瓶　✔<br>
+      A3010　5月21日　3.50 h　4,692 瓶　✔（原為 0.74 h 的離群批次，修正後 CV 由 70% 降至 66%）<br>
+      D0114　5月14日　1.67 h　431 瓶　✔<br>
+      C1020　4月1日　4.00 h　1,452 瓶　✔<br>
+      B2011　1月13日　2.17 h　1,115 瓶　✔
+    </p>
   </div>
 
   </div>
 </section>
 
-<!-- ============ 02 ============ -->
+<!-- 02 -->
 <section>
-  <div class="sec-head"><div class="sec-num">02</div><h2>先看資料說了什麼</h2></div>
-  <p class="sec-sub">以下四個發現是用全部 1,571 筆算出來的，不是抽樣。這些就是明天討論的事實基礎。</p>
+  <div class="sec-head"><div class="sec-num">02</div><h2>關鍵發現</h2></div>
+  <p class="sec-sub">以下用全部 1,571 筆算出，不是抽樣。這四點是儀表板要每月自動重算的內容。</p>
   <div class="body">
 
   <div class="fig">
-    <div class="fig-t">發現一　包裝量高度集中：前 10 支＝67% 的產出</div>
-    <div class="fig-s">109 支產品中，前 17 支就佔了 80% 的包裝量。分析資源不需要平均分配。</div>
+    <div class="fig-t">發現一　產出高度集中：前 10 支＝67% 的包裝量</div>
+    <div class="fig-s">109 支產品中，前 17 支就佔了 80% 的包裝量。分析與改善資源不需要平均分配。</div>
     <div class="chart"><div id="c1"></div><div class="tip" id="t1"></div></div>
-    <div class="fig-n">前 10 支合計 1,431,583 瓶（67.1%），但只用掉 50.0% 的工時 —— 因為它們多半是高速線產品。</div>
+    <div class="fig-n">前 10 支合計佔 67% 包裝量，卻只用掉約一半工時 —— 因為它們多半是高速線產品。</div>
   </div>
 
   <div class="tw">
     <table>
-      <thead><tr><th>#</th><th>品號</th><th class="n">包裝量（瓶）</th><th class="n">工時</th><th class="n">天數</th><th class="n">批次</th><th class="n">產能 瓶/工時</th><th class="n">佔總量</th></tr></thead>
+      <thead><tr><th>#</th><th>品號</th><th class="n">包裝量</th><th class="n">工時</th><th class="n">天數</th>
+        <th class="n">批次</th><th class="n">產能</th><th class="n">每千瓶工時</th><th class="n">佔總量</th></tr></thead>
       <tbody id="tb1"></tbody>
-      <tfoot class="tfoot"><tr><td colspan="2">前 10 支小計</td><td class="n">1,431,583</td><td class="n">1,376.7</td><td class="n">500</td><td class="n">631</td><td class="n">1,040</td><td class="n">67.1%</td></tr></tfoot>
     </table>
   </div>
-  <p class="fig-n" style="margin-bottom:34px">依「包裝天數」排的前 10 支只有 6 支與上表重疊 —— <b class="mono">D0310</b>（136 天、253 批次、僅 66,160 瓶）、<b class="mono">D0210</b>、<b class="mono">D0113</b>、<b class="mono">D0330</b> 四支是量小但天天在做的「時間吃掉者」，這類產品是換線與零星排程問題的重災區，必須納入分析名單。</p>
+  <p class="fig-n" style="margin-bottom:34px">依「包裝天數」排的前 10 支只有 6 支與上表重疊。<b class="mono">D0310</b>（136 天、255 批次、僅 6.7 萬瓶）、<b class="mono">D0210</b>、<b class="mono">D0113</b>、<b class="mono">D0330</b> 四支是量小但天天在做的品項，因此分析名單取兩份前 10 的聯集共 14 支。</p>
 
   <div class="fig">
-    <div class="fig-t">發現二　同一支產品自己跟自己比，就有 22–70% 的波動</div>
-    <div class="fig-s">下圖：若每支產品都做到自己歷史表現的第 75 百分位（不是最佳、是「常常做得到」的水準），可省下的工時。</div>
+    <div class="fig-t">發現二　同品項自己跟自己比，仍有 22–66% 的批次波動</div>
+    <div class="fig-s">若每支產品都做到自己歷史表現的第 75 百分位（不是最佳，是「常常做得到」的水準），可省下的工時。</div>
     <div class="chart"><div id="c2"></div><div class="tip" id="t2"></div></div>
-    <div class="fig-n">14 支重點品項合計可省 <b>415 小時</b>；全部 109 支合計 742 小時，約當總工時的 27%。以每天 11.5 工時計，415 小時 ≒ <b>36 個工作天的產線時間</b>。</div>
+    <div class="fig-n">14 支重點品項合計可省 <b>402 小時</b>；全部 109 支合計 <b>729 小時</b>，約當總工時的 26%。以每日中位 10.9 工時計，402 小時 ≒ <b>37 個工作天的產線時間</b>。</div>
   </div>
 
   <div class="callout">
-    <div class="ct">這才是最有價值的分析角度</div>
-    <p>跨產品比產能（A2060 的 1,981 對比 D0310 的 255）沒有意義 —— 瓶型、規格、線別本來就不同。<b>但同一支產品在不同批次之間差 30%，就是純粹的管理落差</b>：人數配置、換線準備、開停機損失、當班熟練度。這是真正可改善、且可量化 ROI 的部分。</p>
+    <div class="ct">為什麼這是最有價值的角度</div>
+    <p>跨產品比產能沒有意義 —— A2060 的 1,981 對比 D0310 的 256，差異來自瓶型與規格，不是誰比較認真。<b>但同一支產品在不同批次之間差三成，就是純粹的管理落差</b>：換線準備、開停機損失、當班熟練度、批量大小。這部分可改善、可設目標、可量化 ROI。</p>
   </div>
 
   <div class="tw">
     <table>
-      <thead><tr><th>品號</th><th class="n">批次</th><th class="n">目前平均</th><th class="n">中位數</th><th class="n">P75 目標</th><th class="n">歷史最佳</th><th class="n">變異 CV</th><th class="n">可省工時</th></tr></thead>
+      <thead><tr><th>品號</th><th class="n">批次</th><th class="n">目前平均</th><th class="n">中位數</th>
+        <th class="n">P75 目標</th><th class="n">歷史最佳</th><th class="n">CV</th><th class="n">可省工時</th></tr></thead>
       <tbody id="tb2"></tbody>
-      <tfoot class="tfoot"><tr><td colspan="7">14 支重點品項合計</td><td class="n">415.0 h</td></tr></tfoot>
+      <tfoot class="tfoot"><tr><td colspan="7">14 支重點品項合計</td><td class="n">402.3 h</td></tr></tfoot>
     </table>
   </div>
-  <p class="fig-n" style="margin-bottom:34px"><b class="mono">A3010</b> 的 CV 高達 70%、最佳批次 6,304 瓶/工時 是中位數的 4 倍 —— 這個數字八成是資料問題（漏填工時或多批合併），<b>需要現場確認</b>，不要直接拿去設目標。</p>
+  <p class="fig-n" style="margin-bottom:34px"><b class="mono">A3010</b> 修正後 CV 仍有 66%，歷史最佳 6,304 瓶/工時 來自 3月4日 一筆 0.5 小時做 3,152 瓶的批次。<b>各品項的「歷史最佳」幾乎都出自極短批次</b>（B1011 的 2,100 是 20 分鐘做 700 瓶），這類批次多為前一批的尾段、不含準備工時。依指示全數保留計入，但設目標時應以 <b>P75</b> 為準，不要用最佳值。</p>
 
   <div class="fig">
-    <div class="fig-t">發現三　整體產能一路下滑，不是季節性</div>
-    <div class="fig-s">月平均產能（瓶/工時），與 2025/10 的 947 瓶/工時 基準線對照。</div>
+    <div class="fig-t">發現三　產能下滑是真的，扣掉產品組合影響後仍在掉</div>
+    <div class="fig-s">左：實際月產能。右：效率指數 —— 以各品項自己的全年平均回推應有工時，扣除產品組合變動，100 = 與全年平均同水準。</div>
     <div class="legend">
-      <span><i style="background:var(--accent)"></i>實際月產能</span>
-      <span><i style="background:var(--signal)"></i>期初基準 947 瓶/工時</span>
+      <span><i style="background:var(--accent)"></i>達基準 / 實際產能</span>
+      <span><i style="background:var(--signal)"></i>低於基準 / 期初基準線</span>
     </div>
-    <div class="chart"><div id="c3"></div><div class="tip" id="t3"></div></div>
-    <div class="fig-n">10 月 947 → 8 月 771，累計掉 18.6%。2 月低點（695）可用農曆年解釋，但 6 月的 677 不行。<b>需要先排除產品組合改變的影響</b> —— 如果只是低速品項（D 系列）比重變高，那就不是效率退步。這是第一個要做的交叉分析。</div>
+    <div class="grid2" style="border:0;background:transparent;gap:18px">
+      <div style="padding:0"><div class="chart"><div id="c3"></div><div class="tip" id="t3"></div></div></div>
+      <div style="padding:0;border:0"><div class="chart"><div id="c4"></div><div class="tip" id="t4"></div></div></div>
+    </div>
+    <div class="fig-n">實際產能 947 → 771（−18.6%）。扣除產品組合後，效率指數 111 → 95（−14.4%）。<b>產品組合只解釋約 22% 的跌幅，其餘是真實的效率退步</b> —— 這是最該追的一件事。2 月低點可用農曆年解釋，6～8 月連三個月低於基準則不行。</div>
+  </div>
+
+  <div class="fig">
+    <div class="fig-t">發現四　資源佔用要看兩個維度，不能只看「慢」</div>
+    <div class="fig-s">相對工時強度指數（＝全廠平均產能 ÷ 該品項產能）對照工時佔比。</div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:14%">判定</th><th>條件</th><th>品項</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--signal)">★ 優先處理</b></td><td>強度指數 &gt; 1.5 <b>且</b> 工時佔比 ≥ 3%</td>
+          <td><b class="mono">D0310</b>（指數 3.04、工時佔比 9.53%）、<b class="mono">D0210</b>（3.15、3.30%）</td></tr>
+        <tr><td>慢但影響小</td><td>強度指數 &gt; 1.5、工時佔比 &lt; 3%</td>
+          <td class="mono">F0010（10.77）、D0991、D0330、C1020、D0113</td></tr>
+        <tr><td>高速品項</td><td>強度指數 &lt; 1.5</td>
+          <td class="mono">A 系列、B 系列</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <div class="ct">指數單獨用會誤判 —— 這是判讀時最容易犯的錯</div>
+    <p>強度指數只表示「比全廠平均慢幾倍」，而<b>瓶型不同本來就會慢</b>。單看指數會把 F0010（指數 10.77，但只佔 2.19% 工時）排第一，卻漏掉 B2011（指數 0.94，卻吃掉全廠 10.13% 工時）。<b>必須兩個維度並用。</b></p>
+    <p style="margin-top:10px"><b>而 D0310 的根因不是「慢」，是「批次太碎」：</b>255 批中有 135 批未滿 1 小時（53%），合計 87.9 小時＝該品項 33% 的工時；平均每批 1.03 小時、每天 1.88 批、橫跨 136 天。<b>改善方向是合批與減少換線，不是要求線上加快速度。</b>全廠亦有 573 筆（36%）批次未滿 1 小時，合計 312 小時＝總工時的 11%。</p>
   </div>
 
   </div>
 </section>
 
-<!-- ============ 03 ============ -->
+<!-- 03 -->
 <section>
-  <div class="sec-head"><div class="sec-num">03</div><h2>這份資料的邊界</h2></div>
-  <p class="sec-sub">先講清楚能算什麼、不能算什麼，明天才不會把時間花在做不到的事情上。</p>
+  <div class="sec-head"><div class="sec-num">03</div><h2>每日工時超過 8 小時的來源</h2></div>
+  <p class="sec-sub">結論：<b>83% 的作業日總工時超過 8 小時，但幾乎都是多品項並行，不是加班。</b></p>
+  <div class="body">
+
+  <div class="tw" style="margin-bottom:22px">
+    <table>
+      <thead><tr><th>觀察</th><th class="n">數值</th><th>判讀</th></tr></thead>
+      <tbody>
+        <tr><td>單日總工時 &gt; 8 小時的天數</td><td class="n">198 / 239 天（83%）</td><td>是常態，不是例外</td></tr>
+        <tr><td>每日總工時中位數</td><td class="n">10.9 小時</td><td>超過單線單日工時</td></tr>
+        <tr><td>單日總工時最高</td><td class="n">28.2 小時</td><td>2025-12-16，10 個品項同日作業</td></tr>
+        <tr><td><b>單一品項當天 &gt; 8 小時</b></td><td class="n"><b>僅 12 筆</b></td><td>這才是真正的長時作業</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <h3><span class="dot" style="background:var(--signal)"></span>單一品項當天超過 8 小時（12 筆全列）</h3>
+      <div class="mono" style="font-size:12.5px;line-height:2" id="solo8"></div>
+    </div>
+    <div>
+      <h3><span class="dot" style="background:var(--cool)"></span>單日總工時最高的日子</h3>
+      <div style="font-size:13px;line-height:1.9">
+        <p class="tight"><b class="mono">2025-12-16　28.2 h / 10 個品項</b><br>
+          <span class="mono" style="color:var(--ink-3)">B5011 7.2　C1020 6.3　C3080 4.2　C3070 2.8　A2040 2.3 …</span></p>
+        <p class="tight"><b class="mono">2025-12-10　27.0 h / 7 個品項</b><br>
+          <span class="mono" style="color:var(--ink-3)">F0010 9.0　F0020 5.0　B1011 4.8　A2020 4.4　D0310 2.0 …</span></p>
+        <p class="tight"><b class="mono">2026-05-11　22.4 h / 9 個品項</b><br>
+          <span class="mono" style="color:var(--ink-3)">A3010 9.0　B1011 4.2　B2011 2.4　F0020 1.8 …</span></p>
+        <p style="margin-top:14px;margin-bottom:0">→ 反推現場<b>至少 3 條線或 3 組人並行</b>。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="ct">建議現場查證的一天</div>
+    <p><b class="mono">2026-02-24　B2021　12.50 小時</b> —— 全檔唯一超過 12 小時的單一品項作業，且 B2021 的 CV 達 35%。這一天發生什麼事，值得問清楚：是真加班、機台故障、還是紀錄合併了兩個班次。</p>
+  </div>
+
+  </div>
+</section>
+
+<!-- 04 -->
+<section>
+  <div class="sec-head"><div class="sec-num">04</div><h2>這份資料的邊界</h2></div>
+  <p class="sec-sub">依「最小變數、單純比較各品項包裝效率」的原則，不新增欄位。以下是這個選擇的代價，先講清楚以免誤用。</p>
   <div class="body">
 
   <div class="grid2">
     <div>
       <h3><span class="dot" style="background:var(--accent)"></span>現在就能做出來</h3>
       <ul class="clean">
-        <li>各品項產能基準（Baseline）與標準工時建議值</li>
-        <li>同品項批次間變異、改善潛力與可省工時</li>
-        <li>Pareto 分析、產品分群（高速 / 中速 / 低速線）</li>
-        <li>月／週產能趨勢與異常批次自動標記</li>
-        <li>接單量 → 所需工時的<b>排程試算</b>（依實績而非拍腦袋）</li>
-        <li>零星批次（單批 &lt;1 小時）的成本盤點與合批建議</li>
+        <li>各品項產能基準與標準工時建議值</li>
+        <li>同品項批次變異、改善潛力與可省工時</li>
+        <li>每千瓶工時、相對工時強度、Pareto 與產品分群</li>
+        <li>月產能趨勢與扣除組合效果的效率指數</li>
+        <li>接單量 → 所需工時的排程試算（依實績）</li>
+        <li>零星批次盤點與合批機會辨識</li>
+        <li>異常批次自動標記與資料檢核</li>
       </ul>
     </div>
     <div>
-      <h3><span class="dot" style="background:var(--signal)"></span>目前資料算不出來</h3>
+      <h3><span class="dot" style="background:var(--signal)"></span>這份資料算不出來</h3>
       <ul class="clean">
-        <li class="no"><b>人均效率</b> —— 沒有作業人數欄位，「工時」是掛鐘時間不是人工時</li>
-        <li class="no"><b>OEE / 稼動率</b> —— 沒有計畫工時、故障與停機紀錄</li>
-        <li class="no"><b>換線損失</b> —— 只能從「同日多品項」推估 1,053 次，無實際換線時間</li>
-        <li class="no"><b>不良率、重工</b> —— 沒有良品／不良品欄位</li>
-        <li class="no"><b>線別、班別、人員</b> —— 無法做線別對比或班別差異分析</li>
-        <li class="no"><b>成本與 ROI 金額化</b> —— 沒有工時單價</li>
+        <li class="no"><b>人均效率</b> —— 無作業人數欄位，工時是掛鐘時間</li>
+        <li class="no"><b>OEE / 稼動率</b> —— 無計畫工時與停機紀錄</li>
+        <li class="no"><b>實際換線損失</b> —— 只能由「同日多品項」推估</li>
+        <li class="no"><b>不良率與重工</b> —— 依決議不納入</li>
+        <li class="no"><b>線別與班別差異</b> —— 無此欄位</li>
+        <li class="no"><b>成本 ROI 金額化</b> —— 無工時單價</li>
       </ul>
     </div>
   </div>
 
-  <div class="callout warn">
-    <div class="ct">最關鍵的一個缺口：作業人數</div>
-    <p>資料顯示每日總工時中位數 10.9 小時、最高 28.2 小時，明顯超過單線單日工時 —— 代表<b>多線或多人並行</b>。少了人數，所有「效率」數字都只是設備／線體速率，不能拿來談人力配置或人均產出。<br>
-    <b>建議：在記錄表加一欄「作業人數」。</b>一個欄位，成本幾乎為零，但能讓分析從「產線速率」升級到「人均效率與人力配置」，價值是數倍的。</p>
+  <div class="callout">
+    <div class="ct">怎麼在這個限制下仍然有效</div>
+    <p>因為假設人數固定，<b>同一支產品自己跟自己比</b>就仍然成立 —— 這正是改善潛力分析的基礎，不受限制影響。要避免的只有一件事：<b>不要拿跨品項的產能數字去評比人員或線別</b>。若日後想談人力配置，屆時再加「作業人數」一欄即可，不必現在動。</p>
   </div>
 
   </div>
 </section>
 
-<!-- ============ 04 ============ -->
+<!-- 05 -->
 <section>
-  <div class="sec-head"><div class="sec-num">04</div><h2>三種運作模式，明天二選一</h2></div>
-  <p class="sec-sub">你問的核心問題：要繼續「丟資料給我分析」，還是改變型態。以下是三條路的實際成本與代價。</p>
+  <div class="sec-head"><div class="sec-num">05</div><h2>儀表板能不能自己發現問題</h2></div>
+  <p class="sec-sub">誠實的答案：一半可以，一半不行。所以做法是<b>「儀表板每月自動跑規則 ＋ 每季一次人工深度分析」</b>。</p>
   <div class="body">
+
+  <p>這次找到的問題，多數其實都能寫成固定規則，寫進儀表板就會每月自動重算並列出踩線項目 —— 儀表板要做的不是「畫圖給人看」，而是<b>吐出一張異常清單</b>。看得到異常，才叫發現問題。</p>
 
   <div class="tw">
     <table>
-      <thead><tr><th style="width:19%">模式</th><th style="width:23%">運作方式</th><th class="n">導入成本</th><th class="n">每次更新</th><th style="width:19%">優點</th><th style="width:19%">缺點與風險</th></tr></thead>
+      <thead><tr><th style="width:30%">這次的發現</th><th style="width:38%">對應的偵測規則</th><th class="n">自動化</th><th>由誰做</th></tr></thead>
       <tbody>
-        <tr>
-          <td><span class="pill low">A</span><br><b>維持現況</b><br><span style="color:var(--ink-3);font-size:12.5px">你丟檔案我分析</span></td>
-          <td>每月把 xlsx 傳給我，我產出報告與圖表</td>
-          <td class="n">0</td>
-          <td class="n">30–60 分<br><span style="color:var(--ink-3)">人工</span></td>
-          <td>零建置、彈性最高、想問什麼問什麼</td>
-          <td>不可累積、每次重來、無法讓現場自己看、你不在就停擺</td>
-        </tr>
-        <tr style="background:var(--accent-wash)">
-          <td><span class="pill rec">B　建議</span><br><b>半自動儀表板</b><br><span style="color:var(--ink-3);font-size:12.5px">固定格式 + 一鍵更新</span></td>
-          <td>維持 Excel 記錄 → 解析腳本 → 靜態儀表板（GitHub Pages）</td>
-          <td class="n">2–3 天</td>
-          <td class="n">5 分<br><span style="color:var(--ink-3)">半自動</span></td>
-          <td>現場可自行查閱、每月更新只要跑一次、資料檢核自動化、成本 0 元</td>
-          <td>仍需人工上傳、不能即時、多人同時編輯會衝突</td>
-        </tr>
-        <tr>
-          <td><span class="pill mid">C</span><br><b>系統化</b><br><span style="color:var(--ink-3);font-size:12.5px">現場登錄 + 資料庫</span></td>
-          <td>平板／手機表單登錄 → 資料庫 → 即時儀表板</td>
-          <td class="n">3–6 週</td>
-          <td class="n">即時<br><span style="color:var(--ink-3)">自動</span></td>
-          <td>源頭防呆、即時、可擴充人數／線別／不良率、可串排程</td>
-          <td>要改變現場作業習慣（最大阻力）、需維運、月費約 NT$0–1,500</td>
-        </tr>
+        <tr><td>量小但天天在做的資源佔用者</td><td class="mono">強度指數 &gt; 1.5 且 工時佔比 ≥ 3%</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>批次過碎、有合批機會</td><td class="mono">&lt;1h 批次佔比 &gt; 40%</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>產能一路下滑</td><td class="mono">效率指數連 3 個月 &lt; 100</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>同品項批次落差過大</td><td class="mono">CV &gt; 25%（樣本 ≥ 10 批）</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>零星批次的整體成本</td><td class="mono">&lt;1h 批次數與工時合計</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>產出集中度</td><td class="mono">Pareto 累積曲線</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr><td>負工時、瓶數空白、混包寫法</td><td class="mono">資料檢核清單（audit.py）</td><td class="n yes">可</td><td>儀表板</td></tr>
+        <tr style="background:var(--signal-wash)"><td><b>6,304 瓶/工時 是資料問題還是真的？</b></td><td>—</td><td class="n no">不可</td><td><b>人</b></td></tr>
+        <tr style="background:var(--signal-wash)"><td><b>為什麼 6 月效率掉下來？</b></td><td>—</td><td class="n no">不可</td><td><b>人</b></td></tr>
+        <tr style="background:var(--signal-wash)"><td><b>下一個該問什麼問題？</b></td><td>—</td><td class="n no">不可</td><td><b>人</b></td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout">
-    <div class="ct">建議選擇：B，並把 C 當成第二階段</div>
-    <p>理由三點：<br>
-    <b>① 先證明價值再談投資。</b>第 02 節的 415 小時改善潛力還只是推算，要先用 B 讓現場主管看到自己品項的數字、確認「這個落差是真的」，才有本錢談 C。<br>
-    <b>② 現有 Excel 習慣不必動。</b>B 完全沿用現在的記錄方式，現場零改變、零抗拒，2–3 天就能上線。<br>
-    <b>③ B 的產出是 C 的規格書。</b>B 跑三個月後，你會確切知道哪些欄位不夠用、現場真正會看哪幾張圖 —— 那時再做 C，需求明確、失敗率低。直接跳 C 通常會做出一個沒人用的系統。</p>
+    <div class="ct">節奏建議</div>
+    <p><b>每月</b>　把當月 xlsx 丟過來，重跑腳本、儀表板自動更新（約 5 分鐘），現場自己看異常清單。<br>
+    <b>每季</b>　做一次人工深度分析，處理規則抓不到的問題、驗證規則門檻是否需要調整、提出下一輪要問的問題。</p>
   </div>
 
   </div>
 </section>
 
-<!-- ============ 05 ============ -->
+<!-- 06 -->
 <section>
-  <div class="sec-head"><div class="sec-num">05</div><h2>儀表板改版方向</h2></div>
-  <p class="sec-sub">你說初版「一點也不高級」。同意 —— 但問題不在配色，在於它只用了 122 個工作表中的 1 個。</p>
+  <div class="sec-head"><div class="sec-num">06</div><h2>儀表板改版內容</h2></div>
+  <p class="sec-sub">初版的問題不在配色，在於它只用了 122 個工作表中的 1 個（A1040、12 批次）。以下是改了什麼。</p>
   <div class="body">
 
   <div class="tw">
     <table>
-      <thead><tr><th style="width:30%">初版的問題</th><th style="width:32%">為什麼要改</th><th>改版做法</th></tr></thead>
+      <thead><tr><th style="width:28%">初版</th><th style="width:30%">為什麼要改</th><th>新版做法</th></tr></thead>
       <tbody>
-        <tr><td><b>只有 12 個批次</b>（單一產品 A1040）</td><td>看不到全貌，也就無法做任何決策</td><td>載入全部 109 支、1,571 筆；預設顯示重點 14 支，可切換全品項</td></tr>
-        <tr><td><b>散佈圖是主角</b></td><td>「工時越多瓶數越多」是常識，不是洞察</td><td>主角換成 <b>改善潛力排行</b> 與 <b>批次變異分布</b> —— 直接指向該做什麼</td></tr>
-        <tr><td><b>四個分頁塞不同圖</b></td><td>要點四次才看得完，主管不會點</td><td>單頁式：KPI 帶 → 排行 → 趨勢 → 明細，一眼掃完</td></tr>
-        <tr><td><b>目標工時試算只用整體平均</b></td><td>用 775 去估 A2060（實際 1,981）會差 2.5 倍</td><td>依<b>品項別實績</b>試算，並同時給 P50／P75／最佳三種情境</td></tr>
-        <tr><td><b>沒有基準線與門檻</b></td><td>看到數字不知道是好是壞</td><td>每支品項標示自身 P75 目標線與異常批次紅點</td></tr>
-        <tr><td><b>視覺缺層次</b></td><td>全部灰底卡片，重點不突出</td><td>統一色彩系統（已通過色盲辨識檢驗）、資料墨水優先、深淺色模式</td></tr>
+        <tr><td>只有 12 個批次（單一產品）</td><td>看不到全貌，無法做任何決策</td><td>載入全部 109 支、1,571 筆</td></tr>
+        <tr><td>散佈圖是主角</td><td>「工時越多瓶數越多」是常識，不是洞察</td><td>主角換成<b>異常清單</b>與<b>改善潛力排行</b>，直接指向該做什麼</td></tr>
+        <tr><td>四個分頁塞不同圖</td><td>要點四次才看得完</td><td>單頁式：異常 → 排行 → 趨勢 → 品項鑽取 → 試算</td></tr>
+        <tr><td>試算只用整體平均</td><td>用 777 去估 A2060（實際 1,981）會差 2.5 倍</td><td>依<b>品項別實績</b>試算，並給 P50／P75／最佳三情境</td></tr>
+        <tr><td>沒有基準線與門檻</td><td>看到數字不知道是好是壞</td><td>每支標示自身 P75 目標線；短批次空心點、離群批次紅圈</td></tr>
+        <tr><td>不能只看一支產品</td><td>無法交給線負責人</td><td><b>品項鑽取</b>：下拉選單切換，最多可加兩支比較，網址帶 <span class="mono">?sku=</span> 可單獨分享</td></tr>
+        <tr><td>視覺缺層次</td><td>全部灰底卡片，重點不突出</td><td>統一淺色系統（色票已通過色盲辨識驗證），資料墨水優先</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="fig-n" style="margin-top:14px">這份文件本身就是新視覺方向的樣張 —— 排版、色票、圖表規格都可以直接沿用到儀表板上。</p>
+
+  <div class="callout">
+    <div class="ct">每月更新流程</div>
+    <p><b>你要做的：</b>把當月 xlsx 丟過來，這樣就好。<br>
+    <b>我這邊跑的：</b><span class="mono">extract.py</span>（解析）→ <span class="mono">audit.py</span>（檢核）→ <span class="mono">payload.py</span>（彙總）→ <span class="mono">build.py</span>（灌回儀表板）→ push 上線。<br>
+    若 <span class="mono">audit.py</span> 抓到必須修正的異常，我會先回報再更新，不會讓錯的數字上線。</p>
+  </div>
 
   </div>
 </section>
 
-<!-- ============ 06 ============ -->
+<!-- 07 -->
 <section>
-  <div class="sec-head"><div class="sec-num">06</div><h2>明天的議程</h2></div>
-  <p class="sec-sub">建議 40 分鐘。前 15 分鐘確認事實，後 25 分鐘做決定。</p>
+  <div class="sec-head"><div class="sec-num">07</div><h2>下一步</h2></div>
+  <p class="sec-sub">儀表板已上線。以下是接下來三件值得做的事，依優先序排列。</p>
   <div class="body">
 
   <ol class="steps">
-    <li><b>確認年份推定（3 分）</b><span>資料期間認定為 2025/10/01 – 2026/08/26，全表零違反。若實際橫跨更多年份，請告訴我，所有趨勢圖要重算。</span></li>
-    <li><b>確認「工時」定義（5 分）</b><span>目前判定為掛鐘時間（結束−起始）。若現場填的其實是「人工時＝人數×時數」，那產能數字的解讀完全不同。<b>這題答錯，後面全錯。</b></span></li>
-    <li><b>釐清每日 &gt;8 小時的來源（5 分）</b><span>日總工時中位數 10.9 小時、最高 28.2 —— 是幾條線？幾組人？這決定要不要加「線別」欄位。</span></li>
-    <li><b>確認分析名單（2 分）</b><span>建議＝量前 10 ∪ 天數前 10 ＝ 14 支（涵蓋 72% 包裝量、60% 工時）。你可以增刪。</span></li>
-    <li><b>決定運作模式（15 分）</b><span>A／B／C 三選一。我的建議是 B，2–3 天可上線。</span></li>
-    <li><b>決定要不要加欄位（10 分）</b><span>優先序：① 作業人數（必要）② 線別 ③ 計畫 vs 實際工時 ④ 不良瓶數。加了①，分析價值直接翻倍。</span></li>
+    <li><b>查 2026-02-24 的 B2021（12.5 小時）</b><span>全檔唯一超過 12 小時的單一品項作業。先確認是真加班、故障、還是紀錄合併，這會決定要不要把「異常長時作業」也列為一條偵測規則。</span></li>
+    <li><b>追 6～8 月效率指數連三個月低於基準的原因</b><span>已排除產品組合因素，是真實退步。可能方向：人員異動、批量變小、換線變頻繁、機台狀況。這題規則抓不到，需要現場資訊。</span></li>
+    <li><b>評估 D0310 / D0210 的合批可行性</b><span>D0310 一年 255 批、53% 未滿 1 小時。若能把每天 1.88 批合併為 1 批，光這一支的改善空間就有 71.5 小時。需要先確認為什麼會被拆這麼碎 —— 是客戶訂單零散，還是排程習慣。</span></li>
   </ol>
 
   <div class="callout" style="margin-top:32px">
-    <div class="ct">如果明天決定走 B，我這邊的交付節奏</div>
-    <p><b>第 1 天</b>　解析腳本 + 資料檢核報告（自動抓出負工時、空瓶數、離群批次）<br>
-    <b>第 2 天</b>　儀表板主體：KPI 帶、改善潛力排行、品項別鑽取、趨勢圖<br>
-    <b>第 3 天</b>　排程試算器（輸入接單量 → 依品項實績算所需工時）+ 上線到 GitHub Pages<br>
-    你只要每月丟一次 xlsx，其餘我處理。</p>
+    <div class="ct">下次可以考慮、但現在不必做的事</div>
+    <p>若日後想從「線體速率」升級到「人均效率與人力配置」，只要加一欄<b>作業人數</b>即可 —— 一個欄位、成本近乎零，分析價值會明顯提升。目前依決議維持最小變數，先把品項效率這條線做扎實。</p>
   </div>
 
   </div>
 </section>
 
 <footer>
-  <span>資料來源：包裝工時記錄表_2026.08.28.xlsx · 全 122 工作表解析 · 1,571 筆有效紀錄</span>
-  <span class="mono">2026-09-02</span>
+  <span>資料來源：包裝工時記錄表_2026.08.28.xlsx · 全 122 工作表解析 · 1,571 筆有效紀錄 · 0 筆異常</span>
+  <span class="mono">v2　2026-09-03</span>
 </footer>
 
 </div>
 
 <script>
-const D = {"topB":[{"sku":"A1020","b":285366,"h":190.6,"d":46,"n":49,"rate":1497.0,"med":1555.0,"p75":1939.0,"best":2760.0,"cv":30.0,"save":43.4},{"sku":"B2011","b":226719,"h":275.1,"d":111,"n":122,"rate":824.0,"med":911.0,"p75":1054.0,"best":2004.0,"cv":32.0,"save":60.0},{"sku":"B1011","b":179492,"h":211.9,"d":76,"n":76,"rate":847.0,"med":909.0,"p75":1109.0,"best":2100.0,"cv":35.0,"save":50.1},{"sku":"A3010","b":165764,"h":131.0,"d":23,"n":23,"rate":1265.0,"med":1565.0,"p75":2027.0,"best":6304.0,"cv":70.0,"save":49.2},{"sku":"A2060","b":160268,"h":80.9,"d":26,"n":26,"rate":1981.0,"med":2138.0,"p75":2388.0,"best":3060.0,"cv":22.0,"save":13.8},{"sku":"A2020","b":138758,"h":87.0,"d":25,"n":25,"rate":1595.0,"med":1656.0,"p75":2169.0,"best":3120.0,"cv":34.0,"save":23.0},{"sku":"A2040","b":70991,"h":44.4,"d":21,"n":21,"rate":1598.0,"med":1634.0,"p75":2250.0,"best":2725.0,"cv":38.0,"save":12.9},{"sku":"B1040","b":70347,"h":53.6,"d":20,"n":20,"rate":1313.0,"med":1525.0,"p75":1854.0,"best":2372.0,"cv":31.0,"save":15.6},{"sku":"A1040","b":67718,"h":43.2,"d":16,"n":16,"rate":1569.0,"med":1730.0,"p75":1941.0,"best":2770.0,"cv":30.0,"save":8.3},{"sku":"D0310","b":66160,"h":259.1,"d":136,"n":253,"rate":255.0,"med":295.0,"p75":352.0,"best":592.0,"cv":32.0,"save":71.2}],"topD":[{"sku":"D0310","b":66160,"h":259.1,"d":136,"n":253,"rate":255.0,"med":295.0,"p75":352.0,"best":592.0,"cv":32.0,"save":71.2},{"sku":"B2011","b":226719,"h":275.1,"d":111,"n":122,"rate":824.0,"med":911.0,"p75":1054.0,"best":2004.0,"cv":32.0,"save":60.0},{"sku":"B1011","b":179492,"h":211.9,"d":76,"n":76,"rate":847.0,"med":909.0,"p75":1109.0,"best":2100.0,"cv":35.0,"save":50.1},{"sku":"A1020","b":285366,"h":190.6,"d":46,"n":49,"rate":1497.0,"med":1555.0,"p75":1939.0,"best":2760.0,"cv":30.0,"save":43.4},{"sku":"D0210","b":22439,"h":90.8,"d":46,"n":47,"rate":247.0,"med":272.0,"p75":322.0,"best":592.0,"cv":32.0,"save":21.2},{"sku":"D0113","b":13792,"h":46.8,"d":35,"n":37,"rate":295.0,"med":317.0,"p75":350.0,"best":474.0,"cv":29.0,"save":7.4},{"sku":"D0330","b":14410,"h":52.8,"d":34,"n":59,"rate":273.0,"med":293.0,"p75":317.0,"best":432.0,"cv":25.0,"save":7.2},{"sku":"B2021","b":54809,"h":81.9,"d":33,"n":33,"rate":669.0,"med":896.0,"p75":1084.0,"best":1638.0,"cv":35.0,"save":31.4},{"sku":"A2060","b":160268,"h":80.9,"d":26,"n":26,"rate":1981.0,"med":2138.0,"p75":2388.0,"best":3060.0,"cv":22.0,"save":13.8},{"sku":"A2020","b":138758,"h":87.0,"d":25,"n":25,"rate":1595.0,"med":1656.0,"p75":2169.0,"best":3120.0,"cv":34.0,"save":23.0}],"gap":[{"sku":"D0310","b":66160,"h":259.1,"d":136,"n":253,"rate":255.0,"med":295.0,"p75":352.0,"best":592.0,"cv":32.0,"save":71.2},{"sku":"B2011","b":226719,"h":275.1,"d":111,"n":122,"rate":824.0,"med":911.0,"p75":1054.0,"best":2004.0,"cv":32.0,"save":60.0},{"sku":"B1011","b":179492,"h":211.9,"d":76,"n":76,"rate":847.0,"med":909.0,"p75":1109.0,"best":2100.0,"cv":35.0,"save":50.1},{"sku":"A3010","b":165764,"h":131.0,"d":23,"n":23,"rate":1265.0,"med":1565.0,"p75":2027.0,"best":6304.0,"cv":70.0,"save":49.2},{"sku":"A1020","b":285366,"h":190.6,"d":46,"n":49,"rate":1497.0,"med":1555.0,"p75":1939.0,"best":2760.0,"cv":30.0,"save":43.4},{"sku":"B2021","b":54809,"h":81.9,"d":33,"n":33,"rate":669.0,"med":896.0,"p75":1084.0,"best":1638.0,"cv":35.0,"save":31.4},{"sku":"A2020","b":138758,"h":87.0,"d":25,"n":25,"rate":1595.0,"med":1656.0,"p75":2169.0,"best":3120.0,"cv":34.0,"save":23.0},{"sku":"D0210","b":22439,"h":90.8,"d":46,"n":47,"rate":247.0,"med":272.0,"p75":322.0,"best":592.0,"cv":32.0,"save":21.2},{"sku":"B1040","b":70347,"h":53.6,"d":20,"n":20,"rate":1313.0,"med":1525.0,"p75":1854.0,"best":2372.0,"cv":31.0,"save":15.6},{"sku":"A2060","b":160268,"h":80.9,"d":26,"n":26,"rate":1981.0,"med":2138.0,"p75":2388.0,"best":3060.0,"cv":22.0,"save":13.8},{"sku":"A2040","b":70991,"h":44.4,"d":21,"n":21,"rate":1598.0,"med":1634.0,"p75":2250.0,"best":2725.0,"cv":38.0,"save":12.9},{"sku":"A1040","b":67718,"h":43.2,"d":16,"n":16,"rate":1569.0,"med":1730.0,"p75":1941.0,"best":2770.0,"cv":30.0,"save":8.3},{"sku":"D0113","b":13792,"h":46.8,"d":35,"n":37,"rate":295.0,"med":317.0,"p75":350.0,"best":474.0,"cv":29.0,"save":7.4},{"sku":"D0330","b":14410,"h":52.8,"d":34,"n":59,"rate":273.0,"med":293.0,"p75":317.0,"best":432.0,"cv":25.0,"save":7.2}],"months":[{"m":"2025-10","b":212301,"h":224.1,"rate":947.0},{"m":"2025-11","b":205439,"h":232.3,"rate":884.0},{"m":"2025-12","b":184847,"h":257.7,"rate":717.0},{"m":"2026-01","b":235930,"h":290.7,"rate":811.0},{"m":"2026-02","b":124428,"h":179.0,"rate":695.0},{"m":"2026-03","b":235149,"h":291.1,"rate":808.0},{"m":"2026-04","b":187696,"h":258.9,"rate":725.0},{"m":"2026-05","b":184366,"h":236.2,"rate":781.0},{"m":"2026-06","b":157006,"h":232.1,"rate":677.0},{"m":"2026-07","b":201133,"h":284.6,"rate":707.0},{"m":"2026-08","b":204319,"h":264.9,"rate":771.0}]};
+const D = /*PAYLOAD:START*/{"meta":{"period":["2025-10-01","2026-08-26"],"records":1571,"skuCount":109,"workDays":239,"bottles":2140360,"hours":2754.7,"rate":777,"hPer1k":1.29,"saveFocus":402.3,"saveAll":729,"focusBShare":72.0,"focusHShare":59.7,"paretoN":17,"shortN":573,"shortH":312,"shortShare":36,"dayMedian":10.9,"dayMax":28.2,"over8Days":197,"solo8":[{"date":"2026-02-24","sku":"B2021","h":12.5},{"date":"2025-10-09","sku":"B2011","h":10.42},{"date":"2026-07-13","sku":"B2021","h":10.0},{"date":"2026-07-22","sku":"B2011","h":9.83},{"date":"2026-06-18","sku":"A1020","h":9.0},{"date":"2026-05-11","sku":"A3010","h":9.0},{"date":"2026-06-16","sku":"A3010","h":9.0},{"date":"2026-08-25","sku":"B1011","h":9.0},{"date":"2025-12-10","sku":"F0010","h":9.0},{"date":"2026-08-18","sku":"B3011","h":8.83},{"date":"2026-03-13","sku":"A1020","h":8.5},{"date":"2026-03-25","sku":"A2060","h":8.17}]},"skus":[{"sku":"A1020","b":285366,"h":190.6,"d":46,"n":49,"rate":1497,"hPer1k":0.67,"med":1555,"p75":1939,"best":2760,"worst":508,"cv":30,"save":43.4,"intensity":0.52,"hShare":6.92,"bShare":13.33,"shortN":1,"shortH":0.3,"shortShare":2,"perDay":1.07,"avgBatchH":3.89},{"sku":"B2011","b":230682,"h":279.0,"d":111,"n":124,"rate":827,"hPer1k":1.21,"med":911,"p75":1057,"best":2004,"worst":264,"cv":33,"save":60.8,"intensity":0.94,"hShare":10.13,"bShare":10.78,"shortN":20,"shortH":10.4,"shortShare":16,"perDay":1.12,"avgBatchH":2.25},{"sku":"B1011","b":179492,"h":211.9,"d":76,"n":76,"rate":847,"hPer1k":1.18,"med":909,"p75":1109,"best":2100,"worst":235,"cv":35,"save":50.1,"intensity":0.92,"hShare":7.69,"bShare":8.39,"shortN":5,"shortH":2.7,"shortShare":7,"perDay":1.0,"avgBatchH":2.79},{"sku":"A3010","b":165764,"h":117.5,"d":23,"n":23,"rate":1411,"hPer1k":0.71,"med":1565,"p75":2027,"best":6304,"worst":417,"cv":66,"save":35.7,"intensity":0.55,"hShare":4.27,"bShare":7.74,"shortN":1,"shortH":0.5,"shortShare":4,"perDay":1.0,"avgBatchH":5.11},{"sku":"A2060","b":160268,"h":80.9,"d":26,"n":26,"rate":1981,"hPer1k":0.5,"med":2138,"p75":2388,"best":3060,"worst":1318,"cv":22,"save":13.8,"intensity":0.39,"hShare":2.94,"bShare":7.49,"shortN":4,"shortH":2.5,"shortShare":15,"perDay":1.0,"avgBatchH":3.11},{"sku":"A2020","b":138758,"h":87.0,"d":25,"n":25,"rate":1595,"hPer1k":0.63,"med":1656,"p75":2169,"best":3120,"worst":702,"cv":34,"save":23.0,"intensity":0.49,"hShare":3.16,"bShare":6.48,"shortN":2,"shortH":1.0,"shortShare":8,"perDay":1.0,"avgBatchH":3.48},{"sku":"A2040","b":70991,"h":44.4,"d":21,"n":21,"rate":1598,"hPer1k":0.63,"med":1634,"p75":2250,"best":2725,"worst":596,"cv":38,"save":12.9,"intensity":0.49,"hShare":1.61,"bShare":3.32,"shortN":3,"shortH":1.8,"shortShare":14,"perDay":1.0,"avgBatchH":2.12},{"sku":"B1040","b":70347,"h":53.6,"d":20,"n":20,"rate":1313,"hPer1k":0.76,"med":1525,"p75":1854,"best":2372,"worst":684,"cv":31,"save":15.6,"intensity":0.59,"hShare":1.95,"bShare":3.29,"shortN":2,"shortH":1.0,"shortShare":10,"perDay":1.0,"avgBatchH":2.68},{"sku":"A1040","b":67718,"h":43.2,"d":16,"n":16,"rate":1569,"hPer1k":0.64,"med":1730,"p75":1940,"best":2770,"worst":702,"cv":30,"save":8.3,"intensity":0.5,"hShare":1.57,"bShare":3.16,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":2.7},{"sku":"D0310","b":67077,"h":262.4,"d":136,"n":255,"rate":256,"hPer1k":3.91,"med":295,"p75":351,"best":592,"worst":74,"cv":32,"save":71.5,"intensity":3.04,"hShare":9.53,"bShare":3.13,"shortN":135,"shortH":87.9,"shortShare":53,"perDay":1.88,"avgBatchH":1.03},{"sku":"B2021","b":54809,"h":81.9,"d":33,"n":33,"rate":669,"hPer1k":1.49,"med":896,"p75":1084,"best":1638,"worst":47,"cv":35,"save":31.4,"intensity":1.16,"hShare":2.97,"bShare":2.56,"shortN":7,"shortH":4.1,"shortShare":21,"perDay":1.0,"avgBatchH":2.48},{"sku":"A1050","b":52012,"h":42.4,"d":14,"n":25,"rate":1226,"hPer1k":0.82,"med":1440,"p75":1886,"best":2926,"worst":479,"cv":39,"save":14.8,"intensity":0.63,"hShare":1.54,"bShare":2.43,"shortN":10,"shortH":6.1,"shortShare":40,"perDay":1.79,"avgBatchH":1.7},{"sku":"B3020","b":39023,"h":30.0,"d":11,"n":11,"rate":1301,"hPer1k":0.77,"med":1546,"p75":1942,"best":2214,"worst":543,"cv":34,"save":9.9,"intensity":0.6,"hShare":1.09,"bShare":1.82,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":2.73},{"sku":"B3011","b":38599,"h":50.8,"d":19,"n":19,"rate":759,"hPer1k":1.32,"med":881,"p75":1119,"best":1977,"worst":376,"cv":37,"save":16.3,"intensity":1.02,"hShare":1.85,"bShare":1.8,"shortN":3,"shortH":1.7,"shortShare":16,"perDay":1.0,"avgBatchH":2.68},{"sku":"A1032","b":37463,"h":27.3,"d":11,"n":12,"rate":1371,"hPer1k":0.73,"med":1541,"p75":1956,"best":3352,"worst":575,"cv":48,"save":8.2,"intensity":0.57,"hShare":0.99,"bShare":1.75,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.09,"avgBatchH":2.28},{"sku":"A2050","b":34654,"h":25.8,"d":16,"n":17,"rate":1341,"hPer1k":0.75,"med":1834,"p75":2111,"best":2678,"worst":52,"cv":39,"save":9.4,"intensity":0.58,"hShare":0.94,"bShare":1.62,"shortN":8,"shortH":5.0,"shortShare":47,"perDay":1.06,"avgBatchH":1.52},{"sku":"B2031","b":34221,"h":32.6,"d":16,"n":16,"rate":1050,"hPer1k":0.95,"med":1201,"p75":1449,"best":1956,"worst":278,"cv":40,"save":9.0,"intensity":0.74,"hShare":1.18,"bShare":1.6,"shortN":1,"shortH":0.5,"shortShare":6,"perDay":1.0,"avgBatchH":2.04},{"sku":"E0120","b":27600,"h":17.9,"d":10,"n":10,"rate":1540,"hPer1k":0.65,"med":1711,"p75":2305,"best":2880,"worst":450,"cv":37,"save":5.9,"intensity":0.5,"hShare":0.65,"bShare":1.29,"shortN":3,"shortH":2.3,"shortShare":30,"perDay":1.0,"avgBatchH":1.79},{"sku":"D0521","b":27108,"h":35.4,"d":12,"n":12,"rate":765,"hPer1k":1.31,"med":816,"p75":1260,"best":1579,"worst":420,"cv":42,"save":13.9,"intensity":1.02,"hShare":1.29,"bShare":1.27,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":2.95},{"sku":"E0121","b":22650,"h":11.9,"d":10,"n":10,"rate":1901,"hPer1k":0.53,"med":2053,"p75":2520,"best":2880,"worst":675,"cv":35,"save":2.9,"intensity":0.41,"hShare":0.43,"bShare":1.06,"shortN":4,"shortH":3.0,"shortShare":40,"perDay":1.0,"avgBatchH":1.19},{"sku":"D0210","b":22439,"h":90.8,"d":46,"n":47,"rate":247,"hPer1k":4.05,"med":272,"p75":322,"best":592,"worst":75,"cv":32,"save":21.2,"intensity":3.15,"hShare":3.3,"bShare":1.05,"shortN":13,"shortH":8.0,"shortShare":28,"perDay":1.02,"avgBatchH":1.93},{"sku":"B5011","b":20559,"h":26.9,"d":12,"n":12,"rate":764,"hPer1k":1.31,"med":1024,"p75":1214,"best":1688,"worst":23,"cv":40,"save":10.0,"intensity":1.02,"hShare":0.98,"bShare":0.96,"shortN":1,"shortH":0.8,"shortShare":8,"perDay":1.0,"avgBatchH":2.24},{"sku":"D0520","b":17329,"h":16.8,"d":5,"n":5,"rate":1029,"hPer1k":0.97,"med":1010,"p75":1094,"best":1178,"worst":976,"cv":7,"save":1.0,"intensity":0.75,"hShare":0.61,"bShare":0.81,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":3.37},{"sku":"D0330","b":14410,"h":52.8,"d":34,"n":59,"rate":273,"hPer1k":3.66,"med":293,"p75":316,"best":432,"worst":108,"cv":25,"save":7.2,"intensity":2.84,"hShare":1.92,"bShare":0.67,"shortN":38,"shortH":27.7,"shortShare":64,"perDay":1.74,"avgBatchH":0.89},{"sku":"D0113","b":13792,"h":46.8,"d":35,"n":37,"rate":295,"hPer1k":3.39,"med":317,"p75":350,"best":474,"worst":104,"cv":29,"save":7.4,"intensity":2.63,"hShare":1.7,"bShare":0.64,"shortN":12,"shortH":7.1,"shortShare":32,"perDay":1.06,"avgBatchH":1.26},{"sku":"D0530","b":13627,"h":13.3,"d":9,"n":10,"rate":1028,"hPer1k":0.97,"med":1041,"p75":1686,"best":2399,"worst":98,"cv":74,"save":5.2,"intensity":0.76,"hShare":0.48,"bShare":0.64,"shortN":3,"shortH":1.6,"shortShare":30,"perDay":1.11,"avgBatchH":1.33},{"sku":"C1020","b":13588,"h":48.6,"d":18,"n":19,"rate":280,"hPer1k":3.58,"med":300,"p75":386,"best":874,"worst":96,"cv":58,"save":13.4,"intensity":2.78,"hShare":1.76,"bShare":0.63,"shortN":1,"shortH":0.5,"shortShare":5,"perDay":1.06,"avgBatchH":2.56},{"sku":"B2041","b":12347,"h":9.9,"d":5,"n":5,"rate":1245,"hPer1k":0.8,"med":1314,"p75":1472,"best":1474,"worst":896,"cv":18,"save":1.5,"intensity":0.62,"hShare":0.36,"bShare":0.58,"shortN":1,"shortH":0.8,"shortShare":20,"perDay":1.0,"avgBatchH":1.98},{"sku":"D0591","b":11290,"h":9.2,"d":9,"n":9,"rate":1221,"hPer1k":0.82,"med":1466,"p75":1923,"best":2282,"worst":417,"cv":50,"save":3.4,"intensity":0.64,"hShare":0.34,"bShare":0.53,"shortN":2,"shortH":0.8,"shortShare":22,"perDay":1.0,"avgBatchH":1.03},{"sku":"A2020-1","b":10021,"h":4.1,"d":3,"n":3,"rate":2454,"hPer1k":0.41,"med":2485,"p75":2754,"best":2754,"worst":1098,"cv":34,"save":0.4,"intensity":0.32,"hShare":0.15,"bShare":0.47,"shortN":1,"shortH":0.3,"shortShare":33,"perDay":1.0,"avgBatchH":1.36},{"sku":"D2021","b":9773,"h":16.2,"d":18,"n":18,"rate":605,"hPer1k":1.65,"med":577,"p75":721,"best":4017,"worst":171,"cv":111,"save":2.6,"intensity":1.29,"hShare":0.59,"bShare":0.46,"shortN":11,"shortH":7.1,"shortShare":61,"perDay":1.0,"avgBatchH":0.9},{"sku":"A3012","b":8840,"h":7.6,"d":4,"n":4,"rate":1166,"hPer1k":0.86,"med":1167,"p75":1750,"best":1902,"worst":804,"cv":33,"save":2.5,"intensity":0.67,"hShare":0.28,"bShare":0.41,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.9},{"sku":"D0230","b":8729,"h":36.3,"d":24,"n":24,"rate":240,"hPer1k":4.16,"med":248,"p75":323,"best":401,"worst":128,"cv":33,"save":9.3,"intensity":3.23,"hShare":1.32,"bShare":0.41,"shortN":5,"shortH":3.8,"shortShare":21,"perDay":1.0,"avgBatchH":1.51},{"sku":"D2212","b":7455,"h":30.2,"d":14,"n":15,"rate":247,"hPer1k":4.05,"med":272,"p75":334,"best":439,"worst":100,"cv":32,"save":7.9,"intensity":3.14,"hShare":1.1,"bShare":0.35,"shortN":3,"shortH":1.8,"shortShare":20,"perDay":1.07,"avgBatchH":2.01},{"sku":"D0114","b":7229,"h":24.3,"d":21,"n":22,"rate":297,"hPer1k":3.37,"med":325,"p75":380,"best":508,"worst":110,"cv":30,"save":5.3,"intensity":2.62,"hShare":0.88,"bShare":0.34,"shortN":8,"shortH":4.9,"shortShare":36,"perDay":1.05,"avgBatchH":1.11},{"sku":"D0592","b":7213,"h":7.7,"d":6,"n":7,"rate":941,"hPer1k":1.06,"med":1092,"p75":2040,"best":2414,"worst":399,"cv":51,"save":4.1,"intensity":0.83,"hShare":0.28,"bShare":0.34,"shortN":5,"shortH":2.5,"shortShare":71,"perDay":1.17,"avgBatchH":1.1},{"sku":"B2021-1","b":6963,"h":6.9,"d":5,"n":5,"rate":1007,"hPer1k":0.99,"med":1024,"p75":1111,"best":1175,"worst":386,"cv":42,"save":0.7,"intensity":0.77,"hShare":0.25,"bShare":0.33,"shortN":2,"shortH":0.8,"shortShare":40,"perDay":1.0,"avgBatchH":1.38},{"sku":"D0291","b":6523,"h":23.5,"d":19,"n":19,"rate":278,"hPer1k":3.6,"med":304,"p75":333,"best":382,"worst":130,"cv":24,"save":3.9,"intensity":2.8,"hShare":0.85,"bShare":0.3,"shortN":6,"shortH":4.3,"shortShare":32,"perDay":1.0,"avgBatchH":1.24},{"sku":"D0331","b":5742,"h":25.9,"d":16,"n":25,"rate":222,"hPer1k":4.51,"med":220,"p75":289,"best":402,"worst":48,"cv":38,"save":6.0,"intensity":3.51,"hShare":0.94,"bShare":0.27,"shortN":10,"shortH":5.8,"shortShare":40,"perDay":1.56,"avgBatchH":1.04},{"sku":"D0111","b":5486,"h":19.5,"d":20,"n":20,"rate":281,"hPer1k":3.56,"med":307,"p75":358,"best":449,"worst":18,"cv":47,"save":4.2,"intensity":2.77,"hShare":0.71,"bShare":0.26,"shortN":11,"shortH":6.6,"shortShare":55,"perDay":1.0,"avgBatchH":0.98},{"sku":"D0131","b":4886,"h":17.7,"d":17,"n":18,"rate":277,"hPer1k":3.62,"med":298,"p75":332,"best":516,"worst":146,"cv":33,"save":3.0,"intensity":2.81,"hShare":0.64,"bShare":0.23,"shortN":9,"shortH":5.4,"shortShare":50,"perDay":1.06,"avgBatchH":0.98},{"sku":"F0010","b":4360,"h":60.4,"d":17,"n":19,"rate":72,"hPer1k":13.86,"med":75,"p75":99,"best":181,"worst":36,"cv":41,"save":16.5,"intensity":10.77,"hShare":2.19,"bShare":0.2,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.12,"avgBatchH":3.18},{"sku":"D0231","b":4197,"h":17.2,"d":13,"n":13,"rate":244,"hPer1k":4.09,"med":269,"p75":312,"best":363,"worst":144,"cv":23,"save":3.7,"intensity":3.18,"hShare":0.62,"bShare":0.2,"shortN":4,"shortH":2.6,"shortShare":31,"perDay":1.0,"avgBatchH":1.32},{"sku":"C1030","b":4170,"h":13.8,"d":7,"n":7,"rate":301,"hPer1k":3.32,"med":280,"p75":422,"best":971,"worst":120,"cv":70,"save":3.9,"intensity":2.58,"hShare":0.5,"bShare":0.19,"shortN":1,"shortH":0.8,"shortShare":14,"perDay":1.0,"avgBatchH":1.98},{"sku":"D1410-1","b":3903,"h":16.1,"d":11,"n":11,"rate":243,"hPer1k":4.12,"med":299,"p75":357,"best":376,"worst":85,"cv":30,"save":5.1,"intensity":3.2,"hShare":0.58,"bShare":0.18,"shortN":3,"shortH":2.6,"shortShare":27,"perDay":1.0,"avgBatchH":1.46},{"sku":"D0991","b":3806,"h":49.7,"d":11,"n":12,"rate":77,"hPer1k":13.05,"med":77,"p75":88,"best":127,"worst":52,"cv":25,"save":6.5,"intensity":10.14,"hShare":1.8,"bShare":0.18,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.09,"avgBatchH":4.14},{"sku":"D0422","b":3402,"h":24.8,"d":12,"n":12,"rate":137,"hPer1k":7.3,"med":175,"p75":211,"best":311,"worst":68,"cv":39,"save":8.7,"intensity":5.67,"hShare":0.9,"bShare":0.16,"shortN":1,"shortH":0.2,"shortShare":8,"perDay":1.0,"avgBatchH":2.07},{"sku":"C3070","b":3394,"h":16.8,"d":8,"n":10,"rate":202,"hPer1k":4.96,"med":237,"p75":297,"best":873,"worst":104,"cv":76,"save":5.4,"intensity":3.85,"hShare":0.61,"bShare":0.16,"shortN":3,"shortH":1.2,"shortShare":30,"perDay":1.25,"avgBatchH":1.68},{"sku":"D1520","b":3243,"h":2.9,"d":3,"n":3,"rate":1112,"hPer1k":0.9,"med":1029,"p75":1441,"best":1441,"worst":482,"cv":40,"save":0.7,"intensity":0.7,"hShare":0.11,"bShare":0.15,"shortN":1,"shortH":0.5,"shortShare":33,"perDay":1.0,"avgBatchH":0.97},{"sku":"D1521","b":3004,"h":1.6,"d":2,"n":2,"rate":1897,"hPer1k":0.53,"med":1931,"p75":2059,"best":2059,"worst":1803,"cv":7,"save":0.1,"intensity":0.41,"hShare":0.06,"bShare":0.14,"shortN":1,"shortH":0.6,"shortShare":50,"perDay":1.0,"avgBatchH":0.79},{"sku":"D2010","b":2999,"h":5.1,"d":4,"n":4,"rate":590,"hPer1k":1.69,"med":700,"p75":876,"best":902,"worst":300,"cv":35,"save":1.7,"intensity":1.32,"hShare":0.18,"bShare":0.14,"shortN":1,"shortH":0.8,"shortShare":25,"perDay":1.0,"avgBatchH":1.27},{"sku":"D0732","b":2964,"h":1.9,"d":2,"n":2,"rate":1546,"hPer1k":0.65,"med":1725,"p75":2181,"best":2181,"worst":1269,"cv":26,"save":0.6,"intensity":0.5,"hShare":0.07,"bShare":0.14,"shortN":1,"shortH":0.6,"shortShare":50,"perDay":1.0,"avgBatchH":0.96},{"sku":"Z0001","b":2940,"h":3.2,"d":2,"n":2,"rate":928,"hPer1k":1.08,"med":1241,"p75":1901,"best":1901,"worst":581,"cv":53,"save":1.6,"intensity":0.84,"hShare":0.11,"bShare":0.14,"shortN":1,"shortH":0.8,"shortShare":50,"perDay":1.0,"avgBatchH":1.58},{"sku":"F0020","b":2913,"h":35.9,"d":14,"n":14,"rate":81,"hPer1k":12.33,"med":87,"p75":150,"best":438,"worst":29,"cv":88,"save":16.5,"intensity":9.58,"hShare":1.3,"bShare":0.14,"shortN":1,"shortH":0.3,"shortShare":7,"perDay":1.0,"avgBatchH":2.57},{"sku":"C7020","b":2756,"h":15.7,"d":5,"n":5,"rate":176,"hPer1k":5.68,"med":172,"p75":264,"best":353,"worst":108,"cv":43,"save":5.2,"intensity":4.42,"hShare":0.57,"bShare":0.13,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":3.13},{"sku":"Z3001","b":2728,"h":3.5,"d":1,"n":1,"rate":779,"hPer1k":1.28,"med":779,"p75":779,"best":779,"worst":779,"cv":0,"save":0.0,"intensity":1.0,"hShare":0.13,"bShare":0.13,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":3.5},{"sku":"D1130","b":2664,"h":11.8,"d":9,"n":9,"rate":227,"hPer1k":4.41,"med":272,"p75":293,"best":324,"worst":86,"cv":36,"save":2.6,"intensity":3.43,"hShare":0.43,"bShare":0.12,"shortN":3,"shortH":1.7,"shortShare":33,"perDay":1.0,"avgBatchH":1.31},{"sku":"D0594","b":2620,"h":11.2,"d":3,"n":3,"rate":233,"hPer1k":4.29,"med":228,"p75":346,"best":346,"worst":103,"cv":44,"save":3.7,"intensity":3.34,"hShare":0.41,"bShare":0.12,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":3.75},{"sku":"Z1001","b":2337,"h":1.2,"d":1,"n":2,"rate":1870,"hPer1k":0.53,"med":1917,"p75":2156,"best":2156,"worst":1679,"cv":12,"save":0.2,"intensity":0.42,"hShare":0.05,"bShare":0.11,"shortN":2,"shortH":1.2,"shortShare":100,"perDay":2.0,"avgBatchH":0.62},{"sku":"D0290","b":2273,"h":8.6,"d":15,"n":15,"rate":265,"hPer1k":3.78,"med":262,"p75":300,"best":576,"worst":108,"cv":36,"save":1.0,"intensity":2.93,"hShare":0.31,"bShare":0.11,"shortN":14,"shortH":7.4,"shortShare":93,"perDay":1.0,"avgBatchH":0.57},{"sku":"D9950","b":2228,"h":1.3,"d":1,"n":2,"rate":1671,"hPer1k":0.6,"med":1844,"p75":2536,"best":2536,"worst":1152,"cv":38,"save":0.5,"intensity":0.46,"hShare":0.05,"bShare":0.1,"shortN":2,"shortH":1.3,"shortShare":100,"perDay":2.0,"avgBatchH":0.67},{"sku":"D0420","b":1899,"h":12.8,"d":9,"n":9,"rate":148,"hPer1k":6.76,"med":187,"p75":221,"best":250,"worst":88,"cv":33,"save":4.3,"intensity":5.25,"hShare":0.47,"bShare":0.09,"shortN":3,"shortH":2.5,"shortShare":33,"perDay":1.0,"avgBatchH":1.43},{"sku":"C3080","b":1885,"h":8.8,"d":4,"n":4,"rate":215,"hPer1k":4.64,"med":166,"p75":536,"best":653,"worst":134,"cv":77,"save":5.2,"intensity":3.61,"hShare":0.32,"bShare":0.09,"shortN":1,"shortH":0.9,"shortShare":25,"perDay":1.0,"avgBatchH":2.19},{"sku":"D0593","b":1866,"h":1.8,"d":1,"n":1,"rate":1018,"hPer1k":0.98,"med":1018,"p75":1018,"best":1018,"worst":1018,"cv":0,"save":0.0,"intensity":0.76,"hShare":0.07,"bShare":0.09,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.83},{"sku":"C3020","b":1801,"h":10.3,"d":8,"n":34,"rate":176,"hPer1k":5.69,"med":292,"p75":420,"best":636,"worst":68,"cv":45,"save":6.0,"intensity":4.42,"hShare":0.37,"bShare":0.08,"shortN":32,"shortH":4.9,"shortShare":94,"perDay":4.25,"avgBatchH":0.3},{"sku":"D1390","b":1761,"h":2.1,"d":1,"n":1,"rate":845,"hPer1k":1.18,"med":845,"p75":845,"best":845,"worst":845,"cv":0,"save":0.0,"intensity":0.92,"hShare":0.08,"bShare":0.08,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":2.08},{"sku":"C5010","b":1711,"h":4.7,"d":5,"n":5,"rate":367,"hPer1k":2.73,"med":345,"p75":750,"best":818,"worst":212,"cv":48,"save":2.4,"intensity":2.12,"hShare":0.17,"bShare":0.08,"shortN":3,"shortH":1.7,"shortShare":60,"perDay":1.0,"avgBatchH":0.93},{"sku":"D0810","b":1656,"h":3.7,"d":5,"n":5,"rate":442,"hPer1k":2.26,"med":420,"p75":613,"best":729,"worst":316,"cv":33,"save":1.0,"intensity":1.76,"hShare":0.14,"bShare":0.08,"shortN":5,"shortH":3.7,"shortShare":100,"perDay":1.0,"avgBatchH":0.75},{"sku":"D0243","b":1634,"h":7.4,"d":7,"n":7,"rate":220,"hPer1k":4.55,"med":257,"p75":273,"best":316,"worst":85,"cv":30,"save":1.4,"intensity":3.53,"hShare":0.27,"bShare":0.08,"shortN":4,"shortH":2.8,"shortShare":57,"perDay":1.0,"avgBatchH":1.06},{"sku":"D0191-2","b":1627,"h":5.4,"d":9,"n":10,"rate":300,"hPer1k":3.33,"med":302,"p75":356,"best":364,"worst":150,"cv":24,"save":0.8,"intensity":2.59,"hShare":0.2,"bShare":0.08,"shortN":9,"shortH":4.1,"shortShare":90,"perDay":1.11,"avgBatchH":0.54},{"sku":"D0250","b":1611,"h":6.3,"d":10,"n":10,"rate":254,"hPer1k":3.93,"med":255,"p75":282,"best":348,"worst":193,"cv":19,"save":0.6,"intensity":3.05,"hShare":0.23,"bShare":0.08,"shortN":10,"shortH":6.3,"shortShare":100,"perDay":1.0,"avgBatchH":0.63},{"sku":"D1211","b":1526,"h":11.6,"d":7,"n":7,"rate":132,"hPer1k":7.59,"med":167,"p75":231,"best":806,"worst":48,"cv":103,"save":5.0,"intensity":5.9,"hShare":0.42,"bShare":0.07,"shortN":3,"shortH":1.6,"shortShare":43,"perDay":1.0,"avgBatchH":1.65},{"sku":"D0910","b":1515,"h":4.9,"d":4,"n":4,"rate":308,"hPer1k":3.25,"med":432,"p75":942,"best":1042,"worst":172,"cv":68,"save":3.3,"intensity":2.52,"hShare":0.18,"bShare":0.07,"shortN":2,"shortH":0.9,"shortShare":50,"perDay":1.0,"avgBatchH":1.23},{"sku":"C1010","b":1348,"h":5.6,"d":6,"n":34,"rate":239,"hPer1k":4.19,"med":300,"p75":342,"best":444,"worst":60,"cv":29,"save":1.7,"intensity":3.26,"hShare":0.21,"bShare":0.06,"shortN":34,"shortH":5.6,"shortShare":100,"perDay":5.67,"avgBatchH":0.17},{"sku":"D0730","b":1336,"h":7.0,"d":1,"n":1,"rate":191,"hPer1k":5.24,"med":191,"p75":191,"best":191,"worst":191,"cv":0,"save":0.0,"intensity":4.07,"hShare":0.25,"bShare":0.06,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":7.0},{"sku":"C7010","b":1239,"h":4.7,"d":5,"n":5,"rate":265,"hPer1k":3.77,"med":400,"p75":694,"best":812,"worst":136,"cv":55,"save":2.9,"intensity":2.93,"hShare":0.17,"bShare":0.06,"shortN":3,"shortH":1.0,"shortShare":60,"perDay":1.0,"avgBatchH":0.93},{"sku":"A2040-1","b":1210,"h":1.0,"d":1,"n":1,"rate":1210,"hPer1k":0.83,"med":1210,"p75":1210,"best":1210,"worst":1210,"cv":0,"save":0.0,"intensity":0.64,"hShare":0.04,"bShare":0.06,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.0},{"sku":"D0992","b":1189,"h":14.6,"d":3,"n":3,"rate":82,"hPer1k":12.27,"med":63,"p75":269,"best":269,"worst":58,"cv":76,"save":10.2,"intensity":9.53,"hShare":0.53,"bShare":0.06,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":4.86},{"sku":"D0134","b":1137,"h":3.2,"d":4,"n":5,"rate":350,"hPer1k":2.86,"med":354,"p75":377,"best":384,"worst":315,"cv":8,"save":0.2,"intensity":2.22,"hShare":0.12,"bShare":0.05,"shortN":4,"shortH":2.1,"shortShare":80,"perDay":1.25,"avgBatchH":0.65},{"sku":"D0790","b":1117,"h":0.5,"d":1,"n":1,"rate":2234,"hPer1k":0.45,"med":2234,"p75":2234,"best":2234,"worst":2234,"cv":0,"save":0.0,"intensity":0.35,"hShare":0.02,"bShare":0.05,"shortN":1,"shortH":0.5,"shortShare":100,"perDay":1.0,"avgBatchH":0.5},{"sku":"D0731","b":1097,"h":0.8,"d":1,"n":1,"rate":1316,"hPer1k":0.76,"med":1316,"p75":1316,"best":1316,"worst":1316,"cv":0,"save":0.0,"intensity":0.59,"hShare":0.03,"bShare":0.05,"shortN":1,"shortH":0.8,"shortShare":100,"perDay":1.0,"avgBatchH":0.83},{"sku":"D1010","b":1031,"h":4.0,"d":5,"n":5,"rate":258,"hPer1k":3.88,"med":277,"p75":361,"best":412,"worst":153,"cv":29,"save":1.1,"intensity":3.01,"hShare":0.15,"bShare":0.05,"shortN":4,"shortH":2.7,"shortShare":80,"perDay":1.0,"avgBatchH":0.8},{"sku":"D2330","b":1028,"h":4.9,"d":5,"n":20,"rate":211,"hPer1k":4.73,"med":259,"p75":350,"best":680,"worst":37,"cv":46,"save":1.9,"intensity":3.68,"hShare":0.18,"bShare":0.05,"shortN":19,"shortH":3.9,"shortShare":95,"perDay":4.0,"avgBatchH":0.24},{"sku":"D0241","b":1012,"h":5.6,"d":8,"n":8,"rate":181,"hPer1k":5.52,"med":184,"p75":265,"best":296,"worst":96,"cv":30,"save":1.8,"intensity":4.29,"hShare":0.2,"bShare":0.05,"shortN":7,"shortH":4.1,"shortShare":88,"perDay":1.0,"avgBatchH":0.7},{"sku":"D0174","b":960,"h":4.3,"d":5,"n":5,"rate":222,"hPer1k":4.51,"med":240,"p75":315,"best":317,"worst":69,"cv":42,"save":1.3,"intensity":3.51,"hShare":0.16,"bShare":0.04,"shortN":4,"shortH":2.5,"shortShare":80,"perDay":1.0,"avgBatchH":0.87},{"sku":"C9030","b":913,"h":2.6,"d":3,"n":3,"rate":353,"hPer1k":2.83,"med":323,"p75":568,"best":568,"worst":279,"cv":33,"save":1.0,"intensity":2.2,"hShare":0.09,"bShare":0.04,"shortN":1,"shortH":0.5,"shortShare":33,"perDay":1.0,"avgBatchH":0.86},{"sku":"D0140-1","b":897,"h":3.3,"d":2,"n":2,"rate":269,"hPer1k":3.72,"med":261,"p75":300,"best":300,"worst":223,"cv":15,"save":0.3,"intensity":2.89,"hShare":0.12,"bShare":0.04,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.67},{"sku":"C7021","b":790,"h":7.1,"d":3,"n":3,"rate":112,"hPer1k":8.97,"med":100,"p75":317,"best":317,"worst":72,"cv":67,"save":4.6,"intensity":6.97,"hShare":0.26,"bShare":0.04,"shortN":1,"shortH":0.8,"shortShare":33,"perDay":1.0,"avgBatchH":2.36},{"sku":"C5020","b":767,"h":1.5,"d":2,"n":2,"rate":511,"hPer1k":1.96,"med":522,"p75":622,"best":622,"worst":422,"cv":19,"save":0.3,"intensity":1.52,"hShare":0.05,"bShare":0.04,"shortN":2,"shortH":1.5,"shortShare":100,"perDay":1.0,"avgBatchH":0.75},{"sku":"B1031","b":697,"h":1.6,"d":2,"n":2,"rate":440,"hPer1k":2.27,"med":442,"p75":467,"best":467,"worst":416,"cv":6,"save":0.1,"intensity":1.76,"hShare":0.06,"bShare":0.03,"shortN":2,"shortH":1.6,"shortShare":100,"perDay":1.0,"avgBatchH":0.79},{"sku":"D0820","b":693,"h":5.2,"d":5,"n":5,"rate":132,"hPer1k":7.57,"med":120,"p75":420,"best":444,"worst":82,"cv":70,"save":3.6,"intensity":5.88,"hShare":0.19,"bShare":0.03,"shortN":2,"shortH":0.6,"shortShare":40,"perDay":1.0,"avgBatchH":1.05},{"sku":"C3081","b":651,"h":3.4,"d":2,"n":2,"rate":191,"hPer1k":5.25,"med":190,"p75":205,"best":205,"worst":176,"cv":8,"save":0.2,"intensity":4.08,"hShare":0.12,"bShare":0.03,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.71},{"sku":"D0141","b":634,"h":3.3,"d":3,"n":4,"rate":190,"hPer1k":5.26,"med":236,"p75":399,"best":408,"worst":48,"cv":69,"save":1.7,"intensity":4.08,"hShare":0.12,"bShare":0.03,"shortN":3,"shortH":1.5,"shortShare":75,"perDay":1.33,"avgBatchH":0.83},{"sku":"D0610","b":595,"h":2.7,"d":3,"n":3,"rate":217,"hPer1k":4.62,"med":263,"p75":345,"best":345,"worst":140,"cv":34,"save":1.0,"intensity":3.59,"hShare":0.1,"bShare":0.03,"shortN":2,"shortH":1.3,"shortShare":67,"perDay":1.0,"avgBatchH":0.92},{"sku":"D2712","b":595,"h":1.5,"d":3,"n":3,"rate":397,"hPer1k":2.52,"med":120,"p75":510,"best":510,"worst":88,"cv":80,"save":0.3,"intensity":1.96,"hShare":0.05,"bShare":0.03,"shortN":2,"shortH":0.4,"shortShare":67,"perDay":1.0,"avgBatchH":0.5},{"sku":"D0390","b":456,"h":10.4,"d":3,"n":3,"rate":44,"hPer1k":22.84,"med":44,"p75":51,"best":51,"worst":39,"cv":11,"save":1.5,"intensity":17.75,"hShare":0.38,"bShare":0.02,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":3.47},{"sku":"D0115-1","b":406,"h":1.5,"d":3,"n":3,"rate":271,"hPer1k":3.69,"med":228,"p75":468,"best":468,"worst":196,"cv":41,"save":0.6,"intensity":2.87,"hShare":0.05,"bShare":0.02,"shortN":3,"shortH":1.5,"shortShare":100,"perDay":1.0,"avgBatchH":0.5},{"sku":"D2820","b":404,"h":0.7,"d":1,"n":1,"rate":606,"hPer1k":1.65,"med":606,"p75":606,"best":606,"worst":606,"cv":0,"save":0.0,"intensity":1.28,"hShare":0.02,"bShare":0.02,"shortN":1,"shortH":0.7,"shortShare":100,"perDay":1.0,"avgBatchH":0.67},{"sku":"D0630","b":304,"h":0.9,"d":2,"n":2,"rate":332,"hPer1k":3.02,"med":335,"p75":367,"best":367,"worst":302,"cv":10,"save":0.1,"intensity":2.34,"hShare":0.03,"bShare":0.01,"shortN":2,"shortH":0.9,"shortShare":100,"perDay":1.0,"avgBatchH":0.46},{"sku":"D0195-1","b":299,"h":1.3,"d":2,"n":2,"rate":224,"hPer1k":4.46,"med":217,"p75":245,"best":245,"worst":190,"cv":13,"save":0.1,"intensity":3.46,"hShare":0.05,"bShare":0.01,"shortN":2,"shortH":1.3,"shortShare":100,"perDay":1.0,"avgBatchH":0.67},{"sku":"C9050","b":297,"h":2.2,"d":3,"n":3,"rate":132,"hPer1k":7.58,"med":135,"p75":200,"best":200,"worst":96,"cv":30,"save":0.8,"intensity":5.89,"hShare":0.08,"bShare":0.01,"shortN":2,"shortH":1.2,"shortShare":67,"perDay":1.0,"avgBatchH":0.75},{"sku":"D2531","b":209,"h":1.5,"d":1,"n":1,"rate":139,"hPer1k":7.18,"med":139,"p75":139,"best":139,"worst":139,"cv":0,"save":0.0,"intensity":5.58,"hShare":0.05,"bShare":0.01,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.5},{"sku":"D0990","b":201,"h":0.6,"d":2,"n":2,"rate":345,"hPer1k":2.9,"med":352,"p75":400,"best":400,"worst":303,"cv":14,"save":0.1,"intensity":2.25,"hShare":0.02,"bShare":0.01,"shortN":2,"shortH":0.6,"shortShare":100,"perDay":1.0,"avgBatchH":0.29},{"sku":"D1620","b":158,"h":1.2,"d":1,"n":1,"rate":126,"hPer1k":7.91,"med":126,"p75":126,"best":126,"worst":126,"cv":0,"save":0.0,"intensity":6.15,"hShare":0.05,"bShare":0.01,"shortN":0,"shortH":0,"shortShare":0,"perDay":1.0,"avgBatchH":1.25},{"sku":"C3020-1","b":109,"h":0.3,"d":1,"n":3,"rate":327,"hPer1k":3.06,"med":370,"p75":444,"best":444,"worst":233,"cv":25,"save":0.1,"intensity":2.38,"hShare":0.01,"bShare":0.01,"shortN":3,"shortH":0.3,"shortShare":100,"perDay":3.0,"avgBatchH":0.11},{"sku":"D0133","b":107,"h":0.4,"d":1,"n":1,"rate":257,"hPer1k":3.89,"med":257,"p75":257,"best":257,"worst":257,"cv":0,"save":0.0,"intensity":3.03,"hShare":0.02,"bShare":0.0,"shortN":1,"shortH":0.4,"shortShare":100,"perDay":1.0,"avgBatchH":0.42},{"sku":"D0120","b":105,"h":0.4,"d":1,"n":1,"rate":252,"hPer1k":3.97,"med":252,"p75":252,"best":252,"worst":252,"cv":0,"save":0.0,"intensity":3.08,"hShare":0.02,"bShare":0.0,"shortN":1,"shortH":0.4,"shortShare":100,"perDay":1.0,"avgBatchH":0.42},{"sku":"Z0002","b":82,"h":0.2,"d":1,"n":1,"rate":492,"hPer1k":2.03,"med":492,"p75":492,"best":492,"worst":492,"cv":0,"save":0.0,"intensity":1.58,"hShare":0.01,"bShare":0.0,"shortN":1,"shortH":0.2,"shortShare":100,"perDay":1.0,"avgBatchH":0.17},{"sku":"D0820-1","b":51,"h":0.2,"d":1,"n":1,"rate":306,"hPer1k":3.27,"med":306,"p75":306,"best":306,"worst":306,"cv":0,"save":0.0,"intensity":2.54,"hShare":0.01,"bShare":0.0,"shortN":1,"shortH":0.2,"shortShare":100,"perDay":1.0,"avgBatchH":0.17}],"focus":["A1020","A1040","A2020","A2040","A2060","A3010","B1011","B1040","B2011","B2021","D0113","D0210","D0310","D0330"],"months":[{"m":"2025-10","b":212301,"h":224.2,"rate":947,"expected":850,"index":111},{"m":"2025-11","b":205439,"h":231.3,"rate":888,"expected":830,"index":107},{"m":"2025-12","b":184847,"h":258.7,"rate":715,"expected":716,"index":100},{"m":"2026-01","b":240433,"h":296.2,"rate":812,"expected":792,"index":102},{"m":"2026-02","b":124428,"h":179.0,"rate":695,"expected":701,"index":99},{"m":"2026-03","b":235592,"h":293.3,"rate":803,"expected":844,"index":95},{"m":"2026-04","b":189148,"h":262.9,"rate":720,"expected":701,"index":103},{"m":"2026-05","b":185714,"h":227.7,"rate":816,"expected":803,"index":102},{"m":"2026-06","b":157006,"h":232.1,"rate":677,"expected":718,"index":94},{"m":"2026-07","b":201133,"h":284.6,"rate":707,"expected":752,"index":94},{"m":"2026-08","b":204319,"h":264.9,"rate":771,"expected":814,"index":95}],"alerts":[{"id":"intensity","level":"high","title":"資源佔用偏高的品項","rule":"相對工時強度指數 > 1.5 且 工時佔比 ≥ 3.0%","why":"產量佔比小、工時佔比大。先確認是瓶型使然還是排程造成，再決定要合批還是調線。","items":[{"sku":"D0310","value":"指數 3.04　工時佔比 9.53%","detail":"3.91 h/千瓶　255 批 / 136 天"},{"sku":"D0210","value":"指數 3.15　工時佔比 3.3%","detail":"4.05 h/千瓶　47 批 / 46 天"}]},{"id":"fragment","level":"high","title":"批次過碎，有合批機會","rule":"單批 < 1 小時的批次佔比 > 40.0%（且工時佔比 ≥ 1%）","why":"零星批次的準備與換線成本無法攤提。改善方向是合批，不是要求線上加快。","items":[{"sku":"D0310","value":"135/255 批未滿 1 小時（53%）","detail":"這些批次合計 87.9 h，佔該品項 33% 工時"},{"sku":"D0330","value":"38/59 批未滿 1 小時（64%）","detail":"這些批次合計 27.7 h，佔該品項 52% 工時"}]},{"id":"trend","level":"high","title":"效率指數連續 3 個月低於基準","rule":"扣除產品組合影響後的效率指數連續 3 個月 < 100","why":"指數已排除「低速品項變多」的影響，因此這是真實的效率退步，不是產品組合造成的錯覺。","items":[{"sku":"2026-06","value":"指數 94","detail":"實際 677 vs 組合預期 718 瓶/工時"},{"sku":"2026-07","value":"指數 94","detail":"實際 707 vs 組合預期 752 瓶/工時"},{"sku":"2026-08","value":"指數 95","detail":"實際 771 vs 組合預期 814 瓶/工時"}]},{"id":"variance","level":"mid","title":"同品項批次落差過大","rule":"批次產能變異係數 CV > 25.0%（樣本 ≥ 10 批、工時 ≥ 20 h）","why":"同一支產品、同一條線，批次之間差三成以上就是管理落差，不是產品特性。這是最直接的改善標的。","items":[{"sku":"D0310","value":"CV 32%　可省 71.5 h","detail":"中位 295 → P75 目標 351 瓶/工時"},{"sku":"B2011","value":"CV 33%　可省 60.8 h","detail":"中位 911 → P75 目標 1,057 瓶/工時"},{"sku":"B1011","value":"CV 35%　可省 50.1 h","detail":"中位 909 → P75 目標 1,109 瓶/工時"},{"sku":"A1020","value":"CV 30%　可省 43.4 h","detail":"中位 1,555 → P75 目標 1,939 瓶/工時"},{"sku":"A3010","value":"CV 66%　可省 35.7 h","detail":"中位 1,565 → P75 目標 2,027 瓶/工時"},{"sku":"B2021","value":"CV 35%　可省 31.4 h","detail":"中位 896 → P75 目標 1,084 瓶/工時"},{"sku":"A2020","value":"CV 34%　可省 23.0 h","detail":"中位 1,656 → P75 目標 2,169 瓶/工時"},{"sku":"D0210","value":"CV 32%　可省 21.2 h","detail":"中位 272 → P75 目標 322 瓶/工時"},{"sku":"F0010","value":"CV 41%　可省 16.5 h","detail":"中位 75 → P75 目標 99 瓶/工時"},{"sku":"F0020","value":"CV 88%　可省 16.5 h","detail":"中位 87 → P75 目標 150 瓶/工時"},{"sku":"B3011","value":"CV 37%　可省 16.3 h","detail":"中位 881 → P75 目標 1,119 瓶/工時"},{"sku":"B1040","value":"CV 31%　可省 15.6 h","detail":"中位 1,525 → P75 目標 1,854 瓶/工時"}]},{"id":"fragment_total","level":"mid","title":"零星批次的整體成本","rule":"全廠單批 < 1 小時的批次數與工時合計","why":"這是「批次過碎」在全廠層級的總帳，可用來評估合批專案的效益上限。","items":[{"sku":"全廠合計","value":"573 批（36%）","detail":"合計 312 h，佔總工時 11%"}]},{"id":"pareto","level":"info","title":"產出集中度","rule":"Pareto 累積曲線","why":"分析與改善資源不需要平均分配到 109 支產品上。","items":[{"sku":"前 17 支","value":"佔 80% 包裝量","detail":"共 109 支品項；重點 14 支佔 72.0% 量、59.7% 工時"}]}],"batches":[{"s":"A1020","d":"2025-10-02","h":3.5,"b":5832},{"s":"A1020","d":"2025-10-03","h":4.0,"b":7938},{"s":"A1020","d":"2025-10-28","h":3.5,"b":6816},{"s":"A1020","d":"2025-11-12","h":1.0,"b":972},{"s":"A1020","d":"2025-11-13","h":3.5,"b":7190},{"s":"A1020","d":"2025-11-13","h":1.3333,"b":1536},{"s":"A1020","d":"2025-11-14","h":0.3333,"b":408},{"s":"A1020","d":"2025-11-14","h":4.0,"b":4824},{"s":"A1020","d":"2025-11-18","h":4.0,"b":6804},{"s":"A1020","d":"2025-11-18","h":1.3333,"b":1944},{"s":"A1020","d":"2025-11-19","h":3.5,"b":4942},{"s":"A1020","d":"2025-12-01","h":1.25,"b":972},{"s":"A1020","d":"2025-12-02","h":1.3333,"b":1944},{"s":"A1020","d":"2025-12-03","h":2.1667,"b":3874},{"s":"A1020","d":"2025-12-04","h":3.3333,"b":4860},{"s":"A1020","d":"2025-12-08","h":6.1667,"b":8837},{"s":"A1020","d":"2025-12-18","h":2.8333,"b":5832},{"s":"A1020","d":"2025-12-19","h":1.6667,"b":3729},{"s":"A1020","d":"2025-12-30","h":4.0,"b":9532},{"s":"A1020","d":"2026-01-09","h":4.1667,"b":9644},{"s":"A1020","d":"2026-01-26","h":5.0833,"b":6776},{"s":"A1020","d":"2026-01-28","h":7.25,"b":9720},{"s":"A1020","d":"2026-01-30","h":2.3333,"b":1186},{"s":"A1020","d":"2026-02-23","h":2.0,"b":2682},{"s":"A1020","d":"2026-02-28","h":5.0,"b":7776},{"s":"A1020","d":"2026-03-03","h":2.0833,"b":5749},{"s":"A1020","d":"2026-03-13","h":8.5,"b":8748},{"s":"A1020","d":"2026-03-14","h":3.5,"b":4813},{"s":"A1020","d":"2026-03-30","h":4.0,"b":6804},{"s":"A1020","d":"2026-03-31","h":5.4167,"b":6729},{"s":"A1020","d":"2026-04-09","h":5.6667,"b":9329},{"s":"A1020","d":"2026-04-15","h":6.0,"b":7776},{"s":"A1020","d":"2026-04-16","h":1.3333,"b":2926},{"s":"A1020","d":"2026-04-21","h":3.4167,"b":6704},{"s":"A1020","d":"2026-05-08","h":4.6667,"b":7776},{"s":"A1020","d":"2026-05-09","h":3.25,"b":5592},{"s":"A1020","d":"2026-05-28","h":6.0,"b":9418},{"s":"A1020","d":"2026-06-10","h":3.5,"b":6758},{"s":"A1020","d":"2026-06-18","h":9.0,"b":5316},{"s":"A1020","d":"2026-06-22","h":5.25,"b":6778},{"s":"A1020","d":"2026-07-07","h":5.8333,"b":8172},{"s":"A1020","d":"2026-07-08","h":2.0,"b":4044},{"s":"A1020","d":"2026-07-17","h":3.3333,"b":7896},{"s":"A1020","d":"2026-07-20","h":2.5,"b":3963},{"s":"A1020","d":"2026-07-23","h":3.1667,"b":5832},{"s":"A1020","d":"2026-07-24","h":8.0,"b":7510},{"s":"A1020","d":"2026-08-03","h":4.0,"b":6696},{"s":"A1020","d":"2026-08-17","h":6.8333,"b":6804},{"s":"A1020","d":"2026-08-19","h":4.75,"b":6663},{"s":"A1032","d":"2025-10-07","h":2.25,"b":3517},{"s":"A1032","d":"2025-11-05","h":2.25,"b":2244},{"s":"A1032","d":"2025-11-06","h":1.0,"b":1339},{"s":"A1032","d":"2025-11-25","h":6.0,"b":3450},{"s":"A1032","d":"2026-01-08","h":2.0,"b":3531},{"s":"A1032","d":"2026-02-03","h":1.0833,"b":3631},{"s":"A1032","d":"2026-03-11","h":1.0,"b":612},{"s":"A1032","d":"2026-03-11","h":3.5,"b":5390},{"s":"A1032","d":"2026-04-22","h":1.3333,"b":1266},{"s":"A1032","d":"2026-05-15","h":1.6667,"b":3549},{"s":"A1032","d":"2026-06-23","h":1.75,"b":3535},{"s":"A1032","d":"2026-08-11","h":3.5,"b":5399},{"s":"A1040","d":"2025-10-13","h":4.75,"b":5566},{"s":"A1040","d":"2025-10-29","h":1.8333,"b":3336},{"s":"A1040","d":"2025-10-30","h":1.25,"b":2201},{"s":"A1040","d":"2025-11-25","h":2.0,"b":1404},{"s":"A1040","d":"2025-11-26","h":1.5,"b":4155},{"s":"A1040","d":"2025-12-09","h":4.75,"b":5502},{"s":"A1040","d":"2026-01-17","h":3.3333,"b":5665},{"s":"A1040","d":"2026-01-31","h":1.75,"b":2808},{"s":"A1040","d":"2026-02-02","h":2.0,"b":3960},{"s":"A1040","d":"2026-03-07","h":3.0,"b":5459},{"s":"A1040","d":"2026-04-07","h":3.5,"b":3744},{"s":"A1040","d":"2026-04-08","h":1.3333,"b":2902},{"s":"A1040","d":"2026-05-12","h":2.3333,"b":5460},{"s":"A1040","d":"2026-06-29","h":3.0833,"b":5563},{"s":"A1040","d":"2026-07-06","h":3.25,"b":4388},{"s":"A1040","d":"2026-07-28","h":3.5,"b":5605},{"s":"A1050","d":"2025-10-07","h":1.5833,"b":2160},{"s":"A1050","d":"2025-10-07","h":0.9167,"b":1644},{"s":"A1050","d":"2025-10-08","h":0.3333,"b":265},{"s":"A1050","d":"2025-10-29","h":2.3333,"b":2160},{"s":"A1050","d":"2025-10-29","h":0.3333,"b":490},{"s":"A1050","d":"2025-11-26","h":1.5,"b":2160},{"s":"A1050","d":"2025-11-26","h":3.1667,"b":4740},{"s":"A1050","d":"2026-01-05","h":5.5,"b":4320},{"s":"A1050","d":"2026-01-05","h":1.3333,"b":2558},{"s":"A1050","d":"2026-01-30","h":3.0,"b":2160},{"s":"A1050","d":"2026-01-30","h":1.6667,"b":3331},{"s":"A1050","d":"2026-03-07","h":1.0,"b":2160},{"s":"A1050","d":"2026-03-07","h":0.6667,"b":1951},{"s":"A1050","d":"2026-04-23","h":2.25,"b":2160},{"s":"A1050","d":"2026-04-23","h":3.0,"b":3266},{"s":"A1050","d":"2026-05-16","h":1.3333,"b":2663},{"s":"A1050","d":"2026-05-20","h":2.8333,"b":1356},{"s":"A1050","d":"2026-05-21","h":0.5833,"b":804},{"s":"A1050","d":"2026-05-21","h":0.25,"b":445},{"s":"A1050","d":"2026-06-02","h":4.5833,"b":4320},{"s":"A1050","d":"2026-06-02","h":0.5,"b":927},{"s":"A1050","d":"2026-06-29","h":0.9167,"b":1080},{"s":"A1050","d":"2026-06-29","h":0.75,"b":860},{"s":"A1050","d":"2026-08-10","h":1.25,"b":2160},{"s":"A1050","d":"2026-08-10","h":0.8333,"b":1872},{"s":"A2020","d":"2025-10-04","h":2.0,"b":3120},{"s":"A2020","d":"2025-10-08","h":7.33,"b":10517},{"s":"A2020","d":"2025-11-12","h":1.5,"b":3120},{"s":"A2020","d":"2025-11-13","h":1.4167,"b":3410},{"s":"A2020","d":"2025-11-21","h":2.5,"b":7800},{"s":"A2020","d":"2025-11-24","h":1.0,"b":1983},{"s":"A2020","d":"2025-12-10","h":4.4167,"b":8760},{"s":"A2020","d":"2026-01-12","h":6.6667,"b":10238},{"s":"A2020","d":"2026-01-26","h":2.6667,"b":2004},{"s":"A2020","d":"2026-01-29","h":2.5,"b":4680},{"s":"A2020","d":"2026-01-30","h":1.5,"b":3525},{"s":"A2020","d":"2026-02-09","h":4.9167,"b":6336},{"s":"A2020","d":"2026-04-07","h":2.5,"b":6094},{"s":"A2020","d":"2026-04-23","h":2.0833,"b":5997},{"s":"A2020","d":"2026-05-11","h":1.1667,"b":1092},{"s":"A2020","d":"2026-05-12","h":3.3333,"b":6485},{"s":"A2020","d":"2026-05-27","h":6.75,"b":11028},{"s":"A2020","d":"2026-06-24","h":7.3333,"b":7689},{"s":"A2020","d":"2026-07-09","h":3.1667,"b":7152},{"s":"A2020","d":"2026-07-13","h":0.25,"b":414},{"s":"A2020","d":"2026-07-23","h":3.0833,"b":6240},{"s":"A2020","d":"2026-07-27","h":0.75,"b":1146},{"s":"A2020","d":"2026-08-06","h":6.0,"b":7519},{"s":"A2020","d":"2026-08-21","h":6.6667,"b":4680},{"s":"A2020","d":"2026-08-24","h":5.5,"b":7729},{"s":"A2020-1","d":"2026-01-12","h":0.3333,"b":366},{"s":"A2020-1","d":"2026-01-31","h":1.25,"b":3442},{"s":"A2020-1","d":"2026-02-12","h":2.5,"b":6213},{"s":"A2040","d":"2025-10-14","h":2.67,"b":4032},{"s":"A2040","d":"2025-10-15","h":1.5,"b":3210},{"s":"A2040","d":"2025-11-12","h":2.5,"b":5368},{"s":"A2040","d":"2025-11-28","h":2.0,"b":3022},{"s":"A2040","d":"2025-12-15","h":1.5,"b":1200},{"s":"A2040","d":"2025-12-16","h":2.3333,"b":4566},{"s":"A2040","d":"2025-12-24","h":3.5833,"b":2169},{"s":"A2040","d":"2026-01-16","h":2.1667,"b":3528},{"s":"A2040","d":"2026-02-05","h":2.75,"b":7233},{"s":"A2040","d":"2026-03-12","h":4.0,"b":5629},{"s":"A2040","d":"2026-03-20","h":1.0,"b":2390},{"s":"A2040","d":"2026-04-20","h":3.1667,"b":6048},{"s":"A2040","d":"2026-04-21","h":1.0,"b":1187},{"s":"A2040","d":"2026-05-11","h":0.6667,"b":1817},{"s":"A2040","d":"2026-05-16","h":1.1667,"b":2986},{"s":"A2040","d":"2026-06-11","h":5.5833,"b":4349},{"s":"A2040","d":"2026-06-23","h":0.8333,"b":497},{"s":"A2040","d":"2026-07-09","h":2.5833,"b":4220},{"s":"A2040","d":"2026-07-22","h":1.0,"b":2142},{"s":"A2040","d":"2026-08-05","h":0.25,"b":299},{"s":"A2040","d":"2026-08-14","h":2.1667,"b":5099},{"s":"A2040-1","d":"2026-01-20","h":1.0,"b":1210},{"s":"A2050","d":"2025-10-20","h":1.4167,"b":3024},{"s":"A2050","d":"2025-10-21","h":0.8333,"b":1369},{"s":"A2050","d":"2025-11-24","h":1.5,"b":1980},{"s":"A2050","d":"2025-12-01","h":0.6667,"b":413},{"s":"A2050","d":"2025-12-17","h":2.8333,"b":4318},{"s":"A2050","d":"2026-01-12","h":0.3333,"b":372},{"s":"A2050","d":"2026-01-20","h":0.9167,"b":1681},{"s":"A2050","d":"2026-01-20","h":1.6667,"b":3246},{"s":"A2050","d":"2026-03-05","h":4.1667,"b":218},{"s":"A2050","d":"2026-03-20","h":0.9167,"b":2455},{"s":"A2050","d":"2026-04-20","h":5.6667,"b":5922},{"s":"A2050","d":"2026-05-16","h":0.3333,"b":832},{"s":"A2050","d":"2026-06-25","h":0.1667,"b":359},{"s":"A2050","d":"2026-07-15","h":1.3333,"b":2784},{"s":"A2050","d":"2026-07-16","h":0.8333,"b":1593},{"s":"A2050","d":"2026-07-22","h":1.25,"b":2095},{"s":"A2050","d":"2026-08-14","h":1.0,"b":1993},{"s":"A2060","d":"2025-10-01","h":3.25,"b":5616},{"s":"A2060","d":"2025-10-04","h":3.0,"b":7927},{"s":"A2060","d":"2025-10-31","h":0.75,"b":1560},{"s":"A2060","d":"2025-11-04","h":5.3333,"b":11507},{"s":"A2060","d":"2025-11-24","h":1.0,"b":2184},{"s":"A2060","d":"2025-11-25","h":4.0,"b":10754},{"s":"A2060","d":"2025-12-17","h":1.3333,"b":3561},{"s":"A2060","d":"2025-12-23","h":5.6667,"b":12922},{"s":"A2060","d":"2026-01-12","h":0.3333,"b":1020},{"s":"A2060","d":"2026-01-22","h":5.5,"b":8736},{"s":"A2060","d":"2026-01-23","h":2.3333,"b":5613},{"s":"A2060","d":"2026-03-04","h":3.1667,"b":7363},{"s":"A2060","d":"2026-03-05","h":1.3333,"b":2184},{"s":"A2060","d":"2026-03-07","h":5.0,"b":7891},{"s":"A2060","d":"2026-03-25","h":8.1667,"b":13572},{"s":"A2060","d":"2026-03-26","h":0.5,"b":735},{"s":"A2060","d":"2026-05-06","h":2.75,"b":5826},{"s":"A2060","d":"2026-05-16","h":1.8333,"b":4317},{"s":"A2060","d":"2026-06-02","h":7.25,"b":11339},{"s":"A2060","d":"2026-06-25","h":2.75,"b":6552},{"s":"A2060","d":"2026-06-29","h":1.4167,"b":3833},{"s":"A2060","d":"2026-07-16","h":0.9167,"b":1416},{"s":"A2060","d":"2026-07-17","h":2.3333,"b":3696},{"s":"A2060","d":"2026-07-20","h":2.6667,"b":3516},{"s":"A2060","d":"2026-08-05","h":4.3333,"b":7892},{"s":"A2060","d":"2026-08-26","h":4.0,"b":8736},{"s":"A3010","d":"2025-10-20","h":4.8333,"b":9473},{"s":"A3010","d":"2025-10-27","h":5.8333,"b":9389},{"s":"A3010","d":"2025-11-19","h":3.1667,"b":6892},{"s":"A3010","d":"2025-11-22","h":6.0,"b":9428},{"s":"A3010","d":"2025-12-01","h":6.1667,"b":9380},{"s":"A3010","d":"2026-01-07","h":4.6667,"b":9591},{"s":"A3010","d":"2026-01-21","h":3.0,"b":1512},{"s":"A3010","d":"2026-01-22","h":6.8333,"b":7960},{"s":"A3010","d":"2026-01-23","h":6.0,"b":9388},{"s":"A3010","d":"2026-03-03","h":6.4167,"b":6048},{"s":"A3010","d":"2026-03-04","h":0.5,"b":3152},{"s":"A3010","d":"2026-03-17","h":5.0,"b":11449},{"s":"A3010","d":"2026-04-01","h":3.3333,"b":6756},{"s":"A3010","d":"2026-04-29","h":2.5,"b":4531},{"s":"A3010","d":"2026-05-09","h":4.75,"b":4224},{"s":"A3010","d":"2026-05-11","h":9.0,"b":5125},{"s":"A3010","d":"2026-05-21","h":3.5,"b":4692},{"s":"A3010","d":"2026-05-22","h":5.5,"b":6849},{"s":"A3010","d":"2026-06-16","h":9.0,"b":3756},{"s":"A3010","d":"2026-06-17","h":2.5,"b":5653},{"s":"A3010","d":"2026-07-16","h":6.5833,"b":11374},{"s":"A3010","d":"2026-08-04","h":6.1667,"b":9472},{"s":"A3010","d":"2026-08-12","h":6.25,"b":9670},{"s":"A3012","d":"2025-10-07","h":2.75,"b":2855},{"s":"A3012","d":"2026-01-07","h":1.6667,"b":2159},{"s":"A3012","d":"2026-03-23","h":1.1667,"b":2219},{"s":"A3012","d":"2026-06-24","h":2.0,"b":1607},{"s":"B1011","d":"2025-10-01","h":1.0,"b":672},{"s":"B1011","d":"2025-10-02","h":2.3333,"b":2706},{"s":"B1011","d":"2025-10-03","h":1.5,"b":1680},{"s":"B1011","d":"2025-10-04","h":1.5833,"b":1714},{"s":"B1011","d":"2025-10-16","h":2.5,"b":3392},{"s":"B1011","d":"2025-10-18","h":2.75,"b":3480},{"s":"B1011","d":"2025-10-21","h":3.5,"b":3469},{"s":"B1011","d":"2025-11-03","h":3.8333,"b":3486},{"s":"B1011","d":"2025-11-06","h":3.0,"b":2808},{"s":"B1011","d":"2025-11-07","h":2.0,"b":470},{"s":"B1011","d":"2025-11-17","h":1.5,"b":1525},{"s":"B1011","d":"2025-11-19","h":2.1667,"b":1506},{"s":"B1011","d":"2025-11-26","h":3.5,"b":2688},{"s":"B1011","d":"2025-11-27","h":0.5,"b":552},{"s":"B1011","d":"2025-11-29","h":3.1667,"b":3283},{"s":"B1011","d":"2025-12-08","h":4.0,"b":3496},{"s":"B1011","d":"2025-12-10","h":4.75,"b":3439},{"s":"B1011","d":"2025-12-12","h":2.0833,"b":1712},{"s":"B1011","d":"2025-12-22","h":2.9167,"b":3450},{"s":"B1011","d":"2026-01-02","h":1.5833,"b":1759},{"s":"B1011","d":"2026-01-07","h":3.75,"b":3446},{"s":"B1011","d":"2026-01-15","h":2.5,"b":1680},{"s":"B1011","d":"2026-01-19","h":4.1667,"b":3385},{"s":"B1011","d":"2026-01-21","h":1.25,"b":1344},{"s":"B1011","d":"2026-01-22","h":1.6667,"b":1655},{"s":"B1011","d":"2026-01-27","h":2.6667,"b":2016},{"s":"B1011","d":"2026-01-28","h":1.4167,"b":1412},{"s":"B1011","d":"2026-02-02","h":2.0,"b":3960},{"s":"B1011","d":"2026-02-03","h":4.9167,"b":3368},{"s":"B1011","d":"2026-02-05","h":2.9167,"b":3379},{"s":"B1011","d":"2026-02-09","h":2.5833,"b":3198},{"s":"B1011","d":"2026-02-10","h":0.3333,"b":146},{"s":"B1011","d":"2026-02-13","h":4.6667,"b":3334},{"s":"B1011","d":"2026-02-24","h":4.6667,"b":3341},{"s":"B1011","d":"2026-03-03","h":4.0,"b":2016},{"s":"B1011","d":"2026-03-04","h":0.8333,"b":1318},{"s":"B1011","d":"2026-03-14","h":1.5,"b":1344},{"s":"B1011","d":"2026-03-16","h":2.8333,"b":2024},{"s":"B1011","d":"2026-03-18","h":1.25,"b":1258},{"s":"B1011","d":"2026-03-19","h":5.1667,"b":2016},{"s":"B1011","d":"2026-03-20","h":0.6667,"b":934},{"s":"B1011","d":"2026-03-26","h":5.0,"b":3326},{"s":"B1011","d":"2026-03-30","h":3.5,"b":2688},{"s":"B1011","d":"2026-03-31","h":1.0,"b":637},{"s":"B1011","d":"2026-04-01","h":1.5833,"b":1656},{"s":"B1011","d":"2026-04-08","h":4.6667,"b":3345},{"s":"B1011","d":"2026-04-14","h":3.3333,"b":2793},{"s":"B1011","d":"2026-04-17","h":4.1667,"b":2773},{"s":"B1011","d":"2026-04-21","h":2.0,"b":2106},{"s":"B1011","d":"2026-04-22","h":1.1667,"b":1266},{"s":"B1011","d":"2026-04-27","h":6.0,"b":2688},{"s":"B1011","d":"2026-04-28","h":0.3333,"b":700},{"s":"B1011","d":"2026-05-05","h":3.0,"b":3154},{"s":"B1011","d":"2026-05-11","h":4.1667,"b":3138},{"s":"B1011","d":"2026-05-15","h":2.0833,"b":3124},{"s":"B1011","d":"2026-05-19","h":2.9167,"b":3148},{"s":"B1011","d":"2026-05-26","h":2.5,"b":3149},{"s":"B1011","d":"2026-06-02","h":3.6667,"b":3144},{"s":"B1011","d":"2026-06-08","h":3.3333,"b":1831},{"s":"B1011","d":"2026-06-15","h":5.5,"b":3233},{"s":"B1011","d":"2026-07-01","h":2.6667,"b":1514},{"s":"B1011","d":"2026-07-03","h":2.3333,"b":3246},{"s":"B1011","d":"2026-07-08","h":4.4167,"b":3166},{"s":"B1011","d":"2026-07-17","h":2.5833,"b":2030},{"s":"B1011","d":"2026-07-21","h":3.5,"b":3181},{"s":"B1011","d":"2026-07-28","h":2.9167,"b":3169},{"s":"B1011","d":"2026-08-01","h":1.3333,"b":1662},{"s":"B1011","d":"2026-08-06","h":1.5,"b":1008},{"s":"B1011","d":"2026-08-07","h":2.0,"b":2016},{"s":"B1011","d":"2026-08-10","h":2.0833,"b":2413},{"s":"B1011","d":"2026-08-13","h":3.0,"b":2518},{"s":"B1011","d":"2026-08-14","h":1.0,"b":1293},{"s":"B1011","d":"2026-08-20","h":1.5833,"b":1344},{"s":"B1011","d":"2026-08-21","h":2.0,"b":2752},{"s":"B1011","d":"2026-08-24","h":4.1667,"b":2352},{"s":"B1011","d":"2026-08-25","h":9.0,"b":4068},{"s":"B1031","d":"2026-01-21","h":0.75,"b":350},{"s":"B1031","d":"2026-03-19","h":0.8333,"b":347},{"s":"B1040","d":"2025-10-17","h":1.4167,"b":2680},{"s":"B1040","d":"2025-10-31","h":5.25,"b":6645},{"s":"B1040","d":"2025-11-27","h":3.6667,"b":3306},{"s":"B1040","d":"2025-12-11","h":1.75,"b":3280},{"s":"B1040","d":"2025-12-31","h":1.1667,"b":2091},{"s":"B1040","d":"2026-01-14","h":1.8333,"b":3226},{"s":"B1040","d":"2026-01-23","h":4.1667,"b":3193},{"s":"B1040","d":"2026-01-29","h":4.4167,"b":5376},{"s":"B1040","d":"2026-01-30","h":0.5,"b":1186},{"s":"B1040","d":"2026-03-04","h":1.5833,"b":3176},{"s":"B1040","d":"2026-03-24","h":7.6667,"b":6419},{"s":"B1040","d":"2026-04-23","h":3.5,"b":5904},{"s":"B1040","d":"2026-05-07","h":1.9167,"b":2472},{"s":"B1040","d":"2026-05-08","h":0.5,"b":699},{"s":"B1040","d":"2026-05-28","h":4.0,"b":5187},{"s":"B1040","d":"2026-06-25","h":1.1667,"b":2593},{"s":"B1040","d":"2026-07-15","h":2.75,"b":4495},{"s":"B1040","d":"2026-07-31","h":1.3333,"b":912},{"s":"B1040","d":"2026-08-01","h":1.3333,"b":2314},{"s":"B1040","d":"2026-08-20","h":3.6667,"b":5193},{"s":"B2011","d":"2025-10-08","h":0.5,"b":288},{"s":"B2011","d":"2025-10-09","h":10.0833,"b":2933},{"s":"B2011","d":"2025-10-09","h":0.3333,"b":336},{"s":"B2011","d":"2025-10-11","h":1.25,"b":1138},{"s":"B2011","d":"2025-10-16","h":1.6667,"b":1680},{"s":"B2011","d":"2025-10-17","h":1.1667,"b":1218},{"s":"B2011","d":"2025-10-20","h":4.4167,"b":3213},{"s":"B2011","d":"2025-10-22","h":2.1667,"b":2281},{"s":"B2011","d":"2025-10-25","h":2.1667,"b":2675},{"s":"B2011","d":"2025-10-29","h":1.5,"b":1344},{"s":"B2011","d":"2025-10-30","h":0.5833,"b":847},{"s":"B2011","d":"2025-10-30","h":1.5,"b":1344},{"s":"B2011","d":"2025-10-31","h":1.6667,"b":1329},{"s":"B2011","d":"2025-11-04","h":2.75,"b":1131},{"s":"B2011","d":"2025-11-05","h":5.3333,"b":2689},{"s":"B2011","d":"2025-11-06","h":4.1667,"b":2713},{"s":"B2011","d":"2025-11-19","h":1.6667,"b":579},{"s":"B2011","d":"2025-11-19","h":4.1667,"b":2417},{"s":"B2011","d":"2025-11-21","h":1.5,"b":1484},{"s":"B2011","d":"2025-11-28","h":2.5833,"b":1936},{"s":"B2011","d":"2025-12-02","h":2.1667,"b":2717},{"s":"B2011","d":"2025-12-04","h":2.5833,"b":2747},{"s":"B2011","d":"2025-12-08","h":3.1667,"b":2924},{"s":"B2011","d":"2025-12-09","h":0.9167,"b":881},{"s":"B2011","d":"2025-12-11","h":4.0833,"b":3068},{"s":"B2011","d":"2025-12-16","h":1.8333,"b":1480},{"s":"B2011","d":"2025-12-17","h":1.75,"b":1670},{"s":"B2011","d":"2025-12-19","h":1.75,"b":1294},{"s":"B2011","d":"2025-12-19","h":1.25,"b":1008},{"s":"B2011","d":"2025-12-22","h":1.1667,"b":1257},{"s":"B2011","d":"2025-12-30","h":1.0833,"b":969},{"s":"B2011","d":"2026-01-02","h":0.3333,"b":430},{"s":"B2011","d":"2026-01-05","h":1.3333,"b":1008},{"s":"B2011","d":"2026-01-06","h":1.4167,"b":1901},{"s":"B2011","d":"2026-01-06","h":2.0,"b":1680},{"s":"B2011","d":"2026-01-07","h":1.1667,"b":1211},{"s":"B2011","d":"2026-01-13","h":2.1667,"b":1115},{"s":"B2011","d":"2026-01-15","h":3.5833,"b":3271},{"s":"B2011","d":"2026-01-16","h":3.5,"b":3097},{"s":"B2011","d":"2026-01-22","h":1.75,"b":2848},{"s":"B2011","d":"2026-01-28","h":1.0,"b":1085},{"s":"B2011","d":"2026-01-28","h":2.9167,"b":2542},{"s":"B2011","d":"2026-02-02","h":1.6667,"b":1680},{"s":"B2011","d":"2026-02-03","h":0.6667,"b":706},{"s":"B2011","d":"2026-02-03","h":3.5,"b":1008},{"s":"B2011","d":"2026-02-04","h":1.4167,"b":1549},{"s":"B2011","d":"2026-02-06","h":2.5,"b":3176},{"s":"B2011","d":"2026-02-10","h":3.5,"b":3347},{"s":"B2011","d":"2026-02-11","h":3.8333,"b":3270},{"s":"B2011","d":"2026-02-11","h":1.5,"b":1680},{"s":"B2011","d":"2026-02-12","h":0.3333,"b":523},{"s":"B2011","d":"2026-02-26","h":1.6667,"b":1587},{"s":"B2011","d":"2026-03-02","h":2.0,"b":1601},{"s":"B2011","d":"2026-03-06","h":1.25,"b":1220},{"s":"B2011","d":"2026-03-07","h":2.1667,"b":3230},{"s":"B2011","d":"2026-03-10","h":3.25,"b":3213},{"s":"B2011","d":"2026-03-13","h":3.0,"b":2688},{"s":"B2011","d":"2026-03-14","h":0.5833,"b":493},{"s":"B2011","d":"2026-03-17","h":4.6667,"b":3213},{"s":"B2011","d":"2026-03-21","h":2.75,"b":2508},{"s":"B2011","d":"2026-03-26","h":2.8333,"b":2362},{"s":"B2011","d":"2026-03-26","h":3.1667,"b":2666},{"s":"B2011","d":"2026-03-27","h":4.3333,"b":2668},{"s":"B2011","d":"2026-03-28","h":3.0,"b":2676},{"s":"B2011","d":"2026-04-01","h":0.5,"b":604},{"s":"B2011","d":"2026-04-08","h":3.6667,"b":2780},{"s":"B2011","d":"2026-04-10","h":2.0,"b":2016},{"s":"B2011","d":"2026-04-13","h":1.75,"b":1040},{"s":"B2011","d":"2026-04-15","h":3.0,"b":2846},{"s":"B2011","d":"2026-04-16","h":2.0,"b":2016},{"s":"B2011","d":"2026-04-17","h":0.9167,"b":1186},{"s":"B2011","d":"2026-04-17","h":2.8333,"b":2604},{"s":"B2011","d":"2026-04-22","h":1.3333,"b":1433},{"s":"B2011","d":"2026-04-23","h":2.5,"b":2872},{"s":"B2011","d":"2026-04-24","h":2.5833,"b":3031},{"s":"B2011","d":"2026-04-27","h":2.8333,"b":3029},{"s":"B2011","d":"2026-04-30","h":0.8333,"b":672},{"s":"B2011","d":"2026-05-04","h":1.0833,"b":1985},{"s":"B2011","d":"2026-05-06","h":2.6667,"b":2352},{"s":"B2011","d":"2026-05-07","h":0.3333,"b":410},{"s":"B2011","d":"2026-05-07","h":3.8333,"b":2782},{"s":"B2011","d":"2026-05-09","h":3.5833,"b":2591},{"s":"B2011","d":"2026-05-11","h":2.4167,"b":1882},{"s":"B2011","d":"2026-05-19","h":2.3333,"b":2359},{"s":"B2011","d":"2026-05-20","h":3.75,"b":1066},{"s":"B2011","d":"2026-05-22","h":0.6667,"b":1280},{"s":"B2011","d":"2026-05-25","h":1.1667,"b":1035},{"s":"B2011","d":"2026-06-04","h":2.25,"b":1771},{"s":"B2011","d":"2026-06-05","h":1.5833,"b":1680},{"s":"B2011","d":"2026-06-08","h":0.5,"b":480},{"s":"B2011","d":"2026-06-09","h":3.25,"b":2742},{"s":"B2011","d":"2026-06-10","h":1.3333,"b":684},{"s":"B2011","d":"2026-06-12","h":1.6667,"b":2595},{"s":"B2011","d":"2026-06-16","h":2.8333,"b":2289},{"s":"B2011","d":"2026-06-30","h":0.3333,"b":258},{"s":"B2011","d":"2026-07-02","h":3.3333,"b":2268},{"s":"B2011","d":"2026-07-06","h":2.5,"b":2238},{"s":"B2011","d":"2026-07-07","h":0.25,"b":339},{"s":"B2011","d":"2026-07-08","h":2.5833,"b":2028},{"s":"B2011","d":"2026-07-09","h":0.5,"b":455},{"s":"B2011","d":"2026-07-14","h":1.5,"b":1410},{"s":"B2011","d":"2026-07-15","h":3.75,"b":2656},{"s":"B2011","d":"2026-07-16","h":0.9167,"b":691},{"s":"B2011","d":"2026-07-17","h":2.9167,"b":2667},{"s":"B2011","d":"2026-07-22","h":9.8333,"b":2592},{"s":"B2011","d":"2026-07-24","h":4.5,"b":2016},{"s":"B2011","d":"2026-07-25","h":1.0833,"b":1021},{"s":"B2011","d":"2026-07-27","h":1.8333,"b":1772},{"s":"B2011","d":"2026-07-29","h":1.8333,"b":1795},{"s":"B2011","d":"2026-07-30","h":4.0833,"b":3215},{"s":"B2011","d":"2026-08-01","h":2.9167,"b":2771},{"s":"B2011","d":"2026-08-05","h":1.5,"b":1450},{"s":"B2011","d":"2026-08-06","h":3.0,"b":3200},{"s":"B2011","d":"2026-08-08","h":3.0,"b":2676},{"s":"B2011","d":"2026-08-11","h":3.0833,"b":2669},{"s":"B2011","d":"2026-08-12","h":1.0,"b":1836},{"s":"B2011","d":"2026-08-12","h":1.0,"b":492},{"s":"B2011","d":"2026-08-13","h":0.1667,"b":334},{"s":"B2011","d":"2026-08-13","h":3.25,"b":2674},{"s":"B2011","d":"2026-08-15","h":1.5,"b":1008},{"s":"B2011","d":"2026-08-17","h":0.25,"b":216},{"s":"B2011","d":"2026-08-21","h":1.5833,"b":1603},{"s":"B2011","d":"2026-08-25","h":2.5,"b":2687},{"s":"B2011","d":"2026-08-26","h":2.8333,"b":2691},{"s":"B2021","d":"2025-10-13","h":2.5,"b":2994},{"s":"B2021","d":"2025-10-14","h":0.17,"b":178},{"s":"B2021","d":"2025-10-20","h":1.42,"b":942},{"s":"B2021","d":"2025-10-21","h":1.67,"b":2221},{"s":"B2021","d":"2025-10-27","h":3.17,"b":2567},{"s":"B2021","d":"2025-11-17","h":2.67,"b":1999},{"s":"B2021","d":"2025-11-22","h":2.33,"b":2016},{"s":"B2021","d":"2025-11-24","h":0.83,"b":618},{"s":"B2021","d":"2025-11-28","h":0.83,"b":900},{"s":"B2021","d":"2025-11-29","h":1.17,"b":1211},{"s":"B2021","d":"2025-12-22","h":1.6667,"b":1396},{"s":"B2021","d":"2026-01-02","h":0.3333,"b":546},{"s":"B2021","d":"2026-01-05","h":2.8333,"b":2174},{"s":"B2021","d":"2026-01-13","h":0.6667,"b":649},{"s":"B2021","d":"2026-02-03","h":2.3333,"b":2443},{"s":"B2021","d":"2026-02-23","h":1.1667,"b":1008},{"s":"B2021","d":"2026-02-24","h":12.5,"b":592},{"s":"B2021","d":"2026-03-06","h":4.75,"b":3070},{"s":"B2021","d":"2026-03-12","h":3.1667,"b":2505},{"s":"B2021","d":"2026-03-23","h":3.0,"b":2987},{"s":"B2021","d":"2026-03-31","h":2.0,"b":2016},{"s":"B2021","d":"2026-04-07","h":3.0,"b":2688},{"s":"B2021","d":"2026-04-08","h":0.5,"b":450},{"s":"B2021","d":"2026-04-14","h":1.1667,"b":1373},{"s":"B2021","d":"2026-04-20","h":1.5,"b":1008},{"s":"B2021","d":"2026-04-21","h":1.4167,"b":1568},{"s":"B2021","d":"2026-05-04","h":1.0,"b":1228},{"s":"B2021","d":"2026-06-30","h":0.75,"b":615},{"s":"B2021","d":"2026-07-09","h":3.0,"b":870},{"s":"B2021","d":"2026-07-13","h":10.0,"b":1752},{"s":"B2021","d":"2026-07-20","h":2.4167,"b":2621},{"s":"B2021","d":"2026-08-04","h":3.5,"b":2627},{"s":"B2021","d":"2026-08-19","h":2.5,"b":2977},{"s":"B2021-1","d":"2026-04-21","h":0.4167,"b":161},{"s":"B2021-1","d":"2026-05-09","h":0.4167,"b":172},{"s":"B2021-1","d":"2026-05-16","h":2.25,"b":2643},{"s":"B2021-1","d":"2026-05-22","h":1.25,"b":1280},{"s":"B2021-1","d":"2026-05-25","h":2.5833,"b":2707},{"s":"B2031","d":"2025-11-03","h":1.5833,"b":3097},{"s":"B2031","d":"2025-11-27","h":1.9167,"b":3269},{"s":"B2031","d":"2025-12-12","h":1.0,"b":672},{"s":"B2031","d":"2025-12-15","h":2.5833,"b":2461},{"s":"B2031","d":"2026-01-17","h":2.6667,"b":3223},{"s":"B2031","d":"2026-02-23","h":4.5,"b":3149},{"s":"B2031","d":"2026-03-18","h":2.5,"b":2517},{"s":"B2031","d":"2026-04-02","h":2.0,"b":2688},{"s":"B2031","d":"2026-04-07","h":1.5,"b":417},{"s":"B2031","d":"2026-04-28","h":1.0,"b":1344},{"s":"B2031","d":"2026-04-29","h":1.4167,"b":1980},{"s":"B2031","d":"2026-05-28","h":2.0,"b":3161},{"s":"B2031","d":"2026-07-14","h":4.5,"b":1824},{"s":"B2031","d":"2026-07-15","h":1.0833,"b":1292},{"s":"B2031","d":"2026-08-17","h":1.8333,"b":2688},{"s":"B2031","d":"2026-08-18","h":0.5,"b":439},{"s":"B2041","d":"2025-10-17","h":2.5,"b":3686},{"s":"B2041","d":"2025-12-22","h":1.5,"b":1344},{"s":"B2041","d":"2025-12-24","h":0.75,"b":1102},{"s":"B2041","d":"2026-02-23","h":2.8333,"b":3149},{"s":"B2041","d":"2026-04-14","h":2.3333,"b":3066},{"s":"B3011","d":"2025-10-09","h":3.83,"b":3444},{"s":"B3011","d":"2025-10-23","h":3.5,"b":3024},{"s":"B3011","d":"2025-10-25","h":0.5,"b":411},{"s":"B3011","d":"2025-11-17","h":2.3333,"b":1491},{"s":"B3011","d":"2025-12-12","h":1.9167,"b":1682},{"s":"B3011","d":"2026-01-09","h":2.75,"b":3369},{"s":"B3011","d":"2026-01-31","h":1.75,"b":1675},{"s":"B3011","d":"2026-02-11","h":1.5,"b":1678},{"s":"B3011","d":"2026-02-26","h":5.4167,"b":3373},{"s":"B3011","d":"2026-04-01","h":0.8333,"b":1002},{"s":"B3011","d":"2026-04-02","h":0.3333,"b":659},{"s":"B3011","d":"2026-04-10","h":3.0,"b":2816},{"s":"B3011","d":"2026-05-08","h":1.6667,"b":1468},{"s":"B3011","d":"2026-05-21","h":4.75,"b":3135},{"s":"B3011","d":"2026-06-09","h":1.4167,"b":1466},{"s":"B3011","d":"2026-06-25","h":1.0,"b":1278},{"s":"B3011","d":"2026-07-14","h":2.6667,"b":1652},{"s":"B3011","d":"2026-08-04","h":2.8333,"b":1651},{"s":"B3011","d":"2026-08-18","h":8.8333,"b":3325},{"s":"B3020","d":"2025-10-11","h":2.1667,"b":3272},{"s":"B3020","d":"2025-10-29","h":3.0,"b":6642},{"s":"B3020","d":"2026-01-16","h":4.25,"b":3237},{"s":"B3020","d":"2026-02-10","h":1.5833,"b":3249},{"s":"B3020","d":"2026-03-04","h":1.6667,"b":3237},{"s":"B3020","d":"2026-03-31","h":2.0833,"b":3220},{"s":"B3020","d":"2026-04-30","h":1.8333,"b":3235},{"s":"B3020","d":"2026-05-12","h":3.0833,"b":3180},{"s":"B3020","d":"2026-06-09","h":2.0833,"b":3334},{"s":"B3020","d":"2026-07-25","h":2.3333,"b":3205},{"s":"B3020","d":"2026-08-11","h":5.9167,"b":3212},{"s":"B5011","d":"2025-10-13","h":1.3333,"b":1652},{"s":"B5011","d":"2025-10-30","h":2.9167,"b":3319},{"s":"B5011","d":"2025-12-16","h":7.1667,"b":168},{"s":"B5011","d":"2025-12-17","h":0.75,"b":1266},{"s":"B5011","d":"2026-01-16","h":1.5833,"b":1630},{"s":"B5011","d":"2026-02-11","h":1.1667,"b":1649},{"s":"B5011","d":"2026-03-10","h":3.3333,"b":3368},{"s":"B5011","d":"2026-04-30","h":1.5833,"b":1640},{"s":"B5011","d":"2026-05-25","h":2.5,"b":1262},{"s":"B5011","d":"2026-06-12","h":1.3333,"b":1316},{"s":"B5011","d":"2026-07-14","h":1.5,"b":1528},{"s":"B5011","d":"2026-08-04","h":1.75,"b":1761},{"s":"C1010","d":"2025-11-07","h":0.5667,"b":34},{"s":"C1010","d":"2025-11-07","h":0.1333,"b":35},{"s":"C1010","d":"2025-11-07","h":0.1,"b":30},{"s":"C1010","d":"2025-11-07","h":0.1167,"b":33},{"s":"C1010","d":"2025-11-07","h":0.0667,"b":17},{"s":"C1010","d":"2025-11-07","h":0.0833,"b":26},{"s":"C1010","d":"2025-11-07","h":0.1333,"b":35},{"s":"C1010","d":"2025-11-07","h":0.1167,"b":36},{"s":"C1010","d":"2025-11-07","h":0.0667,"b":16},{"s":"C1010","d":"2026-01-13","h":0.1667,"b":30},{"s":"C1010","d":"2026-01-13","h":0.1667,"b":32},{"s":"C1010","d":"2026-01-13","h":0.0833,"b":33},{"s":"C1010","d":"2026-01-13","h":0.1,"b":35},{"s":"C1010","d":"2026-01-13","h":0.1,"b":35},{"s":"C1010","d":"2026-01-13","h":0.1,"b":33},{"s":"C1010","d":"2026-01-13","h":0.1167,"b":35},{"s":"C1010","d":"2026-01-13","h":0.0833,"b":35},{"s":"C1010","d":"2026-01-13","h":0.0833,"b":27},{"s":"C1010","d":"2026-01-13","h":0.0833,"b":30},{"s":"C1010","d":"2026-01-13","h":0.1667,"b":35},{"s":"C1010","d":"2026-02-12","h":0.1,"b":34},{"s":"C1010","d":"2026-02-12","h":0.1333,"b":28},{"s":"C1010","d":"2026-02-12","h":0.0833,"b":32},{"s":"C1010","d":"2026-02-12","h":0.1167,"b":35},{"s":"C1010","d":"2026-02-12","h":0.1,"b":30},{"s":"C1010","d":"2026-02-12","h":0.0833,"b":35},{"s":"C1010","d":"2026-02-12","h":0.1333,"b":33},{"s":"C1010","d":"2026-02-12","h":0.1333,"b":35},{"s":"C1010","d":"2026-04-13","h":0.2,"b":35},{"s":"C1010","d":"2026-04-13","h":0.15,"b":33},{"s":"C1010","d":"2026-04-13","h":0.1167,"b":35},{"s":"C1010","d":"2026-04-13","h":0.0833,"b":37},{"s":"C1010","d":"2026-05-16","h":0.6667,"b":195},{"s":"C1010","d":"2026-07-03","h":0.9167,"b":129},{"s":"C1020","d":"2025-10-14","h":2.3333,"b":727},{"s":"C1020","d":"2025-10-28","h":0.5,"b":437},{"s":"C1020","d":"2025-10-31","h":2.0,"b":577},{"s":"C1020","d":"2025-11-24","h":2.5,"b":727},{"s":"C1020","d":"2025-11-27","h":1.4167,"b":439},{"s":"C1020","d":"2025-12-16","h":6.3333,"b":874},{"s":"C1020","d":"2026-01-06","h":2.5,"b":240},{"s":"C1020","d":"2026-01-14","h":4.0,"b":1200},{"s":"C1020","d":"2026-01-14","h":1.0,"b":101},{"s":"C1020","d":"2026-01-21","h":5.6667,"b":1018},{"s":"C1020","d":"2026-02-06","h":3.0,"b":436},{"s":"C1020","d":"2026-02-11","h":2.5,"b":1200},{"s":"C1020","d":"2026-03-02","h":1.0,"b":536},{"s":"C1020","d":"2026-03-06","h":1.3333,"b":480},{"s":"C1020","d":"2026-03-07","h":1.5,"b":398},{"s":"C1020","d":"2026-03-21","h":1.25,"b":869},{"s":"C1020","d":"2026-04-01","h":4.0,"b":1452},{"s":"C1020","d":"2026-04-18","h":2.75,"b":720},{"s":"C1020","d":"2026-04-24","h":3.0,"b":1157},{"s":"C1030","d":"2026-06-11","h":1.6667,"b":703},{"s":"C1030","d":"2026-06-25","h":2.5,"b":710},{"s":"C1030","d":"2026-07-14","h":2.3333,"b":573},{"s":"C1030","d":"2026-07-25","h":2.0,"b":240},{"s":"C1030","d":"2026-07-27","h":1.75,"b":490},{"s":"C1030","d":"2026-08-15","h":0.75,"b":728},{"s":"C1030","d":"2026-08-20","h":2.8333,"b":726},{"s":"C3020","d":"2025-10-14","h":0.22,"b":38},{"s":"C3020","d":"2025-10-14","h":0.15,"b":38},{"s":"C3020","d":"2025-10-14","h":0.27,"b":35},{"s":"C3020","d":"2025-10-14","h":0.12,"b":35},{"s":"C3020","d":"2025-10-14","h":0.15,"b":31},{"s":"C3020","d":"2025-10-14","h":0.15,"b":37},{"s":"C3020","d":"2025-11-28","h":0.2,"b":33},{"s":"C3020","d":"2025-11-28","h":0.13,"b":38},{"s":"C3020","d":"2025-11-28","h":0.08,"b":36},{"s":"C3020","d":"2026-01-10","h":0.1833,"b":34},{"s":"C3020","d":"2026-01-10","h":0.1167,"b":38},{"s":"C3020","d":"2026-01-10","h":0.15,"b":38},{"s":"C3020","d":"2026-01-10","h":0.0833,"b":35},{"s":"C3020","d":"2026-01-10","h":0.1167,"b":34},{"s":"C3020","d":"2026-01-10","h":0.1167,"b":35},{"s":"C3020","d":"2026-02-06","h":0.15,"b":34},{"s":"C3020","d":"2026-02-06","h":0.2,"b":33},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":35},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":34},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":38},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":35},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":38},{"s":"C3020","d":"2026-02-06","h":0.0833,"b":35},{"s":"C3020","d":"2026-04-13","h":0.5167,"b":35},{"s":"C3020","d":"2026-04-13","h":0.2667,"b":35},{"s":"C3020","d":"2026-04-13","h":0.1167,"b":35},{"s":"C3020","d":"2026-04-13","h":0.0833,"b":37},{"s":"C3020","d":"2026-04-13","h":0.1,"b":35},{"s":"C3020","d":"2026-04-13","h":0.1833,"b":37},{"s":"C3020","d":"2026-04-13","h":0.1167,"b":35},{"s":"C3020","d":"2026-04-13","h":0.1167,"b":34},{"s":"C3020","d":"2026-05-19","h":0.3333,"b":212},{"s":"C3020","d":"2026-07-09","h":1.5,"b":141},{"s":"C3020","d":"2026-08-20","h":3.8333,"b":348},{"s":"C3020-1","d":"2025-12-29","h":0.15,"b":35},{"s":"C3020-1","d":"2025-12-29","h":0.0833,"b":37},{"s":"C3020-1","d":"2025-12-29","h":0.1,"b":37},{"s":"C3070","d":"2025-10-27","h":3.5,"b":466},{"s":"C3070","d":"2025-11-27","h":1.5833,"b":370},{"s":"C3070","d":"2025-12-16","h":2.8333,"b":294},{"s":"C3070","d":"2026-01-13","h":1.1667,"b":321},{"s":"C3070","d":"2026-01-13","h":0.75,"b":120},{"s":"C3070","d":"2026-03-06","h":1.5,"b":455},{"s":"C3070","d":"2026-04-04","h":3.0,"b":447},{"s":"C3070","d":"2026-04-23","h":2.0,"b":590},{"s":"C3070","d":"2026-05-19","h":0.1667,"b":40},{"s":"C3070","d":"2026-05-19","h":0.3333,"b":291},{"s":"C3080","d":"2025-11-17","h":2.0,"b":297},{"s":"C3080","d":"2025-11-24","h":1.6667,"b":223},{"s":"C3080","d":"2025-12-16","h":4.1667,"b":766},{"s":"C3080","d":"2025-12-29","h":0.9167,"b":599},{"s":"C3081","d":"2026-07-14","h":1.6667,"b":293},{"s":"C3081","d":"2026-08-15","h":1.75,"b":358},{"s":"C5010","d":"2025-11-27","h":1.0,"b":345},{"s":"C5010","d":"2026-01-16","h":0.75,"b":259},{"s":"C5010","d":"2026-02-13","h":0.4167,"b":341},{"s":"C5010","d":"2026-04-04","h":2.0,"b":425},{"s":"C5010","d":"2026-04-23","h":0.5,"b":341},{"s":"C5020","d":"2026-06-25","h":0.6667,"b":415},{"s":"C5020","d":"2026-08-08","h":0.8333,"b":352},{"s":"C7010","d":"2025-10-31","h":0.5,"b":200},{"s":"C7010","d":"2026-01-12","h":2.0,"b":273},{"s":"C7010","d":"2026-03-14","h":1.6667,"b":419},{"s":"C7010","d":"2026-05-13","h":0.25,"b":144},{"s":"C7010","d":"2026-05-14","h":0.25,"b":203},{"s":"C7020","d":"2026-04-28","h":5.1667,"b":834},{"s":"C7020","d":"2026-06-03","h":4.9167,"b":846},{"s":"C7020","d":"2026-06-17","h":1.5,"b":530},{"s":"C7020","d":"2026-07-21","h":2.5,"b":271},{"s":"C7020","d":"2026-08-07","h":1.5833,"b":275},{"s":"C7021","d":"2026-06-11","h":0.8333,"b":264},{"s":"C7021","d":"2026-07-02","h":2.6667,"b":268},{"s":"C7021","d":"2026-08-07","h":3.5833,"b":258},{"s":"C9030","d":"2025-12-16","h":0.5,"b":284},{"s":"C9030","d":"2026-03-14","h":1.0,"b":279},{"s":"C9030","d":"2026-05-14","h":1.0833,"b":350},{"s":"C9050","d":"2025-12-15","h":0.75,"b":101},{"s":"C9050","d":"2026-01-14","h":0.5,"b":100},{"s":"C9050","d":"2026-04-24","h":1.0,"b":96},{"s":"D0111","d":"2025-10-17","h":1.4167,"b":518},{"s":"D0111","d":"2025-11-13","h":1.0,"b":305},{"s":"D0111","d":"2025-11-25","h":0.5,"b":9},{"s":"D0111","d":"2025-12-05","h":0.9167,"b":304},{"s":"D0111","d":"2025-12-10","h":0.3333,"b":11},{"s":"D0111","d":"2025-12-18","h":0.0833,"b":9},{"s":"D0111","d":"2025-12-23","h":0.5,"b":197},{"s":"D0111","d":"2026-01-02","h":0.5833,"b":198},{"s":"D0111","d":"2026-01-15","h":0.8,"b":198},{"s":"D0111","d":"2026-01-28","h":0.5,"b":161},{"s":"D0111","d":"2026-01-30","h":0.6667,"b":39},{"s":"D0111","d":"2026-01-31","h":1.5,"b":673},{"s":"D0111","d":"2026-02-07","h":1.0,"b":332},{"s":"D0111","d":"2026-02-11","h":0.8333,"b":331},{"s":"D0111","d":"2026-03-02","h":2.3333,"b":449},{"s":"D0111","d":"2026-04-09","h":0.9167,"b":334},{"s":"D0111","d":"2026-05-16","h":1.25,"b":330},{"s":"D0111","d":"2026-05-28","h":1.8333,"b":332},{"s":"D0111","d":"2026-07-08","h":1.5833,"b":447},{"s":"D0111","d":"2026-07-30","h":1.0,"b":309},{"s":"D0113","d":"2025-10-09","h":1.67,"b":523},{"s":"D0113","d":"2025-10-20","h":1.5,"b":515},{"s":"D0113","d":"2025-11-05","h":1.0833,"b":514},{"s":"D0113","d":"2025-11-14","h":1.1667,"b":540},{"s":"D0113","d":"2025-11-29","h":1.0,"b":150},{"s":"D0113","d":"2025-12-01","h":1.0833,"b":269},{"s":"D0113","d":"2025-12-08","h":1.75,"b":639},{"s":"D0113","d":"2025-12-10","h":1.5,"b":526},{"s":"D0113","d":"2026-01-10","h":1.6667,"b":629},{"s":"D0113","d":"2026-01-21","h":2.9167,"b":637},{"s":"D0113","d":"2026-02-02","h":1.9167,"b":641},{"s":"D0113","d":"2026-02-05","h":2.0,"b":636},{"s":"D0113","d":"2026-03-05","h":0.9167,"b":316},{"s":"D0113","d":"2026-03-13","h":0.5,"b":150},{"s":"D0113","d":"2026-03-14","h":2.3333,"b":377},{"s":"D0113","d":"2026-03-26","h":0.5,"b":105},{"s":"D0113","d":"2026-03-27","h":1.6667,"b":415},{"s":"D0113","d":"2026-04-09","h":0.9167,"b":313},{"s":"D0113","d":"2026-04-17","h":1.0,"b":431},{"s":"D0113","d":"2026-04-28","h":1.5,"b":416},{"s":"D0113","d":"2026-05-08","h":1.3333,"b":312},{"s":"D0113","d":"2026-05-15","h":3.0833,"b":320},{"s":"D0113","d":"2026-05-22","h":0.4167,"b":114},{"s":"D0113","d":"2026-05-22","h":0.25,"b":48},{"s":"D0113","d":"2026-05-25","h":0.75,"b":262},{"s":"D0113","d":"2026-05-28","h":1.1667,"b":421},{"s":"D0113","d":"2026-06-04","h":1.25,"b":422},{"s":"D0113","d":"2026-06-16","h":1.5,"b":423},{"s":"D0113","d":"2026-06-25","h":1.3333,"b":421},{"s":"D0113","d":"2026-07-20","h":0.8333,"b":320},{"s":"D0113","d":"2026-07-27","h":0.25,"b":57},{"s":"D0113","d":"2026-07-28","h":1.1667,"b":370},{"s":"D0113","d":"2026-07-31","h":1.75,"b":532},{"s":"D0113","d":"2026-08-17","h":0.3333,"b":39},{"s":"D0113","d":"2026-08-18","h":0.9167,"b":321},{"s":"D0113","d":"2026-08-18","h":0.5,"b":161},{"s":"D0113","d":"2026-08-26","h":1.3333,"b":507},{"s":"D0114","d":"2025-10-11","h":1.0,"b":360},{"s":"D0114","d":"2025-10-13","h":0.5,"b":164},{"s":"D0114","d":"2025-11-04","h":1.0,"b":420},{"s":"D0114","d":"2025-11-20","h":1.0,"b":426},{"s":"D0114","d":"2025-12-05","h":0.5833,"b":211},{"s":"D0114","d":"2025-12-12","h":1.9167,"b":211},{"s":"D0114","d":"2025-12-23","h":1.1667,"b":429},{"s":"D0114","d":"2026-01-22","h":1.5833,"b":540},{"s":"D0114","d":"2026-01-28","h":1.8333,"b":431},{"s":"D0114","d":"2026-02-25","h":0.8333,"b":423},{"s":"D0114","d":"2026-03-23","h":0.3333,"b":56},{"s":"D0114","d":"2026-03-23","h":0.8333,"b":250},{"s":"D0114","d":"2026-03-28","h":1.0833,"b":430},{"s":"D0114","d":"2026-04-22","h":0.8333,"b":312},{"s":"D0114","d":"2026-04-29","h":1.0,"b":316},{"s":"D0114","d":"2026-05-14","h":1.6667,"b":431},{"s":"D0114","d":"2026-05-28","h":1.3333,"b":430},{"s":"D0114","d":"2026-07-03","h":0.5,"b":207},{"s":"D0114","d":"2026-07-14","h":1.1667,"b":325},{"s":"D0114","d":"2026-07-21","h":2.3333,"b":427},{"s":"D0114","d":"2026-08-11","h":0.5,"b":111},{"s":"D0114","d":"2026-08-12","h":1.3333,"b":319},{"s":"D0115-1","d":"2025-12-23","h":0.3333,"b":156},{"s":"D0115-1","d":"2026-04-15","h":0.6667,"b":152},{"s":"D0115-1","d":"2026-05-06","h":0.5,"b":98},{"s":"D0120","d":"2026-05-16","h":0.4167,"b":105},{"s":"D0131","d":"2025-10-15","h":1.5,"b":407},{"s":"D0131","d":"2025-10-23","h":0.6667,"b":306},{"s":"D0131","d":"2025-12-08","h":0.5,"b":73},{"s":"D0131","d":"2025-12-08","h":1.0,"b":332},{"s":"D0131","d":"2025-12-18","h":1.5,"b":407},{"s":"D0131","d":"2026-01-22","h":0.3333,"b":111},{"s":"D0131","d":"2026-01-24","h":1.3333,"b":289},{"s":"D0131","d":"2026-02-07","h":1.0,"b":302},{"s":"D0131","d":"2026-03-02","h":0.9167,"b":300},{"s":"D0131","d":"2026-03-20","h":1.25,"b":301},{"s":"D0131","d":"2026-04-01","h":0.6667,"b":200},{"s":"D0131","d":"2026-04-15","h":1.0,"b":308},{"s":"D0131","d":"2026-04-30","h":0.75,"b":297},{"s":"D0131","d":"2026-05-19","h":0.5833,"b":301},{"s":"D0131","d":"2026-06-11","h":1.5,"b":302},{"s":"D0131","d":"2026-07-20","h":0.6667,"b":197},{"s":"D0131","d":"2026-07-23","h":2.1667,"b":402},{"s":"D0131","d":"2026-08-20","h":0.3333,"b":51},{"s":"D0133","d":"2026-04-30","h":0.4167,"b":107},{"s":"D0134","d":"2026-07-06","h":0.8333,"b":309},{"s":"D0134","d":"2026-07-27","h":0.25,"b":96},{"s":"D0134","d":"2026-07-27","h":0.3333,"b":105},{"s":"D0134","d":"2026-07-28","h":0.6667,"b":214},{"s":"D0134","d":"2026-08-20","h":1.1667,"b":413},{"s":"D0140-1","d":"2026-01-26","h":2.0,"b":600},{"s":"D0140-1","d":"2026-04-17","h":1.3333,"b":297},{"s":"D0141","d":"2026-04-15","h":0.4167,"b":20},{"s":"D0141","d":"2026-04-17","h":0.75,"b":306},{"s":"D0141","d":"2026-05-08","h":1.8333,"b":184},{"s":"D0141","d":"2026-05-08","h":0.3333,"b":124},{"s":"D0174","d":"2026-06-04","h":0.3333,"b":23},{"s":"D0174","d":"2026-06-05","h":1.8333,"b":316},{"s":"D0174","d":"2026-07-08","h":0.5,"b":157},{"s":"D0174","d":"2026-07-16","h":0.8333,"b":264},{"s":"D0174","d":"2026-07-29","h":0.8333,"b":200},{"s":"D0191-2","d":"2025-10-25","h":0.3333,"b":99},{"s":"D0191-2","d":"2025-10-30","h":0.5833,"b":207},{"s":"D0191-2","d":"2025-11-03","h":1.3333,"b":423},{"s":"D0191-2","d":"2025-11-13","h":0.8333,"b":205},{"s":"D0191-2","d":"2025-11-25","h":0.25,"b":51},{"s":"D0191-2","d":"2025-11-26","h":0.3333,"b":102},{"s":"D0191-2","d":"2025-12-02","h":0.5833,"b":209},{"s":"D0191-2","d":"2025-12-18","h":0.1667,"b":25},{"s":"D0191-2","d":"2025-12-18","h":0.5,"b":182},{"s":"D0191-2","d":"2025-12-31","h":0.5,"b":124},{"s":"D0195-1","d":"2026-06-18","h":0.5,"b":95},{"s":"D0195-1","d":"2026-07-08","h":0.8333,"b":204},{"s":"D0210","d":"2025-10-01","h":2.5,"b":734},{"s":"D0210","d":"2025-10-04","h":2.6667,"b":969},{"s":"D0210","d":"2025-10-16","h":1.8333,"b":637},{"s":"D0210","d":"2025-10-25","h":1.5,"b":450},{"s":"D0210","d":"2025-10-27","h":1.1667,"b":331},{"s":"D0210","d":"2025-11-22","h":2.6667,"b":790},{"s":"D0210","d":"2025-12-15","h":3.3333,"b":789},{"s":"D0210","d":"2025-12-29","h":2.5,"b":450},{"s":"D0210","d":"2025-12-30","h":0.75,"b":281},{"s":"D0210","d":"2026-01-08","h":1.6667,"b":450},{"s":"D0210","d":"2026-01-09","h":2.0833,"b":385},{"s":"D0210","d":"2026-01-21","h":2.4167,"b":779},{"s":"D0210","d":"2026-02-02","h":1.0833,"b":300},{"s":"D0210","d":"2026-02-03","h":4.5,"b":337},{"s":"D0210","d":"2026-02-06","h":3.4167,"b":725},{"s":"D0210","d":"2026-02-10","h":1.9167,"b":521},{"s":"D0210","d":"2026-02-12","h":1.25,"b":409},{"s":"D0210","d":"2026-03-06","h":3.3333,"b":750},{"s":"D0210","d":"2026-03-07","h":0.6667,"b":188},{"s":"D0210","d":"2026-03-12","h":0.8333,"b":207},{"s":"D0210","d":"2026-03-13","h":0.5,"b":105},{"s":"D0210","d":"2026-03-20","h":0.8333,"b":150},{"s":"D0210","d":"2026-03-23","h":1.8333,"b":686},{"s":"D0210","d":"2026-03-25","h":2.6667,"b":651},{"s":"D0210","d":"2026-03-26","h":0.5,"b":84},{"s":"D0210","d":"2026-04-02","h":0.5833,"b":150},{"s":"D0210","d":"2026-04-04","h":2.0,"b":622},{"s":"D0210","d":"2026-04-11","h":0.75,"b":150},{"s":"D0210","d":"2026-04-13","h":0.9167,"b":365},{"s":"D0210","d":"2026-04-16","h":7.3333,"b":900},{"s":"D0210","d":"2026-04-17","h":0.25,"b":148},{"s":"D0210","d":"2026-04-24","h":2.0833,"b":721},{"s":"D0210","d":"2026-05-07","h":3.8333,"b":788},{"s":"D0210","d":"2026-05-16","h":2.6667,"b":789},{"s":"D0210","d":"2026-05-19","h":0.0833,"b":34},{"s":"D0210","d":"2026-05-25","h":0.5,"b":57},{"s":"D0210","d":"2026-05-27","h":1.3333,"b":459},{"s":"D0210","d":"2026-05-27","h":0.8333,"b":311},{"s":"D0210","d":"2026-06-03","h":2.9167,"b":520},{"s":"D0210","d":"2026-06-10","h":2.5,"b":734},{"s":"D0210","d":"2026-06-18","h":2.0,"b":519},{"s":"D0210","d":"2026-06-25","h":2.1667,"b":616},{"s":"D0210","d":"2026-07-13","h":2.1667,"b":617},{"s":"D0210","d":"2026-07-17","h":2.9167,"b":600},{"s":"D0210","d":"2026-07-20","h":1.0,"b":240},{"s":"D0210","d":"2026-07-25","h":1.5833,"b":415},{"s":"D0210","d":"2026-08-01","h":2.0,"b":526},{"s":"D0230","d":"2025-10-14","h":2.25,"b":513},{"s":"D0230","d":"2025-11-12","h":1.0833,"b":307},{"s":"D0230","d":"2025-11-28","h":0.75,"b":297},{"s":"D0230","d":"2025-12-15","h":1.0833,"b":302},{"s":"D0230","d":"2025-12-29","h":2.25,"b":454},{"s":"D0230","d":"2026-01-24","h":0.9167,"b":150},{"s":"D0230","d":"2026-01-26","h":1.0,"b":346},{"s":"D0230","d":"2026-02-12","h":2.9167,"b":405},{"s":"D0230","d":"2026-03-12","h":2.1667,"b":443},{"s":"D0230","d":"2026-03-27","h":2.6667,"b":552},{"s":"D0230","d":"2026-03-28","h":0.3333,"b":54},{"s":"D0230","d":"2026-04-11","h":1.25,"b":397},{"s":"D0230","d":"2026-04-14","h":1.0,"b":150},{"s":"D0230","d":"2026-04-15","h":1.1667,"b":452},{"s":"D0230","d":"2026-05-12","h":2.5,"b":747},{"s":"D0230","d":"2026-05-13","h":1.6667,"b":495},{"s":"D0230","d":"2026-06-03","h":1.9167,"b":410},{"s":"D0230","d":"2026-06-17","h":1.8333,"b":400},{"s":"D0230","d":"2026-06-25","h":2.3333,"b":299},{"s":"D0230","d":"2026-07-09","h":1.0,"b":150},{"s":"D0230","d":"2026-07-13","h":1.0,"b":401},{"s":"D0230","d":"2026-07-25","h":0.9167,"b":298},{"s":"D0230","d":"2026-08-05","h":0.8333,"b":305},{"s":"D0230","d":"2026-08-13","h":1.5,"b":402},{"s":"D0231","d":"2025-11-18","h":0.5833,"b":212},{"s":"D0231","d":"2025-12-02","h":1.5833,"b":470},{"s":"D0231","d":"2025-12-16","h":2.1667,"b":311},{"s":"D0231","d":"2026-01-27","h":1.8333,"b":615},{"s":"D0231","d":"2026-02-11","h":1.3333,"b":323},{"s":"D0231","d":"2026-03-05","h":1.25,"b":316},{"s":"D0231","d":"2026-04-14","h":3.0,"b":485},{"s":"D0231","d":"2026-05-27","h":0.5,"b":155},{"s":"D0231","d":"2026-06-09","h":1.25,"b":307},{"s":"D0231","d":"2026-07-02","h":0.5833,"b":157},{"s":"D0231","d":"2026-07-14","h":1.1667,"b":318},{"s":"D0231","d":"2026-07-31","h":1.0,"b":315},{"s":"D0231","d":"2026-08-12","h":0.9167,"b":213},{"s":"D0241","d":"2025-10-30","h":0.5,"b":148},{"s":"D0241","d":"2026-01-02","h":0.3333,"b":57},{"s":"D0241","d":"2026-01-05","h":0.5,"b":89},{"s":"D0241","d":"2026-02-06","h":1.5,"b":144},{"s":"D0241","d":"2026-03-12","h":0.6667,"b":142},{"s":"D0241","d":"2026-04-02","h":0.75,"b":141},{"s":"D0241","d":"2026-04-28","h":0.5,"b":141},{"s":"D0241","d":"2026-05-12","h":0.8333,"b":150},{"s":"D0243","d":"2025-10-02","h":0.67,"b":183},{"s":"D0243","d":"2025-10-03","h":0.67,"b":126},{"s":"D0243","d":"2025-10-14","h":1.67,"b":442},{"s":"D0243","d":"2025-11-22","h":1.75,"b":148},{"s":"D0243","d":"2025-12-11","h":0.5833,"b":145},{"s":"D0243","d":"2026-01-21","h":1.1667,"b":300},{"s":"D0243","d":"2026-04-22","h":0.9167,"b":290},{"s":"D0250","d":"2025-10-08","h":0.5833,"b":150},{"s":"D0250","d":"2025-11-14","h":0.5833,"b":150},{"s":"D0250","d":"2025-11-29","h":0.5,"b":131},{"s":"D0250","d":"2025-12-16","h":0.6667,"b":227},{"s":"D0250","d":"2025-12-29","h":0.5,"b":174},{"s":"D0250","d":"2026-04-04","h":0.6667,"b":165},{"s":"D0250","d":"2026-05-11","h":0.8333,"b":176},{"s":"D0250","d":"2026-06-03","h":0.5833,"b":148},{"s":"D0250","d":"2026-07-28","h":0.6667,"b":145},{"s":"D0250","d":"2026-08-19","h":0.75,"b":145},{"s":"D0290","d":"2025-10-04","h":0.1667,"b":96},{"s":"D0290","d":"2025-10-07","h":0.5,"b":54},{"s":"D0290","d":"2025-11-14","h":0.5833,"b":155},{"s":"D0290","d":"2025-12-23","h":0.6667,"b":155},{"s":"D0290","d":"2026-01-08","h":0.6667,"b":154},{"s":"D0290","d":"2026-02-12","h":0.5,"b":146},{"s":"D0290","d":"2026-03-20","h":1.1667,"b":306},{"s":"D0290","d":"2026-04-28","h":0.6667,"b":150},{"s":"D0290","d":"2026-05-13","h":0.6667,"b":151},{"s":"D0290","d":"2026-06-03","h":0.5,"b":150},{"s":"D0290","d":"2026-06-18","h":0.5,"b":154},{"s":"D0290","d":"2026-07-02","h":0.5,"b":149},{"s":"D0290","d":"2026-07-20","h":0.3333,"b":154},{"s":"D0290","d":"2026-07-23","h":0.5833,"b":149},{"s":"D0290","d":"2026-08-10","h":0.5833,"b":150},{"s":"D0291","d":"2025-10-03","h":1.0,"b":316},{"s":"D0291","d":"2025-10-25","h":0.5,"b":152},{"s":"D0291","d":"2025-11-07","h":1.1667,"b":311},{"s":"D0291","d":"2025-12-11","h":0.9167,"b":308},{"s":"D0291","d":"2025-12-24","h":0.6667,"b":255},{"s":"D0291","d":"2025-12-29","h":0.3333,"b":51},{"s":"D0291","d":"2026-01-08","h":1.1667,"b":152},{"s":"D0291","d":"2026-02-06","h":1.0833,"b":312},{"s":"D0291","d":"2026-03-07","h":1.0833,"b":305},{"s":"D0291","d":"2026-03-28","h":1.6667,"b":513},{"s":"D0291","d":"2026-04-11","h":2.0,"b":616},{"s":"D0291","d":"2026-04-24","h":0.9167,"b":306},{"s":"D0291","d":"2026-05-13","h":1.1667,"b":300},{"s":"D0291","d":"2026-06-15","h":1.0833,"b":409},{"s":"D0291","d":"2026-07-01","h":1.3333,"b":202},{"s":"D0291","d":"2026-07-16","h":1.0,"b":309},{"s":"D0291","d":"2026-07-25","h":0.9167,"b":305},{"s":"D0291","d":"2026-08-04","h":3.0833,"b":781},{"s":"D0291","d":"2026-08-12","h":2.4167,"b":620},{"s":"D0310","d":"2025-10-01","h":1.5,"b":308},{"s":"D0310","d":"2025-10-01","h":0.75,"b":213},{"s":"D0310","d":"2025-10-02","h":1.0833,"b":308},{"s":"D0310","d":"2025-10-02","h":2.0,"b":324},{"s":"D0310","d":"2025-10-03","h":0.6667,"b":306},{"s":"D0310","d":"2025-10-03","h":0.3333,"b":174},{"s":"D0310","d":"2025-10-04","h":0.25,"b":148},{"s":"D0310","d":"2025-10-09","h":1.1667,"b":315},{"s":"D0310","d":"2025-10-09","h":1.0,"b":318},{"s":"D0310","d":"2025-10-13","h":1.0833,"b":301},{"s":"D0310","d":"2025-10-13","h":0.9167,"b":322},{"s":"D0310","d":"2025-10-16","h":1.0833,"b":353},{"s":"D0310","d":"2025-10-16","h":2.0833,"b":369},{"s":"D0310","d":"2025-10-18","h":1.4167,"b":419},{"s":"D0310","d":"2025-10-18","h":0.8333,"b":315},{"s":"D0310","d":"2025-10-21","h":1.1667,"b":302},{"s":"D0310","d":"2025-10-21","h":0.6667,"b":218},{"s":"D0310","d":"2025-10-22","h":1.0,"b":147},{"s":"D0310","d":"2025-10-23","h":1.6667,"b":310},{"s":"D0310","d":"2025-10-23","h":1.1667,"b":310},{"s":"D0310","d":"2025-10-28","h":2.0833,"b":301},{"s":"D0310","d":"2025-10-28","h":3.0833,"b":315},{"s":"D0310","d":"2025-10-29","h":1.0833,"b":302},{"s":"D0310","d":"2025-10-29","h":0.4167,"b":211},{"s":"D0310","d":"2025-10-30","h":2.1667,"b":307},{"s":"D0310","d":"2025-10-30","h":0.9167,"b":318},{"s":"D0310","d":"2025-11-03","h":1.0,"b":303},{"s":"D0310","d":"2025-11-03","h":0.8333,"b":317},{"s":"D0310","d":"2025-11-04","h":0.75,"b":307},{"s":"D0310","d":"2025-11-04","h":0.5833,"b":212},{"s":"D0310","d":"2025-11-05","h":0.5,"b":202},{"s":"D0310","d":"2025-11-05","h":0.5,"b":210},{"s":"D0310","d":"2025-11-06","h":0.9167,"b":302},{"s":"D0310","d":"2025-11-06","h":0.75,"b":217},{"s":"D0310","d":"2025-11-12","h":1.0,"b":304},{"s":"D0310","d":"2025-11-12","h":0.75,"b":318},{"s":"D0310","d":"2025-11-13","h":1.75,"b":204},{"s":"D0310","d":"2025-11-13","h":0.6667,"b":214},{"s":"D0310","d":"2025-11-17","h":0.6667,"b":296},{"s":"D0310","d":"2025-11-17","h":0.8333,"b":324},{"s":"D0310","d":"2025-11-19","h":1.0,"b":261},{"s":"D0310","d":"2025-11-20","h":0.1667,"b":67},{"s":"D0310","d":"2025-11-20","h":0.6667,"b":209},{"s":"D0310","d":"2025-11-20","h":0.75,"b":302},{"s":"D0310","d":"2025-11-20","h":0.75,"b":316},{"s":"D0310","d":"2025-11-22","h":0.5833,"b":198},{"s":"D0310","d":"2025-11-22","h":0.5833,"b":212},{"s":"D0310","d":"2025-11-25","h":0.6667,"b":307},{"s":"D0310","d":"2025-11-25","h":1.0833,"b":316},{"s":"D0310","d":"2025-11-28","h":0.6667,"b":308},{"s":"D0310","d":"2025-11-28","h":0.9167,"b":317},{"s":"D0310","d":"2025-12-01","h":1.0,"b":309},{"s":"D0310","d":"2025-12-02","h":1.8333,"b":315},{"s":"D0310","d":"2025-12-02","h":0.5,"b":202},{"s":"D0310","d":"2025-12-02","h":0.5833,"b":209},{"s":"D0310","d":"2025-12-03","h":0.75,"b":297},{"s":"D0310","d":"2025-12-03","h":0.8333,"b":317},{"s":"D0310","d":"2025-12-04","h":0.6667,"b":210},{"s":"D0310","d":"2025-12-04","h":0.5833,"b":144},{"s":"D0310","d":"2025-12-05","h":0.5,"b":168},{"s":"D0310","d":"2025-12-05","h":0.6667,"b":202},{"s":"D0310","d":"2025-12-09","h":0.5833,"b":200},{"s":"D0310","d":"2025-12-09","h":0.75,"b":213},{"s":"D0310","d":"2025-12-10","h":1.0,"b":302},{"s":"D0310","d":"2025-12-10","h":1.0,"b":317},{"s":"D0310","d":"2025-12-11","h":1.9167,"b":213},{"s":"D0310","d":"2025-12-11","h":1.1667,"b":302},{"s":"D0310","d":"2025-12-17","h":0.9167,"b":329},{"s":"D0310","d":"2025-12-18","h":1.1667,"b":341},{"s":"D0310","d":"2025-12-18","h":0.5,"b":66},{"s":"D0310","d":"2025-12-19","h":0.3333,"b":131},{"s":"D0310","d":"2025-12-19","h":0.75,"b":209},{"s":"D0310","d":"2025-12-19","h":1.0,"b":304},{"s":"D0310","d":"2025-12-19","h":2.0,"b":321},{"s":"D0310","d":"2025-12-22","h":0.8333,"b":219},{"s":"D0310","d":"2025-12-22","h":0.6667,"b":180},{"s":"D0310","d":"2025-12-23","h":0.3333,"b":54},{"s":"D0310","d":"2025-12-24","h":1.3333,"b":339},{"s":"D0310","d":"2025-12-24","h":1.1667,"b":352},{"s":"D0310","d":"2025-12-31","h":1.5,"b":345},{"s":"D0310","d":"2025-12-31","h":0.5,"b":238},{"s":"D0310","d":"2026-01-02","h":2.25,"b":343},{"s":"D0310","d":"2026-01-02","h":1.4167,"b":462},{"s":"D0310","d":"2026-01-07","h":1.4167,"b":210},{"s":"D0310","d":"2026-01-08","h":0.6667,"b":230},{"s":"D0310","d":"2026-01-08","h":1.0,"b":349},{"s":"D0310","d":"2026-01-10","h":0.8333,"b":337},{"s":"D0310","d":"2026-01-10","h":0.75,"b":236},{"s":"D0310","d":"2026-01-15","h":1.0,"b":342},{"s":"D0310","d":"2026-01-17","h":1.1667,"b":448},{"s":"D0310","d":"2026-01-20","h":0.8333,"b":346},{"s":"D0310","d":"2026-01-20","h":0.75,"b":353},{"s":"D0310","d":"2026-01-20","h":1.9167,"b":347},{"s":"D0310","d":"2026-01-20","h":1.0,"b":228},{"s":"D0310","d":"2026-01-21","h":0.5,"b":117},{"s":"D0310","d":"2026-01-24","h":1.0833,"b":344},{"s":"D0310","d":"2026-01-24","h":0.9167,"b":339},{"s":"D0310","d":"2026-01-24","h":0.75,"b":346},{"s":"D0310","d":"2026-01-27","h":1.4167,"b":343},{"s":"D0310","d":"2026-01-27","h":2.75,"b":352},{"s":"D0310","d":"2026-01-27","h":1.25,"b":332},{"s":"D0310","d":"2026-01-27","h":0.75,"b":240},{"s":"D0310","d":"2026-01-28","h":1.25,"b":341},{"s":"D0310","d":"2026-01-29","h":0.4167,"b":237},{"s":"D0310","d":"2026-01-29","h":1.4167,"b":459},{"s":"D0310","d":"2026-01-29","h":1.1667,"b":346},{"s":"D0310","d":"2026-02-04","h":1.1667,"b":333},{"s":"D0310","d":"2026-02-04","h":0.9167,"b":228},{"s":"D0310","d":"2026-02-05","h":2.3333,"b":342},{"s":"D0310","d":"2026-02-05","h":0.6667,"b":236},{"s":"D0310","d":"2026-02-13","h":1.1667,"b":343},{"s":"D0310","d":"2026-02-13","h":0.9167,"b":346},{"s":"D0310","d":"2026-03-02","h":1.0,"b":341},{"s":"D0310","d":"2026-03-05","h":0.75,"b":198},{"s":"D0310","d":"2026-03-05","h":0.6667,"b":208},{"s":"D0310","d":"2026-03-07","h":1.1667,"b":338},{"s":"D0310","d":"2026-03-09","h":1.1667,"b":347},{"s":"D0310","d":"2026-03-11","h":1.1667,"b":331},{"s":"D0310","d":"2026-03-11","h":1.3333,"b":351},{"s":"D0310","d":"2026-03-12","h":1.0833,"b":212},{"s":"D0310","d":"2026-03-12","h":0.4167,"b":189},{"s":"D0310","d":"2026-03-13","h":1.4167,"b":201},{"s":"D0310","d":"2026-03-13","h":1.0833,"b":301},{"s":"D0310","d":"2026-03-14","h":1.4167,"b":300},{"s":"D0310","d":"2026-03-14","h":0.6667,"b":90},{"s":"D0310","d":"2026-03-16","h":4.1667,"b":310},{"s":"D0310","d":"2026-03-17","h":0.6667,"b":201},{"s":"D0310","d":"2026-03-17","h":0.6667,"b":193},{"s":"D0310","d":"2026-03-17","h":0.6667,"b":217},{"s":"D0310","d":"2026-03-19","h":2.1667,"b":312},{"s":"D0310","d":"2026-03-19","h":1.0,"b":297},{"s":"D0310","d":"2026-03-23","h":0.8333,"b":299},{"s":"D0310","d":"2026-03-23","h":1.8333,"b":324},{"s":"D0310","d":"2026-03-24","h":0.3333,"b":120},{"s":"D0310","d":"2026-03-25","h":0.6667,"b":191},{"s":"D0310","d":"2026-03-25","h":0.6667,"b":300},{"s":"D0310","d":"2026-03-27","h":2.6667,"b":303},{"s":"D0310","d":"2026-03-27","h":0.6667,"b":207},{"s":"D0310","d":"2026-03-28","h":0.75,"b":240},{"s":"D0310","d":"2026-03-30","h":0.3333,"b":59},{"s":"D0310","d":"2026-03-30","h":3.6667,"b":310},{"s":"D0310","d":"2026-04-01","h":0.75,"b":240},{"s":"D0310","d":"2026-04-02","h":0.1667,"b":63},{"s":"D0310","d":"2026-04-02","h":0.6667,"b":210},{"s":"D0310","d":"2026-04-04","h":0.6667,"b":199},{"s":"D0310","d":"2026-04-07","h":0.5,"b":208},{"s":"D0310","d":"2026-04-09","h":1.3333,"b":201},{"s":"D0310","d":"2026-04-09","h":0.75,"b":210},{"s":"D0310","d":"2026-04-10","h":1.0,"b":195},{"s":"D0310","d":"2026-04-10","h":0.6667,"b":206},{"s":"D0310","d":"2026-04-15","h":0.3333,"b":57},{"s":"D0310","d":"2026-04-16","h":0.6667,"b":247},{"s":"D0310","d":"2026-04-16","h":0.6667,"b":206},{"s":"D0310","d":"2026-04-20","h":1.25,"b":297},{"s":"D0310","d":"2026-04-20","h":0.9167,"b":210},{"s":"D0310","d":"2026-04-21","h":0.9167,"b":296},{"s":"D0310","d":"2026-04-22","h":2.9167,"b":314},{"s":"D0310","d":"2026-04-22","h":0.75,"b":210},{"s":"D0310","d":"2026-04-22","h":0.5,"b":197},{"s":"D0310","d":"2026-04-25","h":1.0,"b":304},{"s":"D0310","d":"2026-04-25","h":1.1667,"b":207},{"s":"D0310","d":"2026-04-30","h":1.9167,"b":298},{"s":"D0310","d":"2026-04-30","h":1.3333,"b":305},{"s":"D0310","d":"2026-05-04","h":1.1667,"b":307},{"s":"D0310","d":"2026-05-04","h":0.9167,"b":316},{"s":"D0310","d":"2026-05-05","h":1.1667,"b":303},{"s":"D0310","d":"2026-05-05","h":1.3333,"b":312},{"s":"D0310","d":"2026-05-07","h":0.8333,"b":193},{"s":"D0310","d":"2026-05-07","h":0.8333,"b":210},{"s":"D0310","d":"2026-05-08","h":1.1667,"b":196},{"s":"D0310","d":"2026-05-09","h":1.0,"b":209},{"s":"D0310","d":"2026-05-12","h":1.0,"b":300},{"s":"D0310","d":"2026-05-12","h":0.3333,"b":57},{"s":"D0310","d":"2026-05-13","h":0.5,"b":156},{"s":"D0310","d":"2026-05-14","h":1.25,"b":299},{"s":"D0310","d":"2026-05-14","h":0.5,"b":129},{"s":"D0310","d":"2026-05-15","h":0.75,"b":186},{"s":"D0310","d":"2026-05-16","h":1.3333,"b":409},{"s":"D0310","d":"2026-05-16","h":2.0,"b":508},{"s":"D0310","d":"2026-05-20","h":0.8333,"b":303},{"s":"D0310","d":"2026-05-20","h":0.5,"b":211},{"s":"D0310","d":"2026-05-21","h":0.5833,"b":197},{"s":"D0310","d":"2026-05-22","h":0.5833,"b":209},{"s":"D0310","d":"2026-05-22","h":0.6667,"b":211},{"s":"D0310","d":"2026-05-22","h":1.0833,"b":310},{"s":"D0310","d":"2026-05-27","h":1.5,"b":299},{"s":"D0310","d":"2026-05-27","h":1.0,"b":209},{"s":"D0310","d":"2026-05-27","h":0.5,"b":165},{"s":"D0310","d":"2026-05-28","h":0.5,"b":140},{"s":"D0310","d":"2026-06-04","h":0.8333,"b":250},{"s":"D0310","d":"2026-06-04","h":0.5833,"b":206},{"s":"D0310","d":"2026-06-08","h":1.1667,"b":304},{"s":"D0310","d":"2026-06-08","h":0.75,"b":206},{"s":"D0310","d":"2026-06-09","h":1.1667,"b":316},{"s":"D0310","d":"2026-06-09","h":2.0,"b":301},{"s":"D0310","d":"2026-06-12","h":1.75,"b":195},{"s":"D0310","d":"2026-06-12","h":1.5,"b":208},{"s":"D0310","d":"2026-06-15","h":1.3333,"b":303},{"s":"D0310","d":"2026-06-15","h":0.5833,"b":207},{"s":"D0310","d":"2026-06-16","h":0.8333,"b":304},{"s":"D0310","d":"2026-06-16","h":0.5833,"b":210},{"s":"D0310","d":"2026-06-18","h":2.75,"b":301},{"s":"D0310","d":"2026-06-18","h":1.0,"b":313},{"s":"D0310","d":"2026-06-22","h":0.4167,"b":148},{"s":"D0310","d":"2026-06-22","h":0.3333,"b":75},{"s":"D0310","d":"2026-06-23","h":2.5833,"b":360},{"s":"D0310","d":"2026-06-24","h":1.25,"b":279},{"s":"D0310","d":"2026-06-24","h":1.0,"b":340},{"s":"D0310","d":"2026-06-25","h":1.5833,"b":304},{"s":"D0310","d":"2026-06-25","h":0.5833,"b":209},{"s":"D0310","d":"2026-06-30","h":1.0833,"b":301},{"s":"D0310","d":"2026-07-02","h":1.5833,"b":305},{"s":"D0310","d":"2026-07-06","h":1.0,"b":307},{"s":"D0310","d":"2026-07-06","h":1.1667,"b":312},{"s":"D0310","d":"2026-07-08","h":1.25,"b":302},{"s":"D0310","d":"2026-07-08","h":1.3333,"b":312},{"s":"D0310","d":"2026-07-14","h":0.6667,"b":196},{"s":"D0310","d":"2026-07-14","h":0.5833,"b":212},{"s":"D0310","d":"2026-07-16","h":0.6667,"b":197},{"s":"D0310","d":"2026-07-17","h":0.4167,"b":210},{"s":"D0310","d":"2026-07-21","h":0.5833,"b":197},{"s":"D0310","d":"2026-07-21","h":0.5833,"b":213},{"s":"D0310","d":"2026-07-23","h":1.3333,"b":290},{"s":"D0310","d":"2026-07-25","h":1.0833,"b":318},{"s":"D0310","d":"2026-07-28","h":0.9167,"b":197},{"s":"D0310","d":"2026-07-29","h":0.5833,"b":210},{"s":"D0310","d":"2026-07-29","h":2.0833,"b":306},{"s":"D0310","d":"2026-07-29","h":0.8333,"b":213},{"s":"D0310","d":"2026-07-31","h":0.5833,"b":203},{"s":"D0310","d":"2026-07-31","h":0.6667,"b":209},{"s":"D0310","d":"2026-07-31","h":0.6667,"b":304},{"s":"D0310","d":"2026-07-31","h":0.6667,"b":208},{"s":"D0310","d":"2026-08-05","h":0.75,"b":196},{"s":"D0310","d":"2026-08-05","h":0.8333,"b":207},{"s":"D0310","d":"2026-08-07","h":1.1667,"b":301},{"s":"D0310","d":"2026-08-07","h":1.1667,"b":320},{"s":"D0310","d":"2026-08-08","h":1.5,"b":402},{"s":"D0310","d":"2026-08-08","h":0.8333,"b":317},{"s":"D0310","d":"2026-08-11","h":2.0833,"b":408},{"s":"D0310","d":"2026-08-11","h":1.1667,"b":313},{"s":"D0310","d":"2026-08-15","h":1.0833,"b":306},{"s":"D0310","d":"2026-08-15","h":1.1667,"b":315},{"s":"D0310","d":"2026-08-15","h":0.6667,"b":200},{"s":"D0310","d":"2026-08-15","h":0.5833,"b":165},{"s":"D0310","d":"2026-08-17","h":0.25,"b":50},{"s":"D0310","d":"2026-08-19","h":1.8333,"b":300},{"s":"D0310","d":"2026-08-19","h":0.5833,"b":215},{"s":"D0310","d":"2026-08-20","h":1.0,"b":302},{"s":"D0310","d":"2026-08-20","h":1.0,"b":315},{"s":"D0310","d":"2026-08-21","h":0.8333,"b":304},{"s":"D0310","d":"2026-08-21","h":0.5,"b":240},{"s":"D0310","d":"2026-08-25","h":0.8333,"b":312},{"s":"D0310","d":"2026-08-25","h":0.6667,"b":314},{"s":"D0310","d":"2026-08-26","h":1.8333,"b":307},{"s":"D0310","d":"2026-08-26","h":1.3333,"b":313},{"s":"D0330","d":"2025-10-03","h":0.83,"b":305},{"s":"D0330","d":"2025-10-03","h":0.5,"b":210},{"s":"D0330","d":"2025-10-15","h":0.67,"b":206},{"s":"D0330","d":"2025-10-15","h":1.0,"b":301},{"s":"D0330","d":"2025-10-21","h":0.5,"b":197},{"s":"D0330","d":"2025-10-21","h":0.67,"b":212},{"s":"D0330","d":"2025-11-06","h":1.0,"b":204},{"s":"D0330","d":"2025-11-06","h":0.8333,"b":211},{"s":"D0330","d":"2025-11-20","h":0.8333,"b":213},{"s":"D0330","d":"2025-11-20","h":1.0,"b":305},{"s":"D0330","d":"2025-11-26","h":0.9167,"b":300},{"s":"D0330","d":"2025-11-26","h":0.75,"b":312},{"s":"D0330","d":"2025-12-03","h":0.6667,"b":183},{"s":"D0330","d":"2025-12-04","h":0.25,"b":27},{"s":"D0330","d":"2025-12-04","h":0.6667,"b":196},{"s":"D0330","d":"2025-12-09","h":1.25,"b":301},{"s":"D0330","d":"2025-12-09","h":1.0,"b":309},{"s":"D0330","d":"2025-12-19","h":1.0,"b":297},{"s":"D0330","d":"2025-12-19","h":0.6667,"b":207},{"s":"D0330","d":"2026-01-02","h":1.0833,"b":305},{"s":"D0330","d":"2026-01-02","h":0.6667,"b":211},{"s":"D0330","d":"2026-01-10","h":0.75,"b":210},{"s":"D0330","d":"2026-01-10","h":0.6667,"b":194},{"s":"D0330","d":"2026-01-19","h":1.0833,"b":306},{"s":"D0330","d":"2026-01-30","h":1.0833,"b":302},{"s":"D0330","d":"2026-01-30","h":0.75,"b":206},{"s":"D0330","d":"2026-02-04","h":2.0,"b":299},{"s":"D0330","d":"2026-02-04","h":0.8333,"b":308},{"s":"D0330","d":"2026-02-11","h":0.5,"b":198},{"s":"D0330","d":"2026-02-11","h":0.6667,"b":209},{"s":"D0330","d":"2026-02-24","h":1.3333,"b":299},{"s":"D0330","d":"2026-02-24","h":0.6667,"b":209},{"s":"D0330","d":"2026-03-10","h":0.75,"b":191},{"s":"D0330","d":"2026-03-11","h":1.6667,"b":207},{"s":"D0330","d":"2026-03-18","h":0.8333,"b":309},{"s":"D0330","d":"2026-03-18","h":1.8333,"b":298},{"s":"D0330","d":"2026-03-24","h":0.8333,"b":206},{"s":"D0330","d":"2026-03-24","h":0.9167,"b":195},{"s":"D0330","d":"2026-04-08","h":0.8333,"b":114},{"s":"D0330","d":"2026-04-09","h":0.5,"b":184},{"s":"D0330","d":"2026-04-09","h":1.0,"b":309},{"s":"D0330","d":"2026-04-25","h":0.5833,"b":161},{"s":"D0330","d":"2026-04-25","h":1.0,"b":293},{"s":"D0330","d":"2026-04-29","h":0.6667,"b":200},{"s":"D0330","d":"2026-04-29","h":0.8333,"b":202},{"s":"D0330","d":"2026-04-29","h":0.8333,"b":360},{"s":"D0330","d":"2026-05-06","h":1.25,"b":410},{"s":"D0330","d":"2026-05-06","h":1.0833,"b":311},{"s":"D0330","d":"2026-05-12","h":1.1667,"b":207},{"s":"D0330","d":"2026-05-12","h":0.9167,"b":295},{"s":"D0330","d":"2026-05-22","h":1.0,"b":302},{"s":"D0330","d":"2026-06-08","h":1.25,"b":207},{"s":"D0330","d":"2026-06-08","h":0.75,"b":197},{"s":"D0330","d":"2026-06-10","h":0.75,"b":196},{"s":"D0330","d":"2026-07-08","h":0.9167,"b":298},{"s":"D0330","d":"2026-07-23","h":0.75,"b":197},{"s":"D0330","d":"2026-07-29","h":1.0,"b":298},{"s":"D0330","d":"2026-07-29","h":0.9167,"b":310},{"s":"D0330","d":"2026-08-25","h":0.8333,"b":201},{"s":"D0331","d":"2025-11-19","h":0.5,"b":24},{"s":"D0331","d":"2025-12-05","h":1.4167,"b":412},{"s":"D0331","d":"2025-12-05","h":2.0833,"b":381},{"s":"D0331","d":"2026-06-04","h":0.1667,"b":21},{"s":"D0331","d":"2026-06-05","h":1.0,"b":311},{"s":"D0331","d":"2026-06-05","h":1.0833,"b":311},{"s":"D0331","d":"2026-06-12","h":1.5,"b":309},{"s":"D0331","d":"2026-06-12","h":0.75,"b":211},{"s":"D0331","d":"2026-06-23","h":1.25,"b":206},{"s":"D0331","d":"2026-06-23","h":0.5833,"b":194},{"s":"D0331","d":"2026-06-29","h":0.3333,"b":39},{"s":"D0331","d":"2026-06-30","h":1.0833,"b":173},{"s":"D0331","d":"2026-06-30","h":1.4167,"b":310},{"s":"D0331","d":"2026-07-03","h":0.75,"b":212},{"s":"D0331","d":"2026-07-03","h":0.5,"b":201},{"s":"D0331","d":"2026-07-21","h":0.9167,"b":202},{"s":"D0331","d":"2026-07-21","h":1.0,"b":207},{"s":"D0331","d":"2026-08-01","h":1.0,"b":146},{"s":"D0331","d":"2026-08-01","h":1.6667,"b":430},{"s":"D0331","d":"2026-08-03","h":0.5833,"b":49},{"s":"D0331","d":"2026-08-05","h":1.25,"b":306},{"s":"D0331","d":"2026-08-06","h":1.25,"b":319},{"s":"D0331","d":"2026-08-18","h":1.0,"b":300},{"s":"D0331","d":"2026-08-18","h":0.6667,"b":213},{"s":"D0331","d":"2026-08-26","h":2.1667,"b":255},{"s":"D0390","d":"2026-06-09","h":2.6667,"b":118},{"s":"D0390","d":"2026-06-18","h":4.75,"b":185},{"s":"D0390","d":"2026-07-24","h":3.0,"b":153},{"s":"D0420","d":"2025-12-03","h":1.5,"b":277},{"s":"D0420","d":"2025-12-29","h":1.67,"b":172},{"s":"D0420","d":"2026-01-27","h":1.8333,"b":194},{"s":"D0420","d":"2026-03-05","h":1.1667,"b":218},{"s":"D0420","d":"2026-03-17","h":3.1667,"b":278},{"s":"D0420","d":"2026-05-04","h":0.9167,"b":171},{"s":"D0420","d":"2026-05-13","h":0.6667,"b":167},{"s":"D0420","d":"2026-05-28","h":1.0,"b":197},{"s":"D0420","d":"2026-07-23","h":0.9167,"b":225},{"s":"D0422","d":"2025-10-15","h":1.5,"b":388},{"s":"D0422","d":"2025-12-05","h":2.5,"b":389},{"s":"D0422","d":"2025-12-29","h":1.4167,"b":172},{"s":"D0422","d":"2026-01-19","h":6.5833,"b":446},{"s":"D0422","d":"2026-02-04","h":1.0,"b":192},{"s":"D0422","d":"2026-02-05","h":0.1667,"b":36},{"s":"D0422","d":"2026-03-11","h":2.8333,"b":259},{"s":"D0422","d":"2026-04-09","h":1.4167,"b":255},{"s":"D0422","d":"2026-05-04","h":1.1667,"b":229},{"s":"D0422","d":"2026-05-13","h":1.3333,"b":227},{"s":"D0422","d":"2026-06-02","h":1.25,"b":389},{"s":"D0422","d":"2026-07-27","h":3.6667,"b":420},{"s":"D0520","d":"2025-11-05","h":3.4167,"b":3452},{"s":"D0520","d":"2025-12-30","h":2.9167,"b":3435},{"s":"D0520","d":"2026-02-25","h":3.6667,"b":3578},{"s":"D0520","d":"2026-06-05","h":3.4167,"b":3451},{"s":"D0520","d":"2026-07-30","h":3.4167,"b":3413},{"s":"D0521","d":"2025-11-24","h":2.5833,"b":3341},{"s":"D0521","d":"2025-12-22","h":3.0,"b":1680},{"s":"D0521","d":"2025-12-23","h":1.0,"b":1579},{"s":"D0521","d":"2026-01-19","h":6.75,"b":3211},{"s":"D0521","d":"2026-02-25","h":3.25,"b":3265},{"s":"D0521","d":"2026-04-13","h":4.0,"b":1680},{"s":"D0521","d":"2026-04-14","h":1.3333,"b":1547},{"s":"D0521","d":"2026-05-14","h":2.1667,"b":1135},{"s":"D0521","d":"2026-06-04","h":2.5833,"b":3341},{"s":"D0521","d":"2026-06-30","h":4.0,"b":2376},{"s":"D0521","d":"2026-07-30","h":3.4167,"b":2916},{"s":"D0521","d":"2026-08-03","h":1.3333,"b":1037},{"s":"D0530","d":"2025-10-21","h":1.0,"b":1471},{"s":"D0530","d":"2025-11-21","h":0.75,"b":1799},{"s":"D0530","d":"2025-12-22","h":0.5,"b":49},{"s":"D0530","d":"2026-01-05","h":0.3333,"b":36},{"s":"D0530","d":"2026-01-08","h":1.1667,"b":2719},{"s":"D0530","d":"2026-03-09","h":2.6667,"b":2779},{"s":"D0530","d":"2026-08-06","h":2.5,"b":319},{"s":"D0530","d":"2026-08-10","h":1.4167,"b":1474},{"s":"D0530","d":"2026-08-10","h":1.5,"b":1452},{"s":"D0530","d":"2026-08-12","h":1.4167,"b":1529},{"s":"D0591","d":"2025-10-07","h":1.0,"b":2282},{"s":"D0591","d":"2025-11-27","h":1.1667,"b":2167},{"s":"D0591","d":"2026-03-19","h":0.5,"b":416},{"s":"D0591","d":"2026-03-20","h":1.6667,"b":1236},{"s":"D0591","d":"2026-03-25","h":1.0,"b":535},{"s":"D0591","d":"2026-04-02","h":0.3333,"b":659},{"s":"D0591","d":"2026-06-05","h":1.0,"b":1869},{"s":"D0591","d":"2026-08-10","h":1.5833,"b":660},{"s":"D0591","d":"2026-08-15","h":1.0,"b":1466},{"s":"D0592","d":"2025-11-19","h":0.5,"b":1020},{"s":"D0592","d":"2025-11-20","h":2.3333,"b":931},{"s":"D0592","d":"2026-03-19","h":0.8333,"b":864},{"s":"D0592","d":"2026-06-03","h":2.8333,"b":2013},{"s":"D0592","d":"2026-06-03","h":0.1667,"b":182},{"s":"D0592","d":"2026-06-09","h":0.5,"b":996},{"s":"D0592","d":"2026-06-10","h":0.5,"b":1207},{"s":"D0593","d":"2025-10-17","h":1.8333,"b":1866},{"s":"D0594","d":"2025-10-28","h":2.0833,"b":720},{"s":"D0594","d":"2025-10-30","h":1.5,"b":155},{"s":"D0594","d":"2026-06-30","h":7.6667,"b":1745},{"s":"D0610","d":"2025-11-28","h":0.58,"b":200},{"s":"D0610","d":"2026-05-05","h":1.4167,"b":198},{"s":"D0610","d":"2026-07-07","h":0.75,"b":197},{"s":"D0630","d":"2025-11-21","h":0.4167,"b":153},{"s":"D0630","d":"2026-05-06","h":0.5,"b":151},{"s":"D0730","d":"2026-02-05","h":7.0,"b":1336},{"s":"D0731","d":"2026-07-27","h":0.8333,"b":1097},{"s":"D0732","d":"2025-12-11","h":1.3333,"b":1692},{"s":"D0732","d":"2025-12-12","h":0.5833,"b":1272},{"s":"D0790","d":"2025-11-18","h":0.5,"b":1117},{"s":"D0810","d":"2026-01-08","h":0.8333,"b":414},{"s":"D0810","d":"2026-02-13","h":0.5833,"b":425},{"s":"D0810","d":"2026-04-23","h":0.8333,"b":274},{"s":"D0810","d":"2026-06-17","h":0.6667,"b":280},{"s":"D0810","d":"2026-08-08","h":0.8333,"b":263},{"s":"D0820","d":"2025-11-03","h":1.58,"b":146},{"s":"D0820","d":"2025-12-12","h":0.3333,"b":148},{"s":"D0820","d":"2026-01-26","h":1.25,"b":150},{"s":"D0820","d":"2026-04-25","h":0.25,"b":99},{"s":"D0820","d":"2026-06-24","h":1.8333,"b":150},{"s":"D0820-1","d":"2026-04-24","h":0.1667,"b":51},{"s":"D0910","d":"2026-01-09","h":0.4167,"b":434},{"s":"D0910","d":"2026-02-26","h":2.5,"b":430},{"s":"D0910","d":"2026-04-13","h":0.5,"b":322},{"s":"D0910","d":"2026-08-14","h":1.5,"b":329},{"s":"D0990","d":"2026-01-09","h":0.25,"b":100},{"s":"D0990","d":"2026-05-16","h":0.3333,"b":101},{"s":"D0991","d":"2025-11-13","h":3.4167,"b":258},{"s":"D0991","d":"2025-11-25","h":4.0,"b":508},{"s":"D0991","d":"2026-03-30","h":3.4167,"b":266},{"s":"D0991","d":"2026-04-01","h":4.3333,"b":275},{"s":"D0991","d":"2026-04-10","h":5.3333,"b":278},{"s":"D0991","d":"2026-04-21","h":4.0,"b":268},{"s":"D0991","d":"2026-06-10","h":3.5,"b":315},{"s":"D0991","d":"2026-06-16","h":5.6667,"b":487},{"s":"D0991","d":"2026-07-01","h":4.0,"b":211},{"s":"D0991","d":"2026-07-09","h":3.5,"b":311},{"s":"D0991","d":"2026-07-09","h":4.5,"b":370},{"s":"D0991","d":"2026-08-18","h":4.0,"b":259},{"s":"D0992","d":"2025-11-21","h":7.0,"b":403},{"s":"D0992","d":"2025-12-04","h":1.5,"b":403},{"s":"D0992","d":"2026-07-03","h":6.0833,"b":383},{"s":"D1010","d":"2025-11-25","h":0.75,"b":206},{"s":"D1010","d":"2026-01-21","h":0.5,"b":206},{"s":"D1010","d":"2026-03-16","h":0.75,"b":208},{"s":"D1010","d":"2026-05-05","h":1.3333,"b":204},{"s":"D1010","d":"2026-08-08","h":0.6667,"b":207},{"s":"D1130","d":"2025-11-27","h":2.17,"b":423},{"s":"D1130","d":"2026-01-08","h":1.5,"b":412},{"s":"D1130","d":"2026-01-29","h":1.3333,"b":414},{"s":"D1130","d":"2026-03-16","h":0.4167,"b":36},{"s":"D1130","d":"2026-03-17","h":0.5,"b":162},{"s":"D1130","d":"2026-05-21","h":1.6667,"b":202},{"s":"D1130","d":"2026-06-18","h":1.1667,"b":198},{"s":"D1130","d":"2026-07-23","h":2.25,"b":613},{"s":"D1130","d":"2026-08-15","h":0.75,"b":204},{"s":"D1211","d":"2025-11-07","h":0.83,"b":139},{"s":"D1211","d":"2025-12-16","h":0.17,"b":137},{"s":"D1211","d":"2026-01-07","h":1.8333,"b":136},{"s":"D1211","d":"2026-01-21","h":3.3333,"b":564},{"s":"D1211","d":"2026-02-10","h":2.8333,"b":135},{"s":"D1211","d":"2026-05-13","h":2.0,"b":280},{"s":"D1211","d":"2026-07-25","h":0.5833,"b":135},{"s":"D1390","d":"2026-03-09","h":2.0833,"b":1761},{"s":"D1410-1","d":"2025-11-21","h":1.25,"b":399},{"s":"D1410-1","d":"2025-12-17","h":1.4167,"b":506},{"s":"D1410-1","d":"2026-02-13","h":1.3333,"b":399},{"s":"D1410-1","d":"2026-04-01","h":1.0833,"b":299},{"s":"D1410-1","d":"2026-05-04","h":2.3333,"b":397},{"s":"D1410-1","d":"2026-05-20","h":1.0833,"b":407},{"s":"D1410-1","d":"2026-07-13","h":3.5,"b":297},{"s":"D1410-1","d":"2026-07-29","h":0.9167,"b":304},{"s":"D1410-1","d":"2026-08-07","h":1.5,"b":397},{"s":"D1410-1","d":"2026-08-19","h":0.8167,"b":199},{"s":"D1410-1","d":"2026-08-26","h":0.8333,"b":299},{"s":"D1520","d":"2025-11-27","h":0.5,"b":241},{"s":"D1520","d":"2025-12-24","h":1.25,"b":1801},{"s":"D1520","d":"2026-08-03","h":1.1667,"b":1201},{"s":"D1521","d":"2025-11-20","h":1.0,"b":1803},{"s":"D1521","d":"2026-08-03","h":0.5833,"b":1201},{"s":"D1620","d":"2025-12-31","h":1.25,"b":158},{"s":"D2010","d":"2025-12-31","h":1.33,"b":1199},{"s":"D2010","d":"2026-04-23","h":2.0,"b":600},{"s":"D2010","d":"2026-05-28","h":1.0,"b":600},{"s":"D2010","d":"2026-08-19","h":0.75,"b":600},{"s":"D2021","d":"2025-11-04","h":0.33,"b":300},{"s":"D2021","d":"2025-11-22","h":0.67,"b":300},{"s":"D2021","d":"2025-11-26","h":0.83,"b":600},{"s":"D2021","d":"2026-01-02","h":1.0833,"b":600},{"s":"D2021","d":"2026-01-29","h":1.3333,"b":899},{"s":"D2021","d":"2026-02-02","h":0.4167,"b":1674},{"s":"D2021","d":"2026-02-12","h":1.0833,"b":900},{"s":"D2021","d":"2026-03-24","h":1.0,"b":300},{"s":"D2021","d":"2026-04-08","h":0.6667,"b":300},{"s":"D2021","d":"2026-04-18","h":1.0,"b":600},{"s":"D2021","d":"2026-05-20","h":1.8333,"b":900},{"s":"D2021","d":"2026-06-16","h":0.5,"b":300},{"s":"D2021","d":"2026-06-29","h":0.5833,"b":222},{"s":"D2021","d":"2026-06-30","h":0.8333,"b":378},{"s":"D2021","d":"2026-07-17","h":0.9167,"b":300},{"s":"D2021","d":"2026-07-20","h":1.75,"b":300},{"s":"D2021","d":"2026-08-01","h":0.5,"b":300},{"s":"D2021","d":"2026-08-24","h":0.8333,"b":600},{"s":"D2212","d":"2025-11-18","h":2.0,"b":600},{"s":"D2212","d":"2025-11-19","h":0.6667,"b":223},{"s":"D2212","d":"2025-12-12","h":3.0833,"b":820},{"s":"D2212","d":"2025-12-23","h":2.8333,"b":720},{"s":"D2212","d":"2025-12-24","h":0.25,"b":108},{"s":"D2212","d":"2025-12-31","h":4.0,"b":811},{"s":"D2212","d":"2026-01-15","h":4.0833,"b":410},{"s":"D2212","d":"2026-02-03","h":4.5,"b":1218},{"s":"D2212","d":"2026-02-09","h":1.5,"b":408},{"s":"D2212","d":"2026-02-23","h":1.5,"b":401},{"s":"D2212","d":"2026-03-17","h":1.3333,"b":405},{"s":"D2212","d":"2026-03-17","h":1.0,"b":120},{"s":"D2212","d":"2026-03-18","h":0.9167,"b":402},{"s":"D2212","d":"2026-04-08","h":1.3333,"b":407},{"s":"D2212","d":"2026-04-22","h":1.1667,"b":402},{"s":"D2330","d":"2025-12-29","h":0.8667,"b":32},{"s":"D2330","d":"2025-12-29","h":0.1,"b":35},{"s":"D2330","d":"2025-12-29","h":0.15,"b":35},{"s":"D2330","d":"2025-12-29","h":0.05,"b":34},{"s":"D2330","d":"2025-12-29","h":0.1167,"b":35},{"s":"D2330","d":"2025-12-29","h":0.0833,"b":35},{"s":"D2330","d":"2026-02-06","h":0.25,"b":35},{"s":"D2330","d":"2026-02-06","h":0.1167,"b":31},{"s":"D2330","d":"2026-02-06","h":0.1333,"b":34},{"s":"D2330","d":"2026-02-06","h":0.1,"b":35},{"s":"D2330","d":"2026-02-06","h":0.15,"b":37},{"s":"D2330","d":"2026-02-06","h":0.0667,"b":35},{"s":"D2330","d":"2026-04-13","h":0.15,"b":29},{"s":"D2330","d":"2026-04-13","h":0.1,"b":35},{"s":"D2330","d":"2026-04-13","h":0.15,"b":34},{"s":"D2330","d":"2026-04-13","h":0.15,"b":35},{"s":"D2330","d":"2026-04-13","h":0.1333,"b":36},{"s":"D2330","d":"2026-04-13","h":0.1333,"b":35},{"s":"D2330","d":"2026-05-27","h":1.0,"b":205},{"s":"D2330","d":"2026-07-25","h":0.8667,"b":206},{"s":"D2531","d":"2026-03-23","h":1.5,"b":209},{"s":"D2712","d":"2026-07-02","h":0.1667,"b":20},{"s":"D2712","d":"2026-07-06","h":0.25,"b":22},{"s":"D2712","d":"2026-07-15","h":1.0833,"b":553},{"s":"D2820","d":"2025-12-09","h":0.6667,"b":404},{"s":"D9950","d":"2026-04-14","h":0.8333,"b":960},{"s":"D9950","d":"2026-04-14","h":0.5,"b":1268},{"s":"Z0001","d":"2026-03-16","h":2.3333,"b":1356},{"s":"Z0001","d":"2026-03-25","h":0.8333,"b":1584},{"s":"Z0002","d":"2026-03-09","h":0.1667,"b":82},{"s":"Z1001","d":"2026-04-10","h":0.5,"b":1078},{"s":"Z1001","d":"2026-04-10","h":0.75,"b":1259},{"s":"Z3001","d":"2026-07-21","h":3.5,"b":2728},{"s":"E0120","d":"2025-11-28","h":1.0,"b":2400},{"s":"E0120","d":"2025-12-29","h":1.5833,"b":3600},{"s":"E0120","d":"2026-01-15","h":0.9167,"b":1392},{"s":"E0120","d":"2026-01-16","h":0.5833,"b":1008},{"s":"E0120","d":"2026-03-20","h":2.8333,"b":4800},{"s":"E0120","d":"2026-05-11","h":0.8333,"b":2400},{"s":"E0120","d":"2026-05-14","h":2.6667,"b":1200},{"s":"E0120","d":"2026-06-23","h":2.0,"b":3600},{"s":"E0120","d":"2026-07-22","h":2.5,"b":3600},{"s":"E0120","d":"2026-08-14","h":3.0,"b":3600},{"s":"E0121","d":"2025-11-28","h":1.0,"b":2400},{"s":"E0121","d":"2025-12-29","h":0.6667,"b":450},{"s":"E0121","d":"2026-01-06","h":1.5,"b":1800},{"s":"E0121","d":"2026-01-15","h":0.8333,"b":2400},{"s":"E0121","d":"2026-03-20","h":2.5,"b":3600},{"s":"E0121","d":"2026-05-14","h":0.6667,"b":1260},{"s":"E0121","d":"2026-05-15","h":1.3333,"b":2340},{"s":"E0121","d":"2026-06-25","h":1.0833,"b":2400},{"s":"E0121","d":"2026-07-22","h":1.5,"b":3600},{"s":"E0121","d":"2026-08-14","h":0.8333,"b":2400},{"s":"F0010","d":"2025-11-07","h":2.3333,"b":197},{"s":"F0010","d":"2025-11-27","h":3.5833,"b":305},{"s":"F0010","d":"2025-12-10","h":9.0,"b":424},{"s":"F0010","d":"2025-12-18","h":1.8333,"b":182},{"s":"F0010","d":"2026-01-06","h":2.4167,"b":145},{"s":"F0010","d":"2026-01-20","h":4.0833,"b":299},{"s":"F0010","d":"2026-01-24","h":3.5,"b":464},{"s":"F0010","d":"2026-01-24","h":1.5,"b":146},{"s":"F0010","d":"2026-03-19","h":6.5,"b":302},{"s":"F0010","d":"2026-04-16","h":2.8333,"b":183},{"s":"F0010","d":"2026-04-28","h":5.0833,"b":182},{"s":"F0010","d":"2026-05-11","h":1.5,"b":185},{"s":"F0010","d":"2026-05-21","h":2.5,"b":302},{"s":"F0010","d":"2026-06-09","h":1.3333,"b":121},{"s":"F0010","d":"2026-06-09","h":1.9167,"b":142},{"s":"F0010","d":"2026-07-01","h":1.0,"b":181},{"s":"F0010","d":"2026-08-06","h":3.5,"b":181},{"s":"F0010","d":"2026-08-14","h":2.0,"b":118},{"s":"F0010","d":"2026-08-24","h":4.0,"b":301},{"s":"F0020","d":"2025-11-07","h":0.3333,"b":146},{"s":"F0020","d":"2025-12-03","h":5.5,"b":295},{"s":"F0020","d":"2025-12-10","h":5.0,"b":145},{"s":"F0020","d":"2025-12-18","h":2.4167,"b":294},{"s":"F0020","d":"2026-01-06","h":1.0833,"b":308},{"s":"F0020","d":"2026-01-13","h":2.0,"b":152},{"s":"F0020","d":"2026-01-20","h":1.4167,"b":335},{"s":"F0020","d":"2026-02-07","h":3.0,"b":293},{"s":"F0020","d":"2026-04-16","h":1.5,"b":146},{"s":"F0020","d":"2026-04-28","h":3.4167,"b":143},{"s":"F0020","d":"2026-05-11","h":1.8333,"b":143},{"s":"F0020","d":"2026-07-01","h":1.5,"b":143},{"s":"F0020","d":"2026-08-06","h":2.25,"b":148},{"s":"F0020","d":"2026-08-14","h":4.6667,"b":222}]}/*PAYLOAD:END*/;
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const skuMap = Object.fromEntries(D.skus.map(s => [s.sku, s]));
 
-const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const fmt = n => n.toLocaleString('en-US');
-
-function hbar(mount, tipEl, rows, opts){
-  const el = document.getElementById(mount), tip = document.getElementById(tipEl);
-  const W = 880, rowH = opts.rowH || 30, padT = 26, padB = 34,
-        labW = 74, valW = opts.valW || 86,
-        plotW = W - labW - valW - 8,
-        H = padT + rows.length * rowH + padB;
-  const max = opts.max || Math.max(...rows.map(r => r.v));
-  const x = v => (v / max) * plotW;
-  const ink = css('--ink-2'), muted = css('--ink-3'), rule = css('--rule'), col = css(opts.color);
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.aria}">`;
-
-  // gridlines
-  const ticks = opts.ticks;
-  ticks.forEach(t => {
-    const px = labW + x(t);
-    s += `<line x1="${px}" y1="${padT - 8}" x2="${px}" y2="${padT + rows.length*rowH}" stroke="${rule}" stroke-width="1"/>`;
-    s += `<text x="${px}" y="${padT + rows.length*rowH + 20}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${opts.tickFmt(t)}</text>`;
-  });
-  s += `<text x="${labW}" y="${padT + rows.length*rowH + 20}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="middle">0</text>`;
-  s += `<line x1="${labW}" y1="${padT-8}" x2="${labW}" y2="${padT + rows.length*rowH}" stroke="${css('--rule-2')}" stroke-width="1"/>`;
-
-  rows.forEach((r, i) => {
-    const y = padT + i * rowH, bh = rowH - 12, w = Math.max(x(r.v), 2);
-    s += `<text x="${labW - 12}" y="${y + bh/2 + 4}" fill="${ink}" font-size="12" font-weight="600" font-family="'IBM Plex Mono',monospace" text-anchor="end">${r.k}</text>`;
-    s += `<rect class="bar" data-i="${i}" x="${labW}" y="${y}" width="${w}" height="${bh}" rx="3" fill="${col}"/>`;
-    s += `<text x="${labW + w + 9}" y="${y + bh/2 + 4}" fill="${ink}" font-size="11.5" font-family="'IBM Plex Mono',monospace">${r.lab}</text>`;
-    s += `<rect class="hit" data-i="${i}" x="0" y="${y - 6}" width="${W}" height="${rowH}" fill="transparent" style="cursor:crosshair"/>`;
-  });
-  s += `</svg>`;
-  el.innerHTML = s;
-
-  el.querySelectorAll('.hit').forEach(h => {
+function tipOn(el, tip, hits, textOf) {
+  hits.forEach(h => {
     h.addEventListener('mousemove', e => {
-      const r = rows[+h.dataset.i], b = el.getBoundingClientRect();
-      tip.innerHTML = r.tip;
-      tip.style.left = (e.clientX - b.left) + 'px';
-      tip.style.top = (e.clientY - b.top) + 'px';
+      const box = el.getBoundingClientRect();
+      tip.innerHTML = textOf(h);
+      tip.style.left = (e.clientX - box.left) + 'px';
+      tip.style.top = (e.clientY - box.top) + 'px';
       tip.style.opacity = 1;
     });
     h.addEventListener('mouseleave', () => tip.style.opacity = 0);
   });
 }
 
-/* --- chart 1 : top10 bottles --- */
-hbar('c1', 't1', D.topB.map(p => ({
+function hbar(mountId, tipId, rows, opts) {
+  const el = $(mountId), tip = $(tipId);
+  const W = 880, rowH = opts.rowH, padT = 26, padB = 34, labW = 74;
+  const plotW = W - labW - opts.valW - 8, H = padT + rows.length * rowH + padB;
+  const max = opts.max, x = v => (v / max) * plotW;
+  const col = cssv(opts.color), muted = cssv('--ink-3'), ink = cssv('--ink-2'), rule = cssv('--rule');
+  const base = padT + rows.length * rowH;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.aria}">`;
+  opts.ticks.forEach(t => {
+    const px = labW + x(t);
+    s += `<line x1="${px}" y1="${padT - 8}" x2="${px}" y2="${base}" stroke="${rule}"/>`;
+    s += `<text x="${px}" y="${base + 20}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${opts.tickFmt(t)}</text>`;
+  });
+  s += `<text x="${labW}" y="${base + 20}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="middle">0</text>`;
+  s += `<line x1="${labW}" y1="${padT - 8}" x2="${labW}" y2="${base}" stroke="${cssv('--rule-2')}"/>`;
+  rows.forEach((r, i) => {
+    const y = padT + i * rowH, bh = rowH - 12, w = Math.max(x(r.v), 2);
+    s += `<text x="${labW - 11}" y="${y + bh / 2 + 4}" fill="${ink}" font-size="12" font-weight="600" font-family="'IBM Plex Mono',monospace" text-anchor="end">${r.k}</text>`;
+    s += `<rect x="${labW}" y="${y}" width="${w}" height="${bh}" rx="3" fill="${col}"/>`;
+    s += `<text x="${labW + w + 9}" y="${y + bh / 2 + 4}" fill="${ink}" font-size="11.5" font-family="'IBM Plex Mono',monospace">${r.lab}</text>`;
+    s += `<rect class="hit" data-i="${i}" x="0" y="${y - 6}" width="${W}" height="${rowH}" fill="transparent" style="cursor:crosshair"/>`;
+  });
+  el.innerHTML = s + '</svg>';
+  tipOn(el, tip, [...el.querySelectorAll('.hit')], h => rows[+h.dataset.i].tip);
+}
+
+const topB = D.skus.slice(0, 10);
+hbar('c1', 't1', topB.map(p => ({
   k: p.sku, v: p.b, lab: fmt(p.b),
   tip: `<b>${p.sku}</b>　${fmt(p.b)} 瓶<br>工時 <b>${p.h}</b> h　天數 <b>${p.d}</b>　批次 <b>${p.n}</b><br>產能 <b>${fmt(p.rate)}</b> 瓶/工時`
-})), {
-  color: '--accent', rowH: 31, valW: 96, max: 300000,
-  ticks: [100000, 200000, 300000], tickFmt: t => (t/10000) + '萬',
-  aria: '前十大包裝量品項長條圖'
-});
+})), { color: '--accent', rowH: 31, valW: 96, max: 300000,
+  ticks: [100000, 200000, 300000], tickFmt: t => (t / 10000) + '萬', aria: '前十大包裝量品項' });
 
-/* --- chart 2 : savings --- */
-hbar('c2', 't2', D.gap.map(p => ({
+const gap = D.skus.filter(s => D.focus.includes(s.sku)).sort((a, b) => b.save - a.save);
+hbar('c2', 't2', gap.map(p => ({
   k: p.sku, v: p.save, lab: p.save.toFixed(1) + ' h',
-  tip: `<b>${p.sku}</b>　可省 <b>${p.save.toFixed(1)}</b> 小時<br>目前 <b>${fmt(p.rate)}</b> → P75 目標 <b>${fmt(p.p75)}</b> 瓶/工時<br>批次變異 CV <b>${p.cv}%</b>　批次數 <b>${p.n}</b>`
-})), {
-  color: '--accent', rowH: 30, valW: 78, max: 80,
-  ticks: [20, 40, 60, 80], tickFmt: t => t + 'h',
-  aria: '重點品項可節省工時長條圖'
-});
+  tip: `<b>${p.sku}</b>　可省 <b>${p.save.toFixed(1)}</b> 小時<br>現況 <b>${fmt(p.rate)}</b> → P75 目標 <b>${fmt(p.p75)}</b> 瓶/工時<br>CV <b>${p.cv}%</b>　${p.n} 批 / ${p.d} 天`
+})), { color: '--accent', rowH: 30, valW: 78, max: 80,
+  ticks: [20, 40, 60, 80], tickFmt: t => t + 'h', aria: '重點品項可節省工時' });
 
-/* --- chart 3 : monthly trend --- */
-(function(){
-  const el = document.getElementById('c3'), tip = document.getElementById('t3');
-  const m = D.months, W = 880, H = 314, L = 54, R = 22, T = 34, B = 46;
+function lineChart(mountId, tipId, pts, opts) {
+  const el = $(mountId), tip = $(tipId);
+  const W = 560, H = 300, L = 52, R = 18, T = 40, B = 44;
   const pw = W - L - R, ph = H - T - B;
-  const yMax = 1000, yMin = 600;
-  const X = i => L + (i / (m.length - 1)) * pw;
-  const Y = v => T + ph - ((v - yMin) / (yMax - yMin)) * ph;
-  const acc = css('--accent'), sig = css('--signal'), muted = css('--ink-3'),
-        rule = css('--rule'), surf = css('--surface'), ink = css('--ink-2');
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="月平均產能趨勢折線圖">`;
-  [600,700,800,900,1000].forEach(v => {
-    s += `<line x1="${L}" y1="${Y(v)}" x2="${W-R}" y2="${Y(v)}" stroke="${rule}" stroke-width="1"/>`;
-    s += `<text x="${L-11}" y="${Y(v)+4}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="end">${v}</text>`;
+  const X = i => L + (i / (pts.length - 1)) * pw;
+  const Y = v => T + ph - ((v - opts.min) / (opts.max - opts.min)) * ph;
+  const acc = cssv('--accent'), sig = cssv('--signal'), muted = cssv('--ink-3'),
+        rule = cssv('--rule'), surf = cssv('--surface'), ink = cssv('--ink-2');
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.aria}">`;
+  opts.ticks.forEach(v => {
+    s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${rule}"/>`;
+    s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="end">${fmt(v)}</text>`;
   });
-  s += `<text x="${L-11}" y="${T-16}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">瓶/工時</text>`;
-  // baseline
-  s += `<line x1="${L}" y1="${Y(947)}" x2="${W-R}" y2="${Y(947)}" stroke="${sig}" stroke-width="2" stroke-dasharray="6 5"/>`;
-  s += `<text x="${W-R}" y="${Y(947)-9}" fill="${sig}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="end">基準 947</text>`;
-  // area + line
-  let path = m.map((d,i) => `${i?'L':'M'}${X(i)},${Y(d.rate)}`).join(' ');
-  s += `<path d="${path} L${X(m.length-1)},${T+ph} L${L},${T+ph} Z" fill="${acc}" opacity=".09"/>`;
+  s += `<text x="${L - 10}" y="${T - 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${opts.unit}</text>`;
+  s += `<line x1="${L}" y1="${Y(opts.refLine)}" x2="${W - R}" y2="${Y(opts.refLine)}" stroke="${sig}" stroke-width="2" stroke-dasharray="6 5"/>`;
+  s += `<text x="${W - R}" y="${Y(opts.refLine) - 8}" fill="${sig}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="end">${opts.refLabel}</text>`;
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${X(i)},${Y(p.v)}`).join(' ');
+  s += `<path d="${path} L${X(pts.length - 1)},${T + ph} L${L},${T + ph} Z" fill="${acc}" opacity=".09"/>`;
   s += `<path d="${path}" fill="none" stroke="${acc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-  m.forEach((d,i) => {
-    const last = i === m.length-1;
-    s += `<circle cx="${X(i)}" cy="${Y(d.rate)}" r="${last?6:4.5}" fill="${acc}" stroke="${surf}" stroke-width="2"/>`;
-    s += `<text x="${X(i)}" y="${T+ph+22}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.m.slice(5)}</text>`;
-    s += `<rect class="hit" data-i="${i}" x="${X(i)-pw/(m.length*2)}" y="${T}" width="${pw/m.length}" height="${ph}" fill="transparent" style="cursor:crosshair"/>`;
+  pts.forEach((p, i) => {
+    const last = i === pts.length - 1;
+    s += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="${last ? 5.5 : 4}" fill="${acc}" stroke="${surf}" stroke-width="2"/>`;
+    s += `<text x="${X(i)}" y="${T + ph + 21}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${p.k}</text>`;
+    s += `<rect class="hit" data-i="${i}" x="${X(i) - pw / (pts.length * 2)}" y="${T}" width="${pw / pts.length}" height="${ph}" fill="transparent" style="cursor:crosshair"/>`;
   });
-  // endpoint labels
-  s += `<text x="${X(0)+10}" y="${Y(947)+22}" fill="${ink}" font-size="11.5" font-weight="600" font-family="'IBM Plex Mono',monospace">947</text>`;
-  s += `<text x="${X(m.length-1)}" y="${Y(771)-14}" fill="${ink}" font-size="11.5" font-weight="600" font-family="'IBM Plex Mono',monospace" text-anchor="end">771</text>`;
-  s += `<text x="${X(4)}" y="${Y(695)+20}" fill="${muted}" font-size="11" text-anchor="middle">農曆年</text>`;
-  s += `</svg>`;
-  el.innerHTML = s;
-  el.querySelectorAll('.hit').forEach(h => {
-    h.addEventListener('mousemove', e => {
-      const d = m[+h.dataset.i], b = el.getBoundingClientRect();
-      tip.innerHTML = `<b>${d.m}</b><br>產能 <b>${fmt(d.rate)}</b> 瓶/工時<br>包裝 <b>${fmt(d.b)}</b> 瓶　工時 <b>${d.h}</b> h`;
-      tip.style.left = (e.clientX - b.left) + 'px';
-      tip.style.top = (e.clientY - b.top) + 'px';
-      tip.style.opacity = 1;
-    });
-    h.addEventListener('mouseleave', () => tip.style.opacity = 0);
+  [0, pts.length - 1].forEach(i => {
+    s += `<text x="${X(i)}" y="${Y(pts[i].v) - 13}" fill="${ink}" font-size="11.5" font-weight="600" font-family="'IBM Plex Mono',monospace" text-anchor="${i ? 'end' : 'start'}">${fmt(pts[i].v)}</text>`;
+  });
+  el.innerHTML = s + '</svg>';
+  tipOn(el, tip, [...el.querySelectorAll('.hit')], h => pts[+h.dataset.i].tip);
+}
+
+lineChart('c3', 't3', D.months.map(d => ({
+  k: d.m.slice(5), v: d.rate,
+  tip: `<b>${d.m}</b><br>產能 <b>${fmt(d.rate)}</b> 瓶/工時<br>${fmt(d.b)} 瓶 / ${d.h} h`
+})), { min: 600, max: 1000, ticks: [600, 700, 800, 900, 1000], unit: '瓶/工時',
+  refLine: D.months[0].rate, refLabel: `期初 ${fmt(D.months[0].rate)}`, aria: '每月實際產能' });
+
+(function indexChart() {
+  const el = $('c4'), tip = $('t4'), m = D.months;
+  const W = 560, H = 300, L = 52, R = 18, T = 40, B = 44;
+  const pw = W - L - R, ph = H - T - B, lo = 85, hi = 115, bw = pw / m.length;
+  const Y = v => T + ph - ((v - lo) / (hi - lo)) * ph;
+  const acc = cssv('--accent'), sig = cssv('--signal'), muted = cssv('--ink-3'),
+        rule = cssv('--rule'), ink = cssv('--ink-2');
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="每月效率指數">`;
+  [85, 90, 95, 100, 105, 110, 115].forEach(v => {
+    s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${v === 100 ? cssv('--rule-2') : rule}" stroke-width="${v === 100 ? 1.5 : 1}"/>`;
+    s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="11" font-family="'IBM Plex Mono',monospace" text-anchor="end">${v}</text>`;
+  });
+  s += `<text x="${L - 10}" y="${T - 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">指數</text>`;
+  m.forEach((d, i) => {
+    const x = L + i * bw + 5, w = bw - 12, y0 = Y(100), y1 = Y(d.index);
+    s += `<rect x="${x}" y="${Math.min(y0, y1)}" width="${w}" height="${Math.max(Math.abs(y1 - y0), 2)}" rx="2" fill="${d.index >= 100 ? acc : sig}"/>`;
+    s += `<text x="${x + w / 2}" y="${d.index >= 100 ? y1 - 7 : y1 + 15}" fill="${ink}" font-size="10.5" font-weight="600" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.index}</text>`;
+    s += `<text x="${x + w / 2}" y="${T + ph + 21}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.m.slice(5)}</text>`;
+    s += `<rect class="hit" data-i="${i}" x="${L + i * bw}" y="${T}" width="${bw}" height="${ph}" fill="transparent" style="cursor:crosshair"/>`;
+  });
+  el.innerHTML = s + '</svg>';
+  tipOn(el, tip, [...el.querySelectorAll('.hit')], h => {
+    const d = m[+h.dataset.i];
+    return `<b>${d.m}</b>　指數 <b>${d.index}</b><br>實際 <b>${fmt(d.rate)}</b> vs 組合預期 <b>${fmt(d.expected)}</b> 瓶/工時`;
   });
 })();
 
-/* --- tables --- */
-document.getElementById('tb1').innerHTML = D.topB.map((p,i) => `<tr>
-  <td class="n" style="color:var(--ink-3)">${i+1}</td><td class="sku">${p.sku}</td>
+$('tb1').innerHTML = topB.map((p, i) => `<tr>
+  <td class="n" style="color:var(--ink-3)">${i + 1}</td><td class="sku">${p.sku}</td>
   <td class="n">${fmt(p.b)}</td><td class="n">${p.h.toFixed(1)}</td><td class="n">${p.d}</td>
-  <td class="n">${p.n}</td><td class="n">${fmt(p.rate)}</td>
-  <td class="n">${(p.b/2132614*100).toFixed(1)}%</td></tr>`).join('');
+  <td class="n">${p.n}</td><td class="n">${fmt(p.rate)}</td><td class="n">${p.hPer1k.toFixed(2)}</td>
+  <td class="n">${p.bShare.toFixed(1)}%</td></tr>`).join('')
+  + `<tr class="tfoot"><td colspan="2">前 10 支小計</td>
+     <td class="n">${fmt(topB.reduce((a, p) => a + p.b, 0))}</td>
+     <td class="n">${topB.reduce((a, p) => a + p.h, 0).toFixed(1)}</td>
+     <td class="n">${topB.reduce((a, p) => a + p.d, 0)}</td>
+     <td class="n">${topB.reduce((a, p) => a + p.n, 0)}</td>
+     <td class="n">${fmt(topB.reduce((a, p) => a + p.b, 0) / topB.reduce((a, p) => a + p.h, 0))}</td>
+     <td class="n">—</td>
+     <td class="n">${topB.reduce((a, p) => a + p.bShare, 0).toFixed(1)}%</td></tr>`;
 
-document.getElementById('tb2').innerHTML = D.gap.map(p => `<tr>
+$('tb2').innerHTML = gap.map(p => `<tr>
   <td class="sku">${p.sku}</td><td class="n">${p.n}</td><td class="n">${fmt(p.rate)}</td>
   <td class="n">${fmt(p.med)}</td><td class="n" style="color:var(--accent);font-weight:600">${fmt(p.p75)}</td>
-  <td class="n" style="color:var(--ink-3)">${fmt(p.best)}</td>
-  <td class="n">${p.cv}%</td><td class="n">${p.save.toFixed(1)} h</td></tr>`).join('');
+  <td class="n" style="color:var(--ink-3)">${fmt(p.best)}</td><td class="n">${p.cv}%</td>
+  <td class="n">${p.save.toFixed(1)} h</td></tr>`).join('');
+
+$('solo8').innerHTML = D.meta.solo8.map(x =>
+  `${x.date}　<b>${x.sku}</b>　${x.h.toFixed(2)} h`).join('<br>');
 </script>
