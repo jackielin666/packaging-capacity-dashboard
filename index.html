@@ -123,10 +123,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .bar label{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;
   letter-spacing:.06em;text-transform:uppercase}
-select,input[type=number]{font-family:"IBM Plex Mono",monospace;font-size:13.5px;padding:7px 11px;
+select,input[type=number],input[type=search]{font-family:"IBM Plex Mono",monospace;font-size:13.5px;padding:7px 11px;
   border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);color:var(--ink);
   min-width:120px}
 select:focus,input:focus,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#skuSearch{min-width:190px}
+#skuSearch::placeholder{color:var(--ink-3);font-size:12.5px}
 .seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:3px;overflow:hidden}
 .seg button{font-family:"Noto Sans TC",sans-serif;font-size:13px;padding:7px 15px;border:0;
   background:var(--surface);color:var(--ink-2);cursor:pointer}
@@ -274,10 +276,13 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   <p class="sec-sub">從上面點一支進來，或直接選。網址會帶 <span class="mono">?sku=</span>，可以單獨把某一支的連結貼給該線負責人。</p>
   <div class="body">
     <div class="bar">
-      <label>品項</label><select id="selMain"></select>
+      <label for="skuSearch">搜尋</label>
+      <input type="search" id="skuSearch" placeholder="輸入品號，例如 D03" autocomplete="off">
+      <label for="selMain">品項</label><select id="selMain"></select>
       <label>比較 A</label><select id="selCmpA"></select>
       <label>比較 B</label><select id="selCmpB"></select>
     </div>
+    <div class="fig-n" id="searchNote" style="margin:-8px 0 16px"></div>
     <div class="skukpi" id="skuKpi"></div>
 
     <div class="fig">
@@ -559,7 +564,9 @@ function guessStartYear(today = new Date()) {
 /* ══════════════ 3. 指標與規則 ══════════════ */
 
 const SHORT_BATCH_H = 1.0;   // 零星批次門檻
-const OUT_HI = 2.5, OUT_LO = 0.4;   // 離群批次：超過自身中位數的倍數
+// 離群批次：以該品項的平均產能（總瓶數÷總工時）為基準。
+// 用平均而非中位數，是因為畫面上顯示、圖上畫線的就是平均產能 —— 門檻可以被使用者驗證。
+const OUT_HI = 2.5, OUT_LO = 0.7;
 const CV_WATCH = 40;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
 const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
 const DECLINE_MONTHS = 3;
@@ -602,18 +609,19 @@ function analyse(batches) {
     const days = new Set(list.map(x => x.d)).size;
     const short = list.filter(x => x.h < SHORT_BATCH_H);
 
-    // 離群批次：跟自己的中位數比
+    // 離群批次：跟這支產品自己的平均產能比
     const outliers = list
-      .filter(x => { const r = x.b / x.h; return r > med * OUT_HI || r < med * OUT_LO; })
+      .filter(x => { const r = x.b / x.h; return r > rate * OUT_HI || r < rate * OUT_LO; })
       .map(x => ({ ...x, rate: x.b / x.h, recent: recent3.has(x.m) }))
-      .sort((a, b) => a.d < b.d ? 1 : -1);
+      .sort((a, b) => a.d < b.d ? 1 : -1);   // 日期新→舊
 
     // 落後最多的批次 —— 給現場去查那幾天發生什麼事
     const laggards = list
       .map(x => ({ ...x, rate: x.b / x.h, gap: 1 - (x.b / x.h) / p75 }))
       .filter(x => x.gap > 0)
       .sort((a, b) => b.gap - a.gap)
-      .slice(0, 5);
+      .slice(0, 5)
+      .sort((a, b) => a.d < b.d ? 1 : -1);   // 取差距最大的 5 批後，改依日期排序
 
     // 該品項自己的月產能
     const byMonth = new Map();
@@ -743,6 +751,8 @@ function buildAlerts(skus, meta) {
 global.PackingEngine = {
   supported, readXlsx, toBatches, analyse, guessStartYear,
   thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES },
+  isOutlier: (batch, sku) => { const r = batch.b / batch.h;
+    return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
 };
 })(window);
 </script>
@@ -777,14 +787,22 @@ const niceStep = span => {
   const e = Math.pow(10, Math.floor(Math.log10(span / 4)));
   return ([1, 2, 2.5, 5, 10].find(r => r * e >= span / 4) || 10) * e;
 };
-const isOutlier = (b, med) => { const r = b.b / b.h; return r > med * 2.5 || r < med * 0.4; };
+const isOutlier = (batch, sku) => E.isOutlier(batch, sku);
+
+/** 在密集的資料點上寫字：先畫一層與底色同色的粗描邊，字才看得見 */
+function label(x, y, text, color, anchor = 'start') {
+  const common = `x="${x}" y="${y}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="${anchor}"`;
+  return `<text ${common} stroke="${cssv('--surface')}" stroke-width="3.5" stroke-linejoin="round" fill="none">${text}</text>`
+       + `<text ${common} fill="${color}">${text}</text>`;
+}
 const monthLabel = m => +m.slice(5) + '月';
 
 /* ─────────── 02a 批次落點圖（X=時間、Y=產能） ─────────── */
 
 function dotChart(skus) {
   const el = $('cDots'), tip = $('tDots');
-  const W = 900, H = 400, L = 64, R = 24, T = 26, B = 50;
+  // 右邊留白給平均線與門檻線的標籤，不讓文字壓在資料點上
+  const W = 900, H = 400, L = 64, R = 132, T = 26, B = 50;
   const pw = W - L - R, ph = H - T - B;
   const pts = skus.flatMap((s, si) =>
     state.R.batches.filter(b => b.s === s.sku).map(b => ({ ...b, si, rate: b.b / b.h })));
@@ -815,16 +833,21 @@ function dotChart(skus) {
     s += `<text x="${x}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.getUTCMonth() + 1}月</text>`;
   });
 
-  // 各品項的平均產能線
+  // 各品項的平均產能線，以及「低於平均 x 倍就算離群」的門檻線
+  const lo = E.thresholds.OUT_LO;
   skus.forEach((sk, si) => {
     const col = cssv(SERIES[si]);
+    const sig = cssv('--signal');
+    // 離群門檻線 —— 讓現場一眼看出哪些點掉到線下
+    s += `<line x1="${L}" y1="${Y(sk.rate * lo)}" x2="${W - R}" y2="${Y(sk.rate * lo)}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
+    s += label(W - R + 7, Y(sk.rate * lo) + 4, `離群門檻 ${fmt(sk.rate * lo)}`, sig);
     s += `<line x1="${L}" y1="${Y(sk.rate)}" x2="${W - R}" y2="${Y(sk.rate)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".9"/>`;
-    s += `<text x="${L + 4}" y="${Y(sk.rate) - 7}" fill="${col}" font-size="10.5" font-family="'IBM Plex Mono',monospace">${sk.sku} 平均 ${fmt(sk.rate)}</text>`;
+    s += label(W - R + 7, Y(sk.rate) + 4, `平均 ${fmt(sk.rate)}`, col);
   });
 
   pts.forEach((p, i) => {
     const col = cssv(SERIES[p.si]);
-    const out = isOutlier(p, skus[p.si].med);
+    const out = isOutlier(p, skus[p.si]);
     s += `<circle class="hit" data-i="${i}" cx="${X(p.d)}" cy="${Y(p.rate)}" r="${out ? 6.5 : 4.5}"
       fill="${out ? cssv('--signal') : col}" stroke="${cssv('--surface')}" stroke-width="1.5"
       style="cursor:crosshair"/>`;
@@ -832,14 +855,14 @@ function dotChart(skus) {
   el.innerHTML = s + '</svg>';
   tipOn(el, tip, [...el.querySelectorAll('.hit')], h => {
     const p = pts[+h.dataset.i], sk = skus[p.si];
-    const out = isOutlier(p, sk.med);
+    const out = isOutlier(p, sk);
     return `<b>${p.s}</b>　${p.d}<br>${p.h.toFixed(2)} h　${fmt(p.b)} 瓶<br>
       產能 <b>${fmt(p.rate)}</b>（這支平常 ${fmt(sk.med)}）
       ${out ? '<br><span style="opacity:.8">離群批次 — 建議查證</span>' : ''}`;
   });
   $('dotLegend').innerHTML = skus.map((sk, i) =>
     `<span><i style="background:${cssv(SERIES[i])}"></i>${sk.sku}　${sk.n} 批</span>`).join('')
-    + `<span><i style="background:var(--signal)"></i>離群批次（比平常快 2.5 倍或慢到剩四成）</span>`;
+    + `<span><i style="background:var(--signal)"></i>離群批次（低於平均 ${Math.round(E.thresholds.OUT_LO * 100)}% 或高於 ${E.thresholds.OUT_HI} 倍）</span>`;
 }
 
 /* ─────────── 02b 工時與產出散佈圖 ─────────── */
@@ -860,9 +883,11 @@ function scatter(skus) {
     s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${rule}"/>`;
     s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${fmt(v)}</text>`;
   }
-  const sx = niceStep(maxH);
+  // 每 1 小時一格；工時跨度大時自動放寬，避免刻度擠成一團
+  const sx = maxH <= 14 ? 1 : Math.ceil(maxH / 12);
   for (let v = 0; v <= maxH; v += sx) {
-    s += `<text x="${X(v)}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${v.toFixed(sx < 1 ? 1 : 0)}</text>`;
+    s += `<line x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${T + ph}" stroke="${rule}" stroke-dasharray="2 4"/>`;
+    s += `<text x="${X(v)}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${v}</text>`;
   }
   s += `<line x1="${L}" y1="${T + ph}" x2="${W - R}" y2="${T + ph}" stroke="${cssv('--rule-2')}"/>`;
   s += `<text x="${L - 10}" y="${T - 8}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">瓶數</text>`;
@@ -872,11 +897,11 @@ function scatter(skus) {
     const col = cssv(SERIES[si]);
     const xEnd = Math.min(maxH, maxB / sk.p75), yEnd = sk.p75 * xEnd;
     s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(xEnd)}" y2="${Y(yEnd)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".85"/>`;
-    s += `<text x="${X(xEnd) - 4}" y="${Y(yEnd) - 8}" fill="${col}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${sk.sku} 合理目標 ${fmt(sk.p75)}</text>`;
+    s += label(X(xEnd) - 4, Y(yEnd) - 8, `${sk.sku} 合理目標 ${fmt(sk.p75)}`, col, 'end');
   });
   pts.forEach((p, i) => {
     const col = cssv(SERIES[p.si]);
-    const out = isOutlier(p, skus[p.si].med);
+    const out = isOutlier(p, skus[p.si]);
     s += `<circle class="hit" data-i="${i}" cx="${X(p.h)}" cy="${Y(p.b)}" r="${out ? 6.5 : 4.5}"
       fill="${out ? cssv('--signal') : col}" stroke="${cssv('--surface')}" stroke-width="1.5"
       style="cursor:crosshair"/>`;
@@ -1006,17 +1031,18 @@ document.addEventListener('click', ev => {
 
 /* ── 01 品項總覽 ── */
 let tab = 'freq', showAll = false;
+const TOP_N = 10;   // 總覽預設顯示的列數
 
 const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太少' };
 
 function renderOverview() {
   const skus = [...state.R.skus].sort((a, b) =>
     tab === 'freq' ? b.d - a.d || b.b - a.b : b.b - a.b);
-  const list = showAll ? skus : skus.slice(0, 20);
+  const list = showAll ? skus : skus.slice(0, TOP_N);
   $('tabNote').textContent = tab === 'freq'
     ? `依生產天數排序 —— 天天在做的排前面`
     : `依包裝量排序 —— 產量主力排前面`;
-  $('toggleAll').textContent = showAll ? '只看前 20 支' : `顯示全部 ${skus.length} 支`;
+  $('toggleAll').textContent = showAll ? `只看前 ${TOP_N} 支` : `顯示全部 ${skus.length} 支`;
 
   $('tbOverview').innerHTML = list.map(s => {
     const d = s.vsUsual;
@@ -1056,19 +1082,45 @@ function syncTabs() {
 
 /* ── 02 單一品項 ── */
 
+function optionFor(sku) {
+  const k = state.R.skus.find(x => x.sku === sku);
+  return `<option value="${sku}">${sku}　${fmt(k.b)} 瓶 / ${k.d} 天</option>`;
+}
+
 function fillSelects() {
   const skus = state.R.skus;
   const byFreq = [...skus].sort((a, b) => b.d - a.d).slice(0, 15).map(s => s.sku);
-  const opt = s => {
-    const k = state.R.skus.find(x => x.sku === s);
-    return `<option value="${s}">${s}　${fmt(k.b)} 瓶 / ${k.d} 天</option>`;
-  };
   const groups = withNone =>
     (withNone ? '<option value="">— 不比較 —</option>' : '')
-    + `<optgroup label="經常生產">${byFreq.map(opt).join('')}</optgroup>`
-    + `<optgroup label="其他品項">${skus.filter(s => !byFreq.includes(s.sku)).map(s => opt(s.sku)).join('')}</optgroup>`;
+    + `<optgroup label="經常生產">${byFreq.map(optionFor).join('')}</optgroup>`
+    + `<optgroup label="其他品項">${skus.filter(s => !byFreq.includes(s.sku)).map(s => optionFor(s.sku)).join('')}</optgroup>`;
   ['selMain', 'selCalc'].forEach(id => $(id).innerHTML = groups(false));
   ['selCmpA', 'selCmpB'].forEach(id => $(id).innerHTML = groups(true));
+}
+
+/** 搜尋框：輸入品號即時縮小「品項」下拉的範圍；只剩一支就直接切過去 */
+function applySearch() {
+  const q = $('skuSearch').value.trim().toUpperCase();
+  const current = $('selMain').value;
+  const note = $('searchNote');
+
+  if (!q) {
+    fillSelects();
+    $('selMain').value = current; $('selCalc').value = current;
+    note.textContent = '';
+    return;
+  }
+  const hits = state.R.skus.filter(s => s.sku.toUpperCase().includes(q));
+  if (!hits.length) {
+    note.innerHTML = `找不到品號含「<b>${q}</b>」的品項，下拉維持原本的全部 ${state.R.skus.length} 支。`;
+    return;
+  }
+  $('selMain').innerHTML = hits.map(s => optionFor(s.sku)).join('');
+  const keep = hits.some(s => s.sku === current) ? current : hits[0].sku;
+  $('selMain').value = keep;
+  note.innerHTML = `符合「<b>${q}</b>」的有 <b>${hits.length}</b> 支`
+    + (hits.length === 1 ? '，已直接切換。' : '，請從「品項」下拉選擇。');
+  if (keep !== current) goto(keep);
 }
 
 function renderSku(sku) {
@@ -1097,12 +1149,16 @@ function renderSkuNotes(s) {
   const t = E.thresholds;
 
   if (s.outliers.length) {
+    const shown = s.outliers.slice(0, 8), more = s.outliers.length - shown.length;
+    const loLimit = Math.round(s.rate * E.thresholds.OUT_LO);
     cards.push(`<div class="note alert"><h4>離群批次 ${s.outliers.length} 批 — 建議請製造單位說明</h4>
-      <p>這幾批的產能跟這支產品平常（${fmt(s.med)} 瓶/工時）差太多，
-      不是資料有誤就是那天發生了特別的事。</p>
-      <ul>${s.outliers.slice(0, 6).map(o =>
+      <p>產能低於 <b>${fmt(loLimit)}</b> 瓶/工時（＝這支產品平均 ${fmt(s.rate)} 的
+      ${Math.round(E.thresholds.OUT_LO * 100)}%）或高於平均 ${E.thresholds.OUT_HI} 倍的批次。
+      不是資料有誤，就是那天發生了特別的事。依日期新到舊排列。</p>
+      <ul>${shown.map(o =>
         `<li><span>${o.d}${o.recent ? '　近期' : ''}</span>
-         <span>${fmt(o.rate)} 瓶/工時（${o.h.toFixed(2)}h・${fmt(o.b)}瓶）</span></li>`).join('')}</ul></div>`);
+         <span>${fmt(o.rate)} 瓶/工時（${o.h.toFixed(2)}h・${fmt(o.b)}瓶）</span></li>`).join('')}</ul>
+      ${more ? `<p style="margin:8px 0 0;font-size:12px">…另有 ${more} 批，圖上以紅點標示</p>` : ''}</div>`);
   }
   if (s.declining) {
     cards.push(`<div class="note alert"><h4>連續 3 個月比自己平常慢</h4>
@@ -1112,10 +1168,13 @@ function renderSkuNotes(s) {
   }
   if (s.laggards.length) {
     cards.push(`<div class="note watch"><h4>落後最多的批次 — 從這幾天查起</h4>
-      <p>離這支產品的合理目標（${fmt(s.p75)} 瓶/工時）差距最大的幾批。
+      <p>離這支產品的合理目標（${fmt(s.p75)} 瓶/工時）差距最大的 5 批，依日期新到舊排列。
       查查看那幾天有沒有共同點：批量、班別、機台。</p>
-      <ul>${s.laggards.map(l =>
-        `<li><span>${l.d}</span><span>${fmt(l.rate)} 瓶/工時　慢 ${Math.round(l.gap * 100)}%</span></li>`).join('')}</ul></div>`);
+      <ul>${s.laggards.map(l => {
+        const also = isOutlier(l, s) ? '　<span style="color:var(--signal)">離群</span>' : '';
+        return `<li><span>${l.d}${also}</span>
+          <span>${fmt(l.rate)} 瓶/工時　慢 ${Math.round(l.gap * 100)}%</span></li>`;
+      }).join('')}</ul></div>`);
   }
   if (s.cv > t.CV_WATCH) {
     cards.push(`<div class="note watch"><h4>批次之間落差偏大（${s.cv}%）</h4>
@@ -1197,6 +1256,7 @@ function render() {
   $('footMeta').textContent =
     `${state.source} · ${m.records} 筆 / ${m.skuCount} 品項 · ${m.period[0]} – ${m.period[1]}`;
   renderKpis(); syncTabs(); fillSelects(); renderAlerts(); relChart();
+  $('skuSearch').value = ''; $('searchNote').textContent = '';
 
   const wanted = new URLSearchParams(location.search).get('sku');
   const initial = state.R.skus.some(s => s.sku === wanted) ? wanted
@@ -1281,6 +1341,7 @@ $('startYear').onchange = () => {
     load(E.toBatches(rawSheets, state.year).batches, state.source);
   } catch (err) { showError(err.message); }
 };
+$('skuSearch').oninput = applySearch;
 $('selMain').onchange = () => goto($('selMain').value);
 $('selCmpA').onchange = $('selCmpB').onchange = () => renderSku($('selMain').value);
 $('selCalc').onchange = () => {

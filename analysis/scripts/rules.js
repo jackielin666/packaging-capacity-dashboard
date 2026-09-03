@@ -211,7 +211,9 @@ function guessStartYear(today = new Date()) {
 /* ══════════════ 3. 指標與規則 ══════════════ */
 
 const SHORT_BATCH_H = 1.0;   // 零星批次門檻
-const OUT_HI = 2.5, OUT_LO = 0.4;   // 離群批次：超過自身中位數的倍數
+// 離群批次：以該品項的平均產能（總瓶數÷總工時）為基準。
+// 用平均而非中位數，是因為畫面上顯示、圖上畫線的就是平均產能 —— 門檻可以被使用者驗證。
+const OUT_HI = 2.5, OUT_LO = 0.7;
 const CV_WATCH = 40;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
 const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
 const DECLINE_MONTHS = 3;
@@ -254,18 +256,19 @@ function analyse(batches) {
     const days = new Set(list.map(x => x.d)).size;
     const short = list.filter(x => x.h < SHORT_BATCH_H);
 
-    // 離群批次：跟自己的中位數比
+    // 離群批次：跟這支產品自己的平均產能比
     const outliers = list
-      .filter(x => { const r = x.b / x.h; return r > med * OUT_HI || r < med * OUT_LO; })
+      .filter(x => { const r = x.b / x.h; return r > rate * OUT_HI || r < rate * OUT_LO; })
       .map(x => ({ ...x, rate: x.b / x.h, recent: recent3.has(x.m) }))
-      .sort((a, b) => a.d < b.d ? 1 : -1);
+      .sort((a, b) => a.d < b.d ? 1 : -1);   // 日期新→舊
 
     // 落後最多的批次 —— 給現場去查那幾天發生什麼事
     const laggards = list
       .map(x => ({ ...x, rate: x.b / x.h, gap: 1 - (x.b / x.h) / p75 }))
       .filter(x => x.gap > 0)
       .sort((a, b) => b.gap - a.gap)
-      .slice(0, 5);
+      .slice(0, 5)
+      .sort((a, b) => a.d < b.d ? 1 : -1);   // 取差距最大的 5 批後，改依日期排序
 
     // 該品項自己的月產能
     const byMonth = new Map();
@@ -395,5 +398,7 @@ function buildAlerts(skus, meta) {
 global.PackingEngine = {
   supported, readXlsx, toBatches, analyse, guessStartYear,
   thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES },
+  isOutlier: (batch, sku) => { const r = batch.b / batch.h;
+    return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
 };
 })(window);

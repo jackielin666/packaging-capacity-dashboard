@@ -8,7 +8,8 @@
   4. 空白工作表（建檔但整年沒生產）
   5. 欄位標題不符
   6. 極短批次（<0.5h）—— 會把該品項的「歷史最佳」灌水，僅提示不排除
-  7. 離群批次 —— 產能超過該品項中位數 2.5 倍或低於 0.4 倍
+  7. 產能明顯偏離的批次 —— 超過該品項中位數 2.5 倍或低於 0.4 倍。
+     目的是抓資料登打錯誤，與儀表板上「離群批次」（平均 ×0.7）用途不同
 
 用法： python3 audit.py [rows.json路徑]
 """
@@ -60,7 +61,7 @@ def audit(rows, meta):
         for b in batches:
             rate = b["b"] / b["h"]
             if rate > med * OUTLIER_HIGH or rate < med * OUTLIER_LOW:
-                findings["離群批次"].append(
+                findings["產能明顯偏離（疑似登打錯誤）"].append(
                     {**b, "產能": round(rate), "該品項中位": round(med)})
 
     return findings, meta["empty_sheets"]
