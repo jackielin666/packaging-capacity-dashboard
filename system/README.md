@@ -94,6 +94,8 @@
 system/supabase/migrations/   資料庫結構，依序執行即可重建
 system/backup/                每月自動備份到 Google Drive 的程式與安裝說明
 system/test_entry.py          輸入介面的自動化測試
+system/make_mockup.py         產生下面那份設計稿
+design/entry-mockup.html      靜態設計稿（填好示範資料、沒有程式碼，可單獨打開）
 entry.html                    輸入介面（部署在 GitHub Pages）
 index.html                    儀表板
 ```
@@ -198,6 +200,32 @@ python3 system/test_entry.py
 ```
 
 改過 `entry.html` 之後跑一次，確認沒有改壞。
+
+---
+
+## 交給設計時怎麼做
+
+直接把 `entry.html` 交出去只會看到登入畫面 —— 主畫面要連上資料庫才出得來。
+所以用 `system/make_mockup.py` 產生一份靜態稿：
+
+```
+python3 system/make_mockup.py
+```
+
+它會用攔截網路請求的方式跑一次真實頁面、填入示範資料、把輸入值寫成 HTML 屬性、
+移除所有程式碼，輸出 `design/entry-mockup.html`。**這份檔案單獨打開就能看到完整畫面。**
+
+改樣式時有四樣東西不能動，檔案開頭的註解也寫了：
+
+| 不能改 | 原因 |
+|---|---|
+| `id="..."` | 程式靠這些找元素 |
+| `data-f="..."` | 輸入欄位對應到哪個資料欄位 |
+| 表格列的 8 格結構（第 6 格工時、第 7 格產能） | 這兩格由程式即時算出來填入 |
+| `bad`／`low`／`high`／`has`／`none`／`miss`／`today`／`locked` | 狀態樣式，程式會動態加減 |
+
+顏色、字體、間距、圓角、陰影、排版順序都可以隨意改。
+設計定案後把新樣式套回 `entry.html`，再跑一次 `system/test_entry.py` 確認沒改壞。
 
 ---
 
