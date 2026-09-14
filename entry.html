@@ -1,0 +1,1030 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>包裝資料輸入</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+:root{
+  --paper:#F2F3F0; --surface:#FCFCFB; --sunk:#EDEFEA; --raised:#E8EAE5;
+  --ink:#171C1A; --ink-2:#414A46; --ink-3:#6E7772;
+  --rule:#D5D9D2; --rule-2:#C3C8BF;
+  --accent:#0A8877; --signal:#C2571A; --cool:#3F6FA8;
+  --accent-wash:rgba(10,136,119,.10); --signal-wash:rgba(194,87,26,.10);
+  --cool-wash:rgba(63,111,168,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+[hidden]{display:none!important}
+
+/* ── 按鈕 ── */
+.btn{font:500 13.5px/1 "Noto Sans TC",sans-serif;padding:10px 18px;border:1px solid var(--ink);
+  border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;white-space:nowrap}
+.btn:hover:not(:disabled){opacity:.88}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-2)}
+.btn.sm{padding:7px 13px;font-size:12.5px}
+.btn.danger{background:var(--surface);color:var(--signal);border-color:var(--signal)}
+
+/* ── 登入 ── */
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  padding:38px 34px;width:100%;max-width:380px}
+.login .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3)}
+.login h1{font-size:25px;margin:9px 0 26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+.field input{width:100%;padding:11px 13px;border:1px solid var(--rule-2);border-radius:3px;
+  background:var(--paper);font:15px "IBM Plex Mono",monospace;color:var(--ink)}
+.field input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.login .btn{width:100%;padding:12px}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:18px;line-height:1.6}
+
+/* ── 頂欄 ── */
+.topbar{background:var(--ink);color:var(--paper);padding:13px 0}
+.topbar .in{max-width:1060px;margin:0 auto;padding:0 20px;display:flex;align-items:center;
+  gap:14px;flex-wrap:wrap}
+.topbar .t{font-family:"Noto Serif TC",serif;font-size:17px;font-weight:600;flex:1}
+.topbar .who{font-size:12.5px;opacity:.82}
+.topbar .btn{background:transparent;border-color:rgba(255,255,255,.35);color:var(--paper);
+  padding:6px 13px;font-size:12.5px}
+
+/* ── 日期列 ── */
+.daybar{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  margin-top:20px;overflow:hidden}
+.daybar .nav{display:flex;align-items:center;gap:10px;padding:14px 16px;flex-wrap:wrap}
+.daybar .arrow{width:34px;height:34px;padding:0;display:grid;place-items:center;font-size:15px}
+.daybar .date{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:500;
+  letter-spacing:-.01em}
+.daybar .dow{font-size:13px;color:var(--ink-3);margin-left:2px}
+.daybar .spacer{flex:1;min-width:8px}
+.daybar input[type=date]{padding:8px 10px;border:1px solid var(--rule-2);border-radius:3px;
+  background:var(--paper);font:13.5px "IBM Plex Mono",monospace;color:var(--ink)}
+.daysum{display:flex;gap:0;border-top:1px solid var(--rule);background:var(--sunk);flex-wrap:wrap}
+.daysum div{padding:11px 16px;border-right:1px solid var(--rule);flex:1;min-width:110px}
+.daysum div:last-child{border-right:0}
+.daysum .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3)}
+.daysum .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
+.daysum .v small{font-size:11.5px;color:var(--ink-3);margin-left:3px;font-weight:400}
+
+/* ── 輸入表 ── */
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:4px;margin-top:18px}
+.panel > h2{font-size:16px;padding:15px 16px 0}
+.panel .sub{font-size:12.5px;color:var(--ink-3);padding:3px 16px 0}
+.grid{width:100%;border-collapse:collapse;margin-top:13px}
+.grid th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  padding:0 8px 7px;border-bottom:1px solid var(--rule)}
+.grid th:first-child{padding-left:16px}
+.grid th.num{text-align:right}
+.grid td{padding:4px 4px;border-bottom:1px solid var(--rule);vertical-align:middle}
+.grid td:first-child{padding-left:12px}
+.grid td:last-child{padding-right:12px}
+.grid tr.locked td{background:var(--sunk)}
+.grid input{width:100%;padding:8px 9px;border:1px solid transparent;border-radius:3px;
+  background:transparent;font:14px "IBM Plex Mono",monospace;color:var(--ink)}
+.grid input:hover:not(:disabled){border-color:var(--rule)}
+.grid input:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--paper)}
+.grid input:disabled{color:var(--ink-2)}
+.grid input.num{text-align:right}
+.grid input.bad{background:var(--signal-wash);border-color:var(--signal)}
+.grid .calc{font-family:"IBM Plex Mono",monospace;font-size:13.5px;text-align:right;
+  color:var(--ink-2);white-space:nowrap;padding-right:9px}
+.grid .flag{font-size:11.5px;white-space:nowrap;padding:0 9px 0 18px;text-align:left}
+.grid .flag.low{color:var(--signal)}
+.grid .flag.high{color:var(--cool)}
+.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px 6px;margin-top:-4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.grid .x{background:0;border:0;color:var(--ink-3);cursor:pointer;font-size:17px;
+  padding:4px 8px;line-height:1;border-radius:3px}
+.grid .x:hover{color:var(--signal);background:var(--signal-wash)}
+.grid .x:disabled{opacity:.25;cursor:not-allowed}
+.col-sku{width:29%} .col-t{width:11%} .col-n{width:12%} .col-h{width:8%} .col-x{width:42px}
+.panel .foot{display:flex;gap:11px;align-items:center;padding:14px 16px;flex-wrap:wrap}
+.panel .foot .spacer{flex:1;min-width:8px}
+.hint{font-size:12px;color:var(--ink-3)}
+
+/* ── 訊息 ── */
+.msg{padding:12px 16px;border-radius:0 3px 3px 0;font-size:13.5px;margin-top:14px}
+.msg.ok{background:var(--accent-wash);border-left:3px solid var(--accent)}
+.msg.bad{background:var(--signal-wash);border-left:3px solid var(--signal)}
+.msg.info{background:var(--cool-wash);border-left:3px solid var(--cool)}
+.msg b{font-family:"Noto Serif TC",serif}
+
+/* ── 月曆 ── */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:13px 16px 16px}
+.cal .dowh{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3);
+  text-align:center;padding-bottom:3px}
+.cell{height:54px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  cursor:pointer;padding:2px;font:13px "IBM Plex Mono",monospace}
+.cell:hover{border-color:var(--ink)}
+.cell.blank{border:0;background:0;cursor:default}
+.cell.weekend{background:var(--raised);color:var(--ink-3)}
+.cell.future{opacity:.4;cursor:default}
+.cell.today{border:1px dashed var(--rule-2);color:var(--ink-3)}
+.cell.has{background:var(--accent-wash);border-color:var(--accent)}
+.cell.none{background:var(--sunk);color:var(--ink-3)}
+.cell.miss{background:var(--signal-wash);border-color:var(--signal);color:var(--signal)}
+.cell.sel{outline:2px solid var(--ink);outline-offset:1px}
+.cell .n{font-size:10px;opacity:.7}
+.legend{display:flex;gap:15px;flex-wrap:wrap;padding:0 16px 15px;font-size:12px;
+  color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:13px;border-radius:2px;margin-right:6px;
+  vertical-align:-2px;border:1px solid var(--rule)}
+.legend .l-has{background:var(--accent-wash);border-color:var(--accent)}
+.legend .l-none{background:var(--sunk)}
+.legend .l-miss{background:var(--signal-wash);border-color:var(--signal)}
+
+/* ── 手機 ── */
+@media(max-width:720px){
+  .wrap{padding:0 14px 60px}
+  .grid thead{display:none}
+  .grid,.grid tbody,.grid tr,.grid td{display:block;width:100%}
+  .grid tr{border-bottom:1px solid var(--rule-2);padding:10px 4px 12px;position:relative}
+  .grid td{border:0;padding:3px 8px}
+  .grid td:before{content:attr(data-l);display:block;font-family:"IBM Plex Mono",monospace;
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+    margin-bottom:2px}
+  .grid td.pair,.grid td.calc,.grid td.flag{display:inline-block;width:50%;vertical-align:top}
+  .grid .flag{padding-left:8px}
+  .grid input{border-color:var(--rule)}
+  .grid .calc,.grid .flag{text-align:left;padding-left:8px}
+  .grid td.act{position:absolute;top:8px;right:4px;width:auto;padding:0}
+  .grid td.act:before{content:none}
+  .daybar .date{font-size:18px}
+  .daysum div{min-width:50%;flex:none}
+  .daysum div:nth-child(2n){border-right:0}
+  .daysum div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  .cal{gap:3px;padding:10px}
+  .cell{font-size:11px}
+}
+</style>
+<!-- ══ 登入 ══ -->
+<div class="login-wrap" id="bootView">
+  <div class="login"><div class="eyebrow">包裝產能系統</div><h1>載入中…</h1></div>
+</div>
+
+<div class="login-wrap" id="loginView" hidden>
+  <form class="login" id="loginForm" autocomplete="on">
+    <div class="eyebrow">包裝產能系統</div>
+    <h1>資料輸入</h1>
+
+    <div class="field">
+      <label for="acc">帳號</label>
+      <input id="acc" name="username" autocomplete="username" autocapitalize="off"
+             spellcheck="false" required>
+    </div>
+    <div class="field">
+      <label for="pw">密碼</label>
+      <input id="pw" name="password" type="password" autocomplete="current-password" required>
+    </div>
+
+    <button class="btn" type="submit" id="loginBtn">登入</button>
+    <div class="msg bad" id="loginErr" hidden></div>
+    <p class="note">輸入公司給你的帳號即可，不用打信箱。<br>
+      資料直接存進公司資料庫，不會留在這台電腦上。</p>
+  </form>
+</div>
+
+<!-- ══ 主畫面 ══ -->
+<div id="appView" hidden>
+  <div class="topbar">
+    <div class="in">
+      <div class="t">包裝資料輸入</div>
+      <div class="who" id="who"></div>
+      <button class="btn" id="logoutBtn">登出</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- 日期 -->
+    <div class="daybar">
+      <div class="nav">
+        <button class="btn ghost arrow" id="prevDay" title="前一天">←</button>
+        <div>
+          <span class="date" id="dateTxt">—</span>
+          <span class="dow" id="dowTxt"></span>
+        </div>
+        <button class="btn ghost arrow" id="nextDay" title="後一天">→</button>
+        <input type="date" id="datePick">
+        <div class="spacer"></div>
+        <button class="btn ghost sm" id="todayBtn">今天</button>
+        <button class="btn ghost sm" id="gapBtn">跳到待補的日期</button>
+      </div>
+      <div class="daysum">
+        <div><div class="k">批次</div><div class="v" id="sumB">0</div></div>
+        <div><div class="k">包裝量</div><div class="v" id="sumQ">0</div></div>
+        <div><div class="k">工時</div><div class="v" id="sumH">0<small>h</small></div></div>
+        <div><div class="k">當日產能</div><div class="v" id="sumR">—<small>/工時</small></div></div>
+      </div>
+    </div>
+
+    <div class="msg" id="banner" hidden></div>
+
+    <!-- 輸入表 -->
+    <div class="panel">
+      <h2>本日批次</h2>
+      <div class="sub">時間可以直接打 <b>0800</b>，離開欄位會自動變成 08:00。
+        工時和產能是系統算的，不用填。</div>
+
+      <table class="grid">
+        <thead>
+          <tr>
+            <th class="col-sku">品項</th>
+            <th class="col-t">起始</th>
+            <th class="col-t">結束</th>
+            <th class="col-n num">瓶數</th>
+            <th class="col-h num">人數</th>
+            <th class="col-h num">工時</th>
+            <th class="col-n">產能</th>
+            <th class="col-x"></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <div class="foot">
+        <button class="btn ghost sm" id="addRow">＋ 加一列</button>
+        <span class="hint" id="dirtyHint"></span>
+        <div class="spacer"></div>
+        <button class="btn" id="saveBtn" disabled>儲存本日</button>
+      </div>
+    </div>
+
+    <!-- 無作業 -->
+    <div class="panel">
+      <h2>當天沒有包裝作業？</h2>
+      <div class="sub">按下去等於告訴系統「這天確實沒做，不是忘了登記」。
+        月底檢核只會抓「沒批次又沒按這個」的工作日。</div>
+      <div class="foot">
+        <button class="btn ghost" id="noOpBtn">標記本日無包裝作業</button>
+        <span class="hint" id="noOpState"></span>
+      </div>
+    </div>
+
+    <!-- 月曆 -->
+    <div class="panel">
+      <h2 id="calTitle">補登進度</h2>
+      <div class="sub" id="calSub">—</div>
+      <div class="foot" style="padding-bottom:0">
+        <button class="btn ghost sm" id="prevMon">← 上個月</button>
+        <button class="btn ghost sm" id="nextMon">下個月 →</button>
+      </div>
+      <div class="cal" id="cal"></div>
+      <div class="legend">
+        <span><i class="l-has"></i>已登記</span>
+        <span><i class="l-none"></i>無作業</span>
+        <span><i class="l-miss"></i>待補</span>
+        <span class="hint">六日不計入待補。國定假日請按「標記本日無包裝作業」。</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<datalist id="skuList"></datalist>
+<script>
+(function () {
+'use strict';
+
+// ══ 設定 ═══════════════════════════════════════════════════
+// 這兩個值是公開金鑰，放在前端是正常的 —— 真正的保護來自登入與
+// 資料庫的 Row Level Security，沒登入的人一筆資料都讀不到。
+var API  = 'https://vnncuksjvdsxwveomoww.supabase.co';
+var KEY  = 'sb_publishable_Bloy5WhUpWGd7G0Uh_Kmdw_UB4dUNEo';
+var MAIL = '@packing.local';     // 使用者只打帳號，網域由程式補上
+
+// 離群門檻沿用儀表板的定義，兩邊才不會各說各話
+var OUT_LO = 0.7, OUT_HI = 2.5, MIN_BATCHES = 10;
+
+var SS = 'packing.session';
+
+// ══ 小工具 ═════════════════════════════════════════════════
+var $ = function (id) { return document.getElementById(id); };
+
+function ymd(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+       + '-' + String(d.getDate()).padStart(2, '0');
+}
+function parseYmd(s) {
+  var p = s.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function addDays(s, n) {
+  var d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d);
+}
+function today()      { return ymd(new Date()); }
+function monthStart() { var d = new Date(); return ymd(new Date(d.getFullYear(), d.getMonth(), 1)); }
+function isWeekend(s) { var w = parseYmd(s).getDay(); return w === 0 || w === 6; }
+var DOW = ['日', '一', '二', '三', '四', '五', '六'];
+
+function num(n, dp) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: dp || 0,
+                                             maximumFractionDigits: dp || 0 });
+}
+
+/**
+ * 把使用者打的時間正規化。現場習慣直接打四碼，不想按冒號。
+ * 接受 0800 / 800 / 8 / 8:00 / 08：00，一律變成 08:00。
+ */
+function parseTime(v) {
+  var s = String(v == null ? '' : v).trim().replace(/[：.．]/g, ':');
+  if (!s) return null;
+  var h, m, x;
+  if ((x = s.match(/^(\d{1,2}):(\d{1,2})$/)))      { h = +x[1]; m = +x[2]; }
+  else if ((x = s.match(/^(\d{3,4})$/)))           { var d = x[1].padStart(4, '0');
+                                                     h = +d.slice(0, 2); m = +d.slice(2); }
+  else if ((x = s.match(/^(\d{1,2})$/)))           { h = +x[1]; m = 0; }
+  else return null;
+  if (h > 23 || m > 59) return null;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+function toMin(t) {
+  if (!t) return null;
+  var p = t.split(':'); return (+p[0]) * 60 + (+p[1]);
+}
+/** 與資料庫的工時計算方式完全一致（跨午夜加 24 小時，取到小數三位） */
+function calcHours(st, en) {
+  var a = toMin(st), b = toMin(en);
+  if (a === null || b === null || a === b) return null;
+  var d = b - a; if (d < 0) d += 1440;
+  return Math.round(d / 60 * 1000) / 1000;
+}
+
+// ══ 連線 ═══════════════════════════════════════════════════
+var sess = null;
+
+function loadSession() {
+  try { sess = JSON.parse(localStorage.getItem(SS) || 'null'); } catch (e) { sess = null; }
+  return sess;
+}
+function saveSession(s) {
+  sess = s;
+  try { localStorage.setItem(SS, JSON.stringify(s)); } catch (e) {}
+}
+function clearSession() {
+  sess = null;
+  try { localStorage.removeItem(SS); } catch (e) {}
+}
+
+function jwtSub(tok) {
+  try {
+    var b = tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    return JSON.parse(decodeURIComponent(escape(atob(b)))).sub;
+  } catch (e) { return null; }
+}
+
+function signIn(account, password) {
+  return fetch(API + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { apikey: KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: account.toLowerCase() + MAIL, password: password })
+  }).then(function (r) {
+    return r.json().then(function (j) {
+      if (!r.ok) throw new Error(j.error_description || j.msg || ('登入失敗（' + r.status + '）'));
+      saveSession({ access: j.access_token, refresh: j.refresh_token,
+                    exp: Date.now() + (j.expires_in || 3600) * 1000 });
+      return j;
+    });
+  });
+}
+
+function refresh() {
+  if (!sess || !sess.refresh) return Promise.reject(new Error('no session'));
+  return fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+    method: 'POST',
+    headers: { apikey: KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: sess.refresh })
+  }).then(function (r) {
+    if (!r.ok) throw new Error('session expired');
+    return r.json();
+  }).then(function (j) {
+    saveSession({ access: j.access_token, refresh: j.refresh_token,
+                  exp: Date.now() + (j.expires_in || 3600) * 1000 });
+  });
+}
+
+/**
+ * 呼叫資料 API。
+ * PostgREST 讀寫要用不同的標頭指定 schema：讀用 Accept-Profile、寫用 Content-Profile。
+ * 權杖快過期就先換新的；萬一還是被打回 401，換一次再重試，才不會讓使用者
+ * 打到一半跳回登入畫面。
+ */
+function api(path, opts, retried) {
+  opts = opts || {};
+  var pre = (!sess || sess.exp - Date.now() < 60000) ? refresh() : Promise.resolve();
+
+  return pre.catch(function () {}).then(function () {
+    var h = {
+      apikey: KEY,
+      Authorization: 'Bearer ' + (sess ? sess.access : ''),
+      'Accept-Profile': 'packing',
+      'Content-Profile': 'packing'
+    };
+    if (opts.body) h['Content-Type'] = 'application/json';
+    if (opts.prefer) h.Prefer = opts.prefer;
+
+    return fetch(API + '/rest/v1/' + path, {
+      method: opts.method || 'GET', headers: h, body: opts.body
+    });
+  }).then(function (r) {
+    if (r.status === 401 && !retried) {
+      return refresh().then(function () { return api(path, opts, true); });
+    }
+    if (!r.ok) {
+      return r.text().then(function (t) {
+        var m = t;
+        try { var j = JSON.parse(t); m = j.message || j.hint || j.details || t; } catch (e) {}
+        throw new Error(m + '（' + r.status + '）');
+      });
+    }
+    if (r.status === 204) return null;
+    return r.text().then(function (t) { return t ? JSON.parse(t) : null; });
+  });
+}
+
+// ══ 狀態 ═══════════════════════════════════════════════════
+var state = {
+  date: today(),
+  calMonth: today().slice(0, 7),
+  role: null, name: null,
+  skus: {},          // code -> {name, ...}
+  stats: {},         // code -> {mean_rate, batches}
+  rows: [],          // 畫面上的批次列
+  dayStatus: null,   // daily_status 那一列
+  days: {}           // 'YYYY-MM-DD' -> day_summary
+};
+var uid = 0;
+
+function canModify(d) { return state.role === 'manager' || d >= monthStart(); }
+
+function banner(kind, html) {
+  var b = $('banner');
+  if (!kind) { b.hidden = true; return; }
+  b.className = 'msg ' + kind; b.innerHTML = html; b.hidden = false;
+}
+
+// ══ 登入畫面 ═══════════════════════════════════════════════
+$('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var acc = $('acc').value.trim(), pw = $('pw').value;
+  if (!acc || !pw) return;
+  $('loginBtn').disabled = true; $('loginBtn').textContent = '登入中…';
+  $('loginErr').hidden = true;
+
+  signIn(acc, pw)
+    .then(boot)
+    .catch(function (err) {
+      $('loginErr').textContent = /Invalid login/i.test(err.message)
+        ? '帳號或密碼不對，請再試一次。' : err.message;
+      $('loginErr').hidden = false;
+    })
+    .then(function () {
+      $('loginBtn').disabled = false; $('loginBtn').textContent = '登入';
+    });
+});
+
+$('logoutBtn').addEventListener('click', function () {
+  clearSession();
+  location.reload();
+});
+
+// ══ 啟動 ═══════════════════════════════════════════════════
+function boot() {
+  var id = jwtSub(sess.access);
+  return Promise.all([
+    api('members?select=display_name,role&user_id=eq.' + id),
+    api('sku_stats?select=code,name,container,batches,mean_rate,median_rate,last_date'
+        + '&active=is.true&order=batches.desc')
+  ]).then(function (res) {
+    var me = res[0] && res[0][0];
+    if (!me) throw new Error('這個帳號還沒有被指派角色，請聯絡系統管理者。');
+    state.role = me.role;
+    state.name = me.display_name;
+
+    var ROLE = { operator: '輸入專員', manager: '主管', viewer: '檢視者' };
+    $('who').textContent = me.display_name + '（' + (ROLE[me.role] || me.role) + '）';
+
+    // 品項下拉。常做的排前面，現場打前兩碼就能選到。
+    var dl = $('skuList'), html = '';
+    res[1].forEach(function (s) {
+      state.skus[s.code] = s;
+      state.stats[s.code] = s;
+      html += '<option value="' + s.code + '">' + s.code + '　' + s.name + '</option>';
+    });
+    dl.innerHTML = html;
+
+    $('loginView').hidden = true;
+    $('appView').hidden = false;
+
+    if (state.role === 'viewer') {
+      banner('info', '<b>你是檢視者</b>　可以查看所有資料，但不能新增或修改。');
+    }
+    return loadDay(today());
+  });
+}
+
+// ══ 載入某一天 ═════════════════════════════════════════════
+function loadDay(d) {
+  state.date = d;
+  state.calMonth = d.slice(0, 7);
+  banner(null);
+
+  return Promise.all([
+    api('batches?select=id,sku_code,start_time,end_time,bottles,headcount,hours,note'
+        + '&prod_date=eq.' + d + '&order=start_time.asc,id.asc'),
+    api('daily_status?select=prod_date,no_operation,note&prod_date=eq.' + d)
+  ]).then(function (res) {
+    state.rows = res[0].map(function (b) {
+      return {
+        key: ++uid, id: b.id, sku: b.sku_code,
+        start: String(b.start_time).slice(0, 5),
+        end: String(b.end_time).slice(0, 5),
+        bottles: b.bottles, head: b.headcount == null ? '' : b.headcount,
+        note: b.note || '', dirty: false, deleted: false
+      };
+    });
+    state.dayStatus = (res[1] && res[1][0]) || null;
+    if (!state.rows.length) addRow();
+    renderDay();
+    return loadMonth(state.calMonth);
+  }).catch(function (e) { banner('bad', '讀取失敗：' + e.message); });
+}
+
+function addRow() {
+  state.rows.push({ key: ++uid, id: null, sku: '', start: '', end: '',
+                    bottles: '', head: '', note: '', dirty: true, deleted: false });
+}
+
+// ══ 畫面：某一天 ═══════════════════════════════════════════
+function renderDay() {
+  var d = state.date;
+  $('dateTxt').textContent = d;
+  $('dowTxt').textContent = '（' + DOW[parseYmd(d).getDay()] + '）'
+                          + (d === today() ? ' 今天' : '');
+  $('datePick').value = d;
+
+  var editable = canModify(d) && state.role !== 'viewer';
+  var tb = $('rows');
+  tb.innerHTML = '';
+
+  var live = state.rows.filter(function (r) { return !r.deleted; });
+  live.forEach(function (r) { tb.appendChild(renderRow(r, editable)); });
+
+  $('addRow').disabled  = !editable;
+  $('noOpBtn').disabled = !editable;
+
+  // 「補登可以新增，但改舊資料要主管」是刻意的設計，寫清楚免得現場以為壞了
+  if (!editable && state.role === 'operator') {
+    banner('info', '<b>' + d.slice(0, 7) + ' 是過去的月份</b>　'
+      + '你仍然可以<u>新增</u>補登的批次，但已經存在的資料要請主管修改，'
+      + '這樣歷史數字才不會被無聲改掉。');
+    $('addRow').disabled = false;
+  }
+
+  // 無作業標記
+  var marked = state.dayStatus && state.dayStatus.no_operation;
+  $('noOpBtn').textContent = marked ? '取消「無包裝作業」標記' : '標記本日無包裝作業';
+  $('noOpBtn').className = 'btn ' + (marked ? 'danger' : 'ghost');
+  $('noOpState').textContent = marked ? '本日已標記為沒有包裝作業。'
+    : (live.length ? '本日已有批次資料，不需要標記。' : '');
+  $('noOpBtn').disabled = !editable || live.some(rowComplete);
+
+  recalc();
+}
+
+function renderRow(r, editable) {
+  var tr = document.createElement('tr');
+  var locked = r.id && !editable;
+  if (locked) tr.className = 'locked';
+
+  function cell(label, cls, inner) {
+    var td = document.createElement('td');
+    td.className = cls || ''; td.setAttribute('data-l', label);
+    td.innerHTML = inner; return td;
+  }
+  function inp(field, cls, ph, extra) {
+    var v = r[field] === null || r[field] === undefined ? '' : r[field];
+    return '<input class="' + (cls || '') + '" data-f="' + field + '" '
+         + 'value="' + String(v).replace(/"/g, '&quot;') + '" placeholder="' + (ph || '') + '" '
+         + (locked ? 'disabled ' : '') + (extra || '') + '>';
+  }
+
+  var sku = state.skus[r.sku];
+  tr.appendChild(cell('品項', '', inp('sku', '', '打品號', 'list="skuList" autocapitalize="off" spellcheck="false"')
+    + '<div class="skuname">' + (sku ? sku.name : (r.sku ? '⚠ 查無此品號' : '')) + '</div>'));
+  tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
+  tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
+  tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
+  tr.appendChild(cell('人數', 'pair', inp('head', 'num', '—', 'inputmode="numeric"')));
+  tr.appendChild(cell('工時', 'calc', '—'));
+  tr.appendChild(cell('產能', 'flag', '—'));
+
+  var td = document.createElement('td');
+  td.className = 'act';
+  td.innerHTML = '<button class="x" title="刪除這一列"' + (locked ? ' disabled' : '') + '>×</button>';
+  td.querySelector('button').addEventListener('click', function () { removeRow(r); });
+  tr.appendChild(td);
+
+  tr.querySelectorAll('input').forEach(function (el) {
+    el.addEventListener('input', function () {
+      r[el.dataset.f] = el.value; r.dirty = true; recalc();
+    });
+    el.addEventListener('blur', function () {
+      var f = el.dataset.f;
+      if (f === 'start' || f === 'end') {
+        var t = parseTime(el.value);
+        if (t) { el.value = t; r[f] = t; }
+      }
+      if (f === 'sku') { el.value = el.value.trim().toUpperCase(); r.sku = el.value; renderDay(); }
+      recalc();
+    });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); nextField(el); }
+    });
+  });
+
+  tr.dataset.key = r.key;
+  return tr;
+}
+
+/** Enter 往下一格跑；跑到最後一格就自動開新的一列，手不用離開鍵盤 */
+function nextField(el) {
+  var all = Array.prototype.slice.call($('rows').querySelectorAll('input:not([disabled])'));
+  var i = all.indexOf(el);
+  if (i > -1 && i < all.length - 1) { all[i + 1].focus(); all[i + 1].select(); return; }
+  addRow(); renderDay();
+  var first = $('rows').querySelector('tr:last-child input:not([disabled])');
+  if (first) first.focus();
+}
+
+function removeRow(r) {
+  if (r.id) { r.deleted = true; r.dirty = true; }
+  else state.rows = state.rows.filter(function (x) { return x !== r; });
+  if (!state.rows.filter(function (x) { return !x.deleted; }).length) addRow();
+  renderDay();
+}
+
+// ══ 即時計算與異常提示 ═════════════════════════════════════
+function rowBlank(r) {
+  return !r.sku && !r.start && !r.end && String(r.bottles) === '' && String(r.head) === '';
+}
+function rowComplete(r) {
+  return !!(state.skus[r.sku] && parseTime(r.start) && parseTime(r.end)
+            && calcHours(parseTime(r.start), parseTime(r.end)) && +r.bottles > 0);
+}
+
+/**
+ * 每打一個字就重算，現場當下就看得到產能，不用等存檔。
+ * 產能明顯偏離該品項平常水準時直接標出來 —— 多半是瓶數或時間打錯，
+ * 當場抓到比月底對帳再回頭查省事得多。
+ */
+function recalc() {
+  var tb = $('rows'), tb2 = 0, tq = 0, th = 0, anyBad = false, anyDirty = false;
+
+  state.rows.filter(function (r) { return !r.deleted; }).forEach(function (r) {
+    var tr = tb.querySelector('tr[data-key="' + r.key + '"]');
+    if (!tr) return;
+    var cH = tr.children[5], cR = tr.children[6];
+    var st = parseTime(r.start), en = parseTime(r.end);
+    var h = calcHours(st, en);
+    var b = +r.bottles;
+
+    cH.textContent = h ? h.toFixed(2) : '—';
+    cR.textContent = '—'; cR.className = 'flag';
+
+    if (h && b > 0) {
+      var rate = b / h;
+      var s = state.stats[r.sku];
+      var txt = num(Math.round(rate));
+      if (s && s.mean_rate && s.batches >= MIN_BATCHES) {
+        var lo = s.mean_rate * OUT_LO, hi = s.mean_rate * OUT_HI;
+        if (rate < lo) {
+          cR.className = 'flag low';
+          txt += ' ⚠ 偏低（平常 ' + num(s.mean_rate) + '）';
+        } else if (rate > hi) {
+          cR.className = 'flag high';
+          txt += ' ⚠ 偏高（平常 ' + num(s.mean_rate) + '）';
+        }
+      }
+      cR.textContent = txt;
+      tb2++; tq += b; th += h;
+    }
+
+    // 半填的列要擋下來，不然存檔時才報錯很惱人
+    var bad = !rowBlank(r) && !rowComplete(r);
+    tr.querySelectorAll('input').forEach(function (el) {
+      var f = el.dataset.f, wrong = false;
+      if (bad) {
+        if (f === 'sku')      wrong = !state.skus[r.sku];
+        if (f === 'start')    wrong = !parseTime(r.start);
+        if (f === 'end')      wrong = !parseTime(r.end) || (parseTime(r.start) === parseTime(r.end));
+        if (f === 'bottles')  wrong = !(+r.bottles > 0);
+      }
+      el.classList.toggle('bad', wrong);
+    });
+    if (bad) anyBad = true;
+  });
+
+  var wantIns = false, wantEd = false;
+  state.rows.forEach(function (r) {
+    if (r.deleted)            { if (r.id) wantEd = true; return; }
+    if (!r.dirty)             return;
+    if (r.id)                 wantEd = true;
+    else if (rowComplete(r))  wantIns = true;
+  });
+
+  $('sumB').textContent = num(tb2);
+  $('sumQ').textContent = num(tq);
+  $('sumH').innerHTML   = num(th, 1) + '<small>h</small>';
+  $('sumR').innerHTML   = (th > 0 ? num(Math.round(tq / th)) : '—') + '<small>/工時</small>';
+
+  var canIns = state.role === 'operator' || state.role === 'manager';
+  var canEd  = canIns && canModify(state.date);
+  var blocked = wantEd && !canEd;
+
+  $('saveBtn').disabled = anyBad || blocked || !((wantIns && canIns) || (wantEd && canEd));
+  $('dirtyHint').textContent =
+      anyBad  ? '有欄位沒填完或填錯，先補齊才能儲存。'
+    : blocked ? '這個月份的既有資料要主管才能修改或刪除。'
+    : (wantIns || wantEd) ? '有尚未儲存的變更。' : '';
+}
+
+// ══ 儲存 ═══════════════════════════════════════════════════
+$('saveBtn').addEventListener('click', function () {
+  var d = state.date, ins = [], upd = [], del = [];
+
+  state.rows.forEach(function (r) {
+    if (r.deleted) { if (r.id) del.push(r); return; }
+    if (!rowComplete(r) || !r.dirty) return;
+    var payload = {
+      sku_code: r.sku, prod_date: d,
+      start_time: parseTime(r.start), end_time: parseTime(r.end),
+      bottles: +r.bottles,
+      headcount: String(r.head).trim() === '' ? null : +r.head
+    };
+    if (r.id) upd.push({ r: r, p: payload }); else ins.push(payload);
+  });
+
+  if (!ins.length && !upd.length && !del.length) return;
+
+  $('saveBtn').disabled = true; $('saveBtn').textContent = '儲存中…';
+
+  var jobs = [];
+  if (ins.length) {
+    jobs.push(api('batches', { method: 'POST', body: JSON.stringify(ins),
+                               prefer: 'return=representation' }));
+  }
+  upd.forEach(function (u) {
+    jobs.push(api('batches?id=eq.' + u.r.id, { method: 'PATCH', body: JSON.stringify(u.p) }));
+  });
+  del.forEach(function (r) {
+    jobs.push(api('batches?id=eq.' + r.id, { method: 'DELETE' }));
+  });
+
+  Promise.all(jobs).then(function () {
+    var bits = [];
+    if (ins.length) bits.push('新增 ' + ins.length + ' 批');
+    if (upd.length) bits.push('修改 ' + upd.length + ' 批');
+    if (del.length) bits.push('刪除 ' + del.length + ' 批');
+    return refreshStats().then(function () {
+      return loadDay(d).then(function () {
+        var nxt = nextWorkday(d);
+        banner('ok', '<b>已儲存</b>　' + bits.join('、') + '。'
+          + '　<a href="#" id="goNext">前往下一個工作日（' + nxt + '）→</a>');
+        var a = $('goNext');
+        if (a) a.addEventListener('click', function (e) { e.preventDefault(); loadDay(nxt); });
+      });
+    });
+  }).catch(function (e) {
+    banner('bad', '<b>儲存失敗</b>　' + e.message
+      + '<br>資料還留在畫面上，沒有遺失。修正後可以再按一次儲存。');
+  }).then(function () {
+    $('saveBtn').textContent = '儲存本日';
+    recalc();
+  });
+});
+
+function refreshStats() {
+  return api('sku_stats?select=code,name,batches,mean_rate&active=is.true')
+    .then(function (rows) {
+      rows.forEach(function (s) { state.stats[s.code] = s; });
+    }).catch(function () {});
+}
+
+function nextWorkday(d) {
+  var n = addDays(d, 1);
+  while (isWeekend(n)) n = addDays(n, 1);
+  return n;
+}
+
+// ══ 無作業標記 ═════════════════════════════════════════════
+$('noOpBtn').addEventListener('click', function () {
+  var d = state.date, marked = state.dayStatus && state.dayStatus.no_operation;
+  var req = marked
+    ? api('daily_status?prod_date=eq.' + d, { method: 'DELETE' })
+    : api('daily_status', { method: 'POST',
+        body: JSON.stringify({ prod_date: d, no_operation: true }),
+        prefer: 'resolution=merge-duplicates' });
+
+  $('noOpBtn').disabled = true;
+  req.then(function () { return loadDay(d); })
+     .then(function () {
+       banner('ok', marked ? '已取消標記。' : '<b>已標記本日無包裝作業</b>　月底檢核不會再把這天算成漏登。');
+     })
+     .catch(function (e) { banner('bad', '設定失敗：' + e.message); $('noOpBtn').disabled = false; });
+});
+
+// ══ 月曆：補登進度 ═════════════════════════════════════════
+function loadMonth(m) {
+  var first = m + '-01';
+  var last  = ymd(new Date(+m.slice(0, 4), +m.slice(5, 7), 0));
+  state.calMonth = m;
+  return api('day_summary?select=prod_date,batches,bottles,hours,no_operation'
+             + '&prod_date=gte.' + first + '&prod_date=lte.' + last)
+    .then(function (rows) {
+      state.days = {};
+      rows.forEach(function (r) { state.days[r.prod_date] = r; });
+      renderCal();
+    }).catch(function (e) { banner('bad', '月曆讀取失敗：' + e.message); });
+}
+
+/** 一天的狀態：已登記／無作業／待補／未來／週末 */
+function dayKind(d) {
+  var s = state.days[d];
+  if (s && s.batches > 0)   return 'has';
+  if (s && s.no_operation)  return 'none';
+  if (d > today())          return 'future';
+  if (isWeekend(d))         return 'weekend';
+  if (d === today())        return 'today';   // 今天還沒過完，不算漏登
+  return 'miss';
+}
+
+function renderCal() {
+  var m = state.calMonth;
+  var y = +m.slice(0, 4), mo = +m.slice(5, 7);
+  var lastDay = new Date(y, mo, 0).getDate();
+  var lead = new Date(y, mo - 1, 1).getDay();
+
+  $('calTitle').textContent = y + ' 年 ' + mo + ' 月　補登進度';
+
+  var cal = $('cal'), html = '';
+  DOW.forEach(function (w) { html += '<div class="dowh">' + w + '</div>'; });
+  for (var i = 0; i < lead; i++) html += '<div class="cell blank"></div>';
+
+  var nHas = 0, nNone = 0, nMiss = 0;
+  for (var day = 1; day <= lastDay; day++) {
+    var d = m + '-' + String(day).padStart(2, '0');
+    var k = dayKind(d);
+    if (k === 'has') nHas++; else if (k === 'none') nNone++; else if (k === 'miss') nMiss++;
+    var s = state.days[d];
+    var sub = (k === 'has') ? (s.batches + ' 批') : (k === 'none' ? '休' : '');
+    html += '<button class="cell ' + k + (d === state.date ? ' sel' : '') + '" data-d="' + d + '">'
+          + '<span>' + day + '</span><span class="n">' + sub + '</span></button>';
+  }
+  cal.innerHTML = html;
+
+  cal.querySelectorAll('.cell[data-d]').forEach(function (el) {
+    el.addEventListener('click', function () { loadDay(el.dataset.d); });
+  });
+
+  $('calSub').innerHTML = '已登記 <b>' + nHas + '</b> 天　·　無作業 <b>' + nNone + '</b> 天　·　'
+    + (nMiss ? '待補 <b style="color:var(--signal)">' + nMiss + '</b> 天'
+             : '<b style="color:var(--accent)">沒有待補的日子</b>');
+}
+
+/** 往回找最早一個還沒處理的工作日。接單式生產不是每天都做，所以找不到很正常。 */
+function findGap() {
+  var from = addDays(today(), -120);
+  return api('day_summary?select=prod_date,batches,no_operation&prod_date=gte.' + from)
+    .then(function (rows) {
+      var done = {};
+      rows.forEach(function (r) {
+        if (r.batches > 0 || r.no_operation) done[r.prod_date] = true;
+      });
+      var d = from, t = today();
+      while (d < t) {
+        if (!isWeekend(d) && !done[d]) return d;
+        d = addDays(d, 1);
+      }
+      return null;
+    });
+}
+
+// ══ 從 Excel 貼上 ══════════════════════════════════════════
+/**
+ * 現場本來就在用 Excel，短期內不會完全脫離。
+ * 允許整塊複製貼上（品項／起／迄／瓶數／人數），比一格一格重打快得多。
+ */
+$('rows').addEventListener('paste', function (e) {
+  var text = (e.clipboardData || window.clipboardData).getData('text') || '';
+  if (text.indexOf('\t') < 0 && text.indexOf('\n') < 0) return;   // 單格貼上就照原本行為
+  e.preventDefault();
+
+  var tr = e.target.closest('tr');
+  var startKey = tr ? +tr.dataset.key : null;
+  var live = state.rows.filter(function (r) { return !r.deleted; });
+  var idx = Math.max(0, live.findIndex(function (r) { return r.key === startKey; }));
+
+  var lines = text.replace(/\r/g, '').split('\n').filter(function (l) { return l.trim(); });
+  var added = 0;
+
+  lines.forEach(function (line, i) {
+    var c = line.split('\t');
+    var target = live[idx + i];
+    if (!target) { addRow(); target = state.rows[state.rows.length - 1]; added++; }
+    if (target.id && !canModify(state.date)) return;     // 不覆蓋鎖住的舊資料
+    if (c[0] !== undefined) target.sku     = String(c[0]).trim().toUpperCase();
+    if (c[1] !== undefined) target.start   = parseTime(c[1]) || String(c[1]).trim();
+    if (c[2] !== undefined) target.end     = parseTime(c[2]) || String(c[2]).trim();
+    if (c[3] !== undefined) target.bottles = String(c[3]).replace(/[, ]/g, '').trim();
+    if (c[4] !== undefined) target.head    = String(c[4]).replace(/[, ]/g, '').trim();
+    target.dirty = true;
+  });
+
+  renderDay();
+  banner('info', '<b>已貼上 ' + lines.length + ' 列</b>　'
+    + '請確認品項與時間都對，再按儲存。欄位順序：品項／起始／結束／瓶數／人數。');
+});
+
+// ══ 操作 ═══════════════════════════════════════════════════
+function guardUnsaved(go) {
+  var dirty = state.rows.some(function (r) {
+    return (r.dirty && (r.id || rowComplete(r))) || (r.deleted && r.id);
+  });
+  if (dirty && !confirm('本日有尚未儲存的變更，離開這一天就會消失。確定要離開嗎？')) return;
+  go();
+}
+
+$('prevDay').addEventListener('click', function () {
+  guardUnsaved(function () { loadDay(addDays(state.date, -1)); });
+});
+$('nextDay').addEventListener('click', function () {
+  guardUnsaved(function () { loadDay(addDays(state.date, 1)); });
+});
+$('todayBtn').addEventListener('click', function () {
+  guardUnsaved(function () { loadDay(today()); });
+});
+$('datePick').addEventListener('change', function (e) {
+  var v = e.target.value;
+  if (v) guardUnsaved(function () { loadDay(v); });
+});
+$('gapBtn').addEventListener('click', function () {
+  $('gapBtn').disabled = true;
+  findGap().then(function (d) {
+    if (d) guardUnsaved(function () { loadDay(d); });
+    else banner('ok', '<b>近四個月的工作日都處理過了</b>　沒有待補的日子。');
+  }).catch(function (e) { banner('bad', e.message); })
+    .then(function () { $('gapBtn').disabled = false; });
+});
+$('prevMon').addEventListener('click', function () {
+  var d = parseYmd(state.calMonth + '-01'); d.setMonth(d.getMonth() - 1);
+  loadMonth(ymd(d).slice(0, 7));
+});
+$('nextMon').addEventListener('click', function () {
+  var d = parseYmd(state.calMonth + '-01'); d.setMonth(d.getMonth() + 1);
+  loadMonth(ymd(d).slice(0, 7));
+});
+$('addRow').addEventListener('click', function () {
+  addRow(); renderDay();
+  var all = $('rows').querySelectorAll('tr:last-child input:not([disabled])');
+  if (all.length) all[0].focus();
+});
+
+window.addEventListener('beforeunload', function (e) {
+  var dirty = state.rows.some(function (r) {
+    return (r.dirty && (r.id || rowComplete(r))) || (r.deleted && r.id);
+  });
+  if (dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ══ 起手 ═══════════════════════════════════════════════════
+function showLogin() {
+  $('bootView').hidden = true;
+  $('loginView').hidden = false;
+  $('acc').focus();
+}
+
+loadSession();
+if (sess && sess.refresh) {
+  // 已登入過就直接續用，不要讓人每天早上重打一次密碼
+  refresh().then(boot).then(function () { $('bootView').hidden = true; })
+           .catch(function () { clearSession(); showLogin(); });
+} else {
+  showLogin();
+}
+
+})();
+</script>
