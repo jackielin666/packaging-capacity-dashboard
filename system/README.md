@@ -125,7 +125,7 @@ Supabase Auth 底層一定要用信箱格式，所以前端會自動把 `admin00
 **位置**：Google Drive →「AI系統資料庫」→
 [包裝產能資料庫備份](https://drive.google.com/drive/folders/1FXHhPneNgMc4H11ZzrFbnhF1h-B-v9vq)
 
-**方式**：Google Apps Script，每月 1 號凌晨 3 點自動匯出三張表的 CSV。
+**方式**：Google Apps Script，每月 10 號凌晨 3 點自動匯出三張表的 CSV。
 跑在 Google 的機器上，不需要開電腦或伺服器，零成本。
 安裝步驟見 `system/backup/README.md`。
 

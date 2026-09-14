@@ -2,7 +2,7 @@
  * 包裝產能資料庫 —— 每月自動備份到 Google Drive
  *
  * 跑在 Google 自己的機器上，不需要開電腦、不需要伺服器、不需要付費。
- * 每月 1 號凌晨把資料庫整份匯出成 CSV，存進指定的 Drive 資料夾。
+ * 每月 10 號凌晨把資料庫整份匯出成 CSV，存進指定的 Drive 資料夾。
  *
  * 安裝方式見同資料夾的 README.md。
  */
@@ -34,7 +34,9 @@ function runBackup() {
   TABLES.forEach(function (t) {
     var rows = fetchAll_(token, t.name, t.columns);
     var csv  = toCsv_(rows, t.columns.split(','));
-    var file = folder.createFile('packing_' + t.name + '_' + stamp + '.csv', csv, MimeType.CSV);
+    var name = 'packing_' + t.name + '_' + stamp + '.csv';
+    replaceExisting_(folder, name);
+    var file = folder.createFile(name, csv, MimeType.CSV);
     report.push(t.name + '：' + rows.length + ' 筆（' + Math.round(csv.length / 1024) + ' KB）');
     Logger.log('已寫入 %s（%s 筆）', file.getName(), rows.length);
   });
@@ -68,13 +70,13 @@ function verifyLatestBackup() {
   return msg;
 }
 
-/** 建立每月 1 號的自動執行排程。只需要按一次。 */
+/** 建立每月 10 號的自動執行排程。只需要按一次。 */
 function installMonthlyTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'runBackup') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('runBackup').timeBased().onMonthDay(1).atHour(3).create();
-  Logger.log('已排定：每月 1 號凌晨 3 點自動備份');
+  ScriptApp.newTrigger('runBackup').timeBased().onMonthDay(10).atHour(3).create();
+  Logger.log('已排定：每月 10 號凌晨 3 點自動備份');
 }
 
 // ── 內部函式 ────────────────────────────────────────────────
@@ -152,6 +154,15 @@ function toCsv_(rows, columns) {
     }).join(','));
   });
   return out.join('\n') + '\n';
+}
+
+/**
+ * Drive 允許同名檔案並存，同一天重跑會留下兩份長得一樣的檔案。
+ * 這會讓 verifyLatestBackup 不知道該讀哪一份，所以先把同名舊檔丟垃圾桶。
+ */
+function replaceExisting_(folder, name) {
+  var it = folder.getFilesByName(name);
+  while (it.hasNext()) it.next().setTrashed(true);
 }
 
 function newestFile_(folder, prefix) {
