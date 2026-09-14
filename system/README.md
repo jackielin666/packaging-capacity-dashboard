@@ -13,8 +13,9 @@
 | 階段 | 內容 | 狀態 |
 |---|---|---|
 | **0** | 資料庫建置、權限、歷史資料匯入 | ✅ 完成 |
+| **備份** | Google Drive 每月自動匯出（Apps Script） | ✅ 程式完成，待安裝 |
 | 1 | 資料輸入介面（登入、批次輸入、即時產能檢核） | 進行中 |
-| 2 | 補登進度月曆、月度完整性檢核、每月 CSV 備份到 GitHub | 未開始 |
+| 2 | 補登進度月曆、月度完整性檢核 | 未開始 |
 | 3 | 儀表板改讀資料庫、月報 PDF | 未開始 |
 | 4 | 人均效率分析（以 2026-08 為基準起點） | 未開始 |
 
@@ -99,23 +100,60 @@ system/supabase/seed/         品項主檔與歷史批次（同時是第一份�
 
 ---
 
+## 登入方式
+
+使用者只輸入**帳號**，不輸入信箱：
+
+```
+帳號：admin000
+密碼：（自行設定）
+```
+
+Supabase Auth 底層一定要用信箱格式，所以前端會自動把 `admin000` 補成
+`admin000@packing.local` 再送出。**使用者從頭到尾看不到信箱**，也不用記。
+日後新增輸入專員時同理：帳號 `packer01`，後面自動補 `@packing.local`。
+
+| 帳號 | 角色 | 用途 |
+|---|---|---|
+| `admin000` | manager 主管 | Jackie 哥，不限月份可改 |
+| `backup` | viewer 唯讀 | 每月備份程式專用，只能讀 |
+
+---
+
+## 備份
+
+**位置**：Google Drive →「AI系統資料庫」→
+[包裝產能資料庫備份](https://drive.google.com/drive/folders/1FXHhPneNgMc4H11ZzrFbnhF1h-B-v9vq)
+
+**方式**：Google Apps Script，每月 1 號凌晨 3 點自動匯出三張表的 CSV。
+跑在 Google 的機器上，不需要開電腦或伺服器，零成本。
+安裝步驟見 `system/backup/README.md`。
+
+備份用唯讀帳號讀取，密碼存在 Apps Script 的指令碼屬性，不進版控。
+另附 `verifyLatestBackup()` 可比對「資料庫筆數 vs 備份筆數」，
+用來抓「備份有跑但檔案是空的」這種最難發現的失效。
+
+---
+
 ## 待辦（需要 Jackie 哥操作）
 
 1. **開放 `packing` schema 給 Data API**
    Supabase 後台 → Project Settings → API → Exposed schemas，把 `packing` 加進去。
-   不做這一步，前端 `supabase-js` 讀不到任何資料。
+   不做這步，前端與備份程式都讀不到任何資料。
 
-2. **改掉 `admin000` 的密碼**
-   目前帳號 `admin000@packing.local` / 密碼 `admin000`（角色 `manager`）僅供開發測試。
-   **真實生產資料進來前必須更換** —— 八碼且帳密相同，等於沒有保護。
+2. **安裝備份程式**
+   照 `system/backup/README.md` 做，約 5 分鐘，只需做一次。
 
-3. **確認 GitHub Pages 網址可開**
-   `https://jackielin666.github.io/packaging-capacity-dashboard/`
-   （開發環境無對外網路，無法代為驗證）
+3. **設定 `admin000` 的密碼**
+   目前是開發用的臨時密碼，真實生產資料進來前必須更換。
 
 ---
 
 ## 已知限制
 
-Supabase 免費方案**沒有自動備份**。階段 2 會加上每月自動匯出 CSV 到 GitHub，
-在不增加成本的前提下讓資料至少有兩份。在那之前，資料庫是單點。
+- Drive 的上層資料夾「AI系統資料庫」擁有者是別的帳號（`rbsjt2013@gmail.com`），
+  子資料夾「包裝產能資料庫備份」擁有者才是 Jackie 哥。
+  上層若被停用或收回共用，備份會連同一起失聯 —— 長期建議把備份資料夾搬到
+  Jackie 哥自己的「我的雲端硬碟」底下。
+- Supabase 免費方案沒有自動備份，上述 Apps Script 是唯一的第二份副本，
+  加上 GitHub 上的 `system/supabase/seed/` 共兩份。
