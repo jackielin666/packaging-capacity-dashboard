@@ -92,11 +92,19 @@
 
 ```
 system/supabase/migrations/   資料庫結構，依序執行即可重建
-system/supabase/seed/         品項主檔與歷史批次（同時是第一份備份）
+system/backup/                每月自動備份到 Google Drive 的程式與安裝說明
+system/test_entry.py          輸入介面的自動化測試
+entry.html                    輸入介面（部署在 GitHub Pages）
+index.html                    儀表板
 ```
 
-`02_batches.csv` 採用 `sku_code,prod_date,start_time,end_time,bottles,headcount` 六欄；
-**不含工時** —— 工時由資料庫推算，存進 CSV 只會製造第二份真相。
+**版控裡只放「結構」，不放「資料」。** 歷史批次與品項主檔放在
+[Google Drive 備份資料夾](https://drive.google.com/drive/folders/1FXHhPneNgMc4H11ZzrFbnhF1h-B-v9vq)，
+由每月自動備份維護。
+
+要重建資料庫時：先依序跑 `migrations/` 建好結構，再把 Drive 上的
+`packing_skus_*.csv` 與 `packing_batches_*.csv` 匯入。
+批次 CSV **不含工時** —— 工時由資料庫從起訖時間推算，匯入也不會被採用。
 
 ---
 
