@@ -137,6 +137,22 @@ with sync_playwright() as p:
     pg.fill("#skuSearch", "")
     pg.wait_for_timeout(400)
 
+    # ── 燈號：看離群「率」，不是「有沒有離群批次」──
+    print("\n── 燈號與正常範圍 ──")
+    lg = pg.inner_text("#lampLegend")
+    check("燈號說明寫明是比率", "離群批次佔" in lg and "%" in lg, lg[:160])
+    check("說明為何不用「有沒有」", "有一兩批離群本來就是常態" in lg, lg[:400])
+    # td.dv 不能被上方工具列的 .bar 撞名成 flex，否則橫條會被壓成 0 寬
+    dvw = pg.eval_on_selector("#tbOverview td.dv .dvb", "e => e.clientWidth")
+    check("偏離橫條畫得出來（寬度 > 0）", dvw > 20, dvw)
+    check("橫條有中線基準", pg.locator("#tbOverview td.dv .dvb").count() > 0)
+    svg = pg.inner_html("#cDots")
+    check("圖上標出平常水準", "平常" in svg, svg[:120])
+    check("圖上標出下限", "下限" in svg)
+    check("圖上畫出正常範圍帶狀", "<rect" in svg and "opacity=\".055\"" in svg)
+    dl = pg.inner_text("#dotLegend")
+    check("圖例寫出正常範圍的兩個端點", "～" in dl and "正常範圍" in dl, dl[:200])
+
     for w in (390, 768, 1440):
         pg.set_viewport_size({"width": w, "height": 900})
         pg.wait_for_timeout(250)
@@ -221,6 +237,8 @@ with sync_playwright() as p:
           pg3.inner_text("#repChk")[:120])
 
     check("月報表格也帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
+    check("本月重點的品項是條列", pg3.locator("#repBody .hilite .hlist li").count() > 0,
+          pg3.locator("#repBody .hilite .hlist li").count())
     check("月報表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html("#repBody"))
 
     print("\n── 月報的本月重點 ──")

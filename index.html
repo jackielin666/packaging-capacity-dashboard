@@ -149,6 +149,15 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   font-weight:600;font-size:13.5px;padding:8px 14px;letter-spacing:.06em}
 .rtab.hl{margin:0}
 .rtab.hl td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+/* 重點裡的品項清單：品號、品名、幅度三欄各自對齊，不要黏成一段 */
+.hlist{list-style:none;margin:5px 0 0;padding:0}
+.hlist li{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:baseline;
+  padding:2.5px 0;border-bottom:1px dotted var(--rule);font-size:11px}
+.hlist li:last-child{border-bottom:0}
+.hlist b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.hlist span{color:var(--ink-2)}
+.hlist em{font-style:normal;font-family:"IBM Plex Mono",monospace;color:var(--signal);
+  white-space:nowrap}
 .rtab.hl tr:last-child td{border-bottom:0}
 .rtab.hl td.no{width:26px;font-family:"IBM Plex Mono",monospace;color:var(--accent);
   font-size:13px;padding-right:0}
@@ -217,6 +226,19 @@ td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
 tbody tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;
   font-variant-numeric:tabular-nums;white-space:nowrap}
+th.c{text-align:center}
+/* 偏離幅度的小橫條。中線＝平常水準，往左是慢、往右是快，刻度 ±30%。
+   class 不能叫 .bar —— 上面的工具列已經用了那個名字，而且它是 display:flex，
+   撞名會把整個欄位變成 flex 容器，橫條就被壓成 0 寬。 */
+td.dv{display:table-cell;white-space:nowrap;text-align:center;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+td.dv b{display:block;font-size:11.5px;font-weight:500;margin-top:3px}
+.dvb{position:relative;display:block;height:7px;background:var(--raised);border-radius:2px}
+.dvb::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;
+  background:var(--rule-2)}
+.dvb i{position:absolute;top:0;bottom:0;border-radius:2px;min-width:2px}
+.dvb i.dn{background:var(--signal)} .dvb i.up{background:var(--accent)}
+.dvb i.flat{background:var(--ink-4)}
 td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
 /* 品號底下帶一行品名。只給品號的表，要先去查對照表才看得懂在講哪支產品 ——
    那一步就是現場不看報表的原因。品名用內文字體、放小一級，不跟品號搶。 */
@@ -341,7 +363,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 [hidden]{display:none!important}
 
-}
 /* 手機上表格橫向捲動會把「狀態」擠出畫面 —— 改成一列一張卡片 */
 @media(max-width:760px){
   #overviewTable thead{display:none}
@@ -354,6 +375,9 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     font-family:"IBM Plex Mono",monospace;letter-spacing:.05em;text-align:left;flex:none}
   #overviewTable td.sku{font-size:16px;padding-bottom:8px}
   #overviewTable td.sku::before{content:none}
+  #overviewTable td.dv{display:grid;grid-template-columns:1fr 64px;align-items:center;gap:10px}
+  #overviewTable td.dv .dvb{width:100%}
+  #overviewTable td.dv b{margin:0;text-align:right}
   #overviewTable td.st{padding-top:8px;margin-top:6px;border-top:1px solid var(--rule)}
   #overviewTable td.st::before{content:"狀態"}
   .lamp{justify-content:flex-end}
@@ -448,11 +472,16 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     </div>
     <div class="tw">
       <table id="overviewTable">
+        <colgroup>
+          <col style="width:20%"><col style="width:8%"><col style="width:10%">
+          <col class="opt" style="width:7%"><col style="width:10%">
+          <col class="opt" style="width:9%"><col style="width:13%"><col style="width:23%">
+        </colgroup>
         <thead><tr>
-          <th>品號 / 品名</th><th class="n">生產天數</th><th class="n">包裝量</th>
+          <th>品號 / 品名</th><th class="n">生產<i>天數</i></th><th class="n">包裝量</th>
           <th class="n opt">批次</th><th class="n">平常水準<i>單位/hr</i></th>
-          <th class="n opt">每千瓶工時<i>hr</i></th>
-          <th class="n">近 3 個生產月 vs 平常</th><th>狀態</th>
+          <th class="n opt">每千瓶<i>工時 hr</i></th>
+          <th class="c">近 3 個生產月<i>vs 平常</i></th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
       </table>
@@ -775,7 +804,16 @@ const SHORT_BATCH_H = 1.0;   // 零星批次門檻
 //
 // 門檻的可驗證性沒有變 —— 畫面上顯示、圖上畫線的同樣是這個中位數。
 const OUT_HI = 2.5, OUT_LO = 0.7;
-const CV_WATCH = 40;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
+const CV_WATCH = 45;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
+// 燈號改看「離群『率』」而不是「有沒有離群批次」。
+// 實測：47 支樣本足夠的品項，近三個生產月的離群率中位數就有 20% ——
+// 換句話說「有一兩批離群」是常態，不是異常。舊規則只要 1 批就亮紅，
+// 結果 28/47 支標異常，燈號等於沒有作用。改成比率後 異常 3／注意 17／正常 27。
+const OUT_RATE_ALERT = 30;   // 近三個生產月離群率 ≥ 此值 → 異常（全廠水準 19% 的 1.5 倍）
+const OUT_RATE_WATCH = 25;   // ≥ 此值 → 注意
+const OUT_MIN_ALERT  = 3;    // 且至少要有這麼多批，避免 2/5 就亮紅
+const OUT_MIN_WATCH  = 2;
+const RECENT_MIN_N   = 5;    // 近三個生產月不到這麼多批，不用比率判定
 const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
 const DECLINE_MONTHS = 3;
 const MIN_BATCHES = 10;      // 低於此批次數不做判定，只標「批次太少」
@@ -817,9 +855,12 @@ function analyse(batches) {
     const days = new Set(list.map(x => x.d)).size;
     const short = list.filter(x => x.h < SHORT_BATCH_H);
 
-    // 離群批次：跟這支產品自己的平常水準（中位數）比
+    // 離群批次：跟這支產品自己的平常水準（中位數）比。
+    // 這裡以前寫成 rate（總瓶數÷總工時，也就是加權平均），但圖上畫的線、
+    // isOutlier() 標紅點用的都是中位數 —— 同一批在清單裡算離群、圖上卻不是紅點，
+    // 兩邊對不起來。基準只能有一個，就是畫面上看得到的那條線。
     const outliers = list
-      .filter(x => { const r = x.b / x.h; return r > rate * OUT_HI || r < rate * OUT_LO; })
+      .filter(x => { const r = x.b / x.h; return r > med * OUT_HI || r < med * OUT_LO; })
       .map(x => ({ ...x, rate: x.b / x.h, recent: recent3.has(x.m) }))
       .sort((a, b) => a.d < b.d ? 1 : -1);   // 日期新→舊
 
@@ -852,13 +893,22 @@ function analyse(batches) {
 
     const cv = Math.round(100 * stdev(rates) / mean(rates));
     const enough = list.length >= MIN_BATCHES;
-    const recentOutliers = outliers.filter(x => x.recent);
+    // 「近期」與 declining 同一個基準：該品項自己最後 3 個有生產的月份
+    const recentAll = list.filter(x => ownRecent.has(x.m));
+    const recentOutliers = outliers.filter(x => ownRecent.has(x.m));
+    const outRate = recentAll.length
+      ? Math.round(100 * recentOutliers.length / recentAll.length) : null;
+    const rated = recentAll.length >= RECENT_MIN_N;   // 批數太少時比率沒有意義
+    const outText = `近三月 ${recentOutliers.length}/${recentAll.length} 批離群（${outRate}%）`;
+
     // 燈號要能自己解釋為什麼 —— 否則「近三月 +1% 卻標異常」會讓人不信任
     let status = 'ok', statusWhy = '批次穩定';
     if (!enough) { status = 'thin'; statusWhy = `全年僅 ${list.length} 批，樣本不足`; }
-    else if (declining) { status = 'alert'; statusWhy = '連續 3 個月變慢'; }
-    else if (recentOutliers.length) {
-      status = 'alert'; statusWhy = `近三月 ${recentOutliers.length} 批離群`;
+    else if (declining) { status = 'alert'; statusWhy = '連續 3 個生產月變慢'; }
+    else if (rated && outRate >= OUT_RATE_ALERT && recentOutliers.length >= OUT_MIN_ALERT) {
+      status = 'alert'; statusWhy = outText;
+    } else if (rated && outRate >= OUT_RATE_WATCH && recentOutliers.length >= OUT_MIN_WATCH) {
+      status = 'watch'; statusWhy = outText;
     } else if (cv > CV_WATCH) { status = 'watch'; statusWhy = `批次落差 ${cv}%`; }
     // 只有在近期整體確實偏低時才這樣寫 —— 否則會出現「+2.5% 卻說偏低」的反向矛盾
     else if (belowCount && vsUsual !== null && vsUsual < 0) {
@@ -875,7 +925,7 @@ function analyse(batches) {
       hShare: +(100 * H / totalH).toFixed(2), bShare: +(100 * B / totalB).toFixed(2),
       shortN: short.length, shortH: +short.reduce((a, x) => a + x.h, 0).toFixed(1),
       status, statusWhy, declining, belowCount, vsUsual, months, outliers, laggards,
-      recentOutlierN: recentOutliers.length,
+      recentOutlierN: recentOutliers.length, recentN: recentAll.length, outRate,
     });
   }
   skus.sort((a, b) => b.b - a.b);
@@ -968,6 +1018,7 @@ function buildAlerts(skus, meta) {
 global.PackingEngine = {
   supported, readXlsx, toBatches, analyse, guessStartYear,
   thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES,
+    OUT_RATE_ALERT, OUT_RATE_WATCH, OUT_MIN_ALERT, OUT_MIN_WATCH, RECENT_MIN_N,
     // 箭頭轉紅／轉綠的門檻，刻意與 DECLINE 同一個數字，避免「箭頭紅、狀態正常」
     ARROW: Math.round((1 - DECLINE) * 100) / 100 },
   // 基準用中位數而不是「總瓶數÷總工時」。後者是加權平均，慢批次佔用的工時多、
@@ -1075,16 +1126,31 @@ function dotChart(skus) {
     s += `<text x="${x}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.getUTCMonth() + 1}月</text>`;
   });
 
-  // 各品項的平常水準線，以及「低於平常水準 x 倍就算離群」的門檻線
-  const lo = E.thresholds.OUT_LO;
+  /* 正常範圍：上限、平常水準、下限三條線，中間的帶狀底色就是「正常」。
+     落在帶狀外面的點才是異常 —— 這樣判定標準完全畫在圖上，不必相信文字說明。
+     只比一支時才畫帶狀，三支疊在一起會糊成一片，那時只留三條線。 */
+  const lo = E.thresholds.OUT_LO, hi = E.thresholds.OUT_HI;
+  const single = skus.length === 1;
   skus.forEach((sk, si) => {
     const col = cssv(SERIES[si]);
     const sig = cssv('--signal');
-    // 離群門檻線 —— 讓現場一眼看出哪些點掉到線下
-    s += `<line x1="${L}" y1="${Y(sk.med * lo)}" x2="${W - R}" y2="${Y(sk.med * lo)}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
-    s += label(W - R + 7, Y(sk.med * lo) + 4, `離群門檻 ${fmt(sk.med * lo)}`, sig);
+    const yLo = Y(sk.med * lo), yHi = Math.max(T, Y(sk.med * hi));
+    if (single) {
+      s += `<rect x="${L}" y="${yHi}" width="${pw}" height="${Math.max(0, yLo - yHi)}"
+             fill="${cssv('--accent')}" opacity=".055"/>`;
+    }
+    // 下限 —— 現場真正會踩到的那條
+    s += `<line x1="${L}" y1="${yLo}" x2="${W - R}" y2="${yLo}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
+    s += label(W - R + 7, yLo + 4, `下限 ${fmt(sk.med * lo)}`, sig);
+    // 平常水準
     s += `<line x1="${L}" y1="${Y(sk.med)}" x2="${W - R}" y2="${Y(sk.med)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".9"/>`;
     s += label(W - R + 7, Y(sk.med) + 4, `平常 ${fmt(sk.med)}`, col);
+    // 上限：2.5 倍平常水準通常在圖外，硬把 Y 軸拉高會把所有點壓到下面一小條，
+    // 所以只在畫得進來的時候畫線，畫不進來就在圖例寫清楚數字。
+    if (Y(sk.med * hi) >= T) {
+      s += `<line x1="${L}" y1="${yHi}" x2="${W - R}" y2="${yHi}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
+      s += label(W - R + 7, yHi + 4, `上限 ${fmt(sk.med * hi)}`, sig);
+    }
   });
 
   pts.forEach((p, i) => {
@@ -1104,7 +1170,10 @@ function dotChart(skus) {
   });
   $('dotLegend').innerHTML = skus.map((sk, i) =>
     `<span><i style="background:${cssv(SERIES[i])}"></i>${sk.sku}　${sk.n} 批</span>`).join('')
-    + `<span><i style="background:var(--signal)"></i>離群批次（低於平均 ${Math.round(E.thresholds.OUT_LO * 100)}% 或高於 ${E.thresholds.OUT_HI} 倍）</span>`;
+    + `<span><i style="background:var(--signal)"></i>離群批次 ——`
+    + ` 掉出 <b>${fmt(skus[0].med * lo)} ～ ${fmt(skus[0].med * hi)}</b> 這個範圍`
+    + `（平常水準 ${fmt(skus[0].med)} 的 ${Math.round(lo * 100)}% ～ ${hi} 倍）</span>`
+    + (single ? `<span style="color:var(--ink-3)">淺綠色區塊就是正常範圍，點落在裡面就不必追</span>` : '');
 }
 
 /* ─────────── 02b 工時與產出散佈圖 ─────────── */
@@ -1301,7 +1370,11 @@ function renderOverview() {
     const d = s.vsUsual;
     const pct = d == null ? null : Math.round(d * 100);
     const cls = pct == null ? 'flat' : pct <= -lim ? 'dn' : pct >= lim ? 'up' : 'flat';
-    const arrow = pct == null ? '—' : pct <= -lim ? '▼' : pct >= lim ? '▲' : '▬';
+    // 只給數字要一列一列讀；配一條從中線長出來的橫條，一眼就掃得出哪幾支偏掉。
+    // 刻度固定 ±30%，超過就頂到底，各列之間才比得起來。
+    const w = pct == null ? 0 : Math.min(Math.abs(pct), 30) / 30 * 50;
+    const bar = pct == null ? '<span class="dvb"></span>'
+      : `<span class="dvb"><i class="${cls}" style="${pct < 0 ? 'right:50%' : 'left:50%'};width:${w}%"></i></span>`;
     return `<tr class="clickable" data-goto="${s.sku}">
       <td class="sku">${s.sku}${skuName(s.sku)}</td>
       <td class="n" data-l="生產天數">${s.d}</td>
@@ -1309,7 +1382,8 @@ function renderOverview() {
       <td class="n opt" data-l="批次">${s.n}</td>
       <td class="n" data-l="平常水準">${fmt(s.med)}</td>
       <td class="n opt" data-l="每千瓶工時">${s.hPer1k.toFixed(2)}</td>
-      <td class="n delta ${cls}" data-l="近 3 個生產月 vs 平常">${arrow}${pct == null ? '' : ' ' + (pct > 0 ? '+' : '') + pct + '%'}</td>
+      <td class="dv delta ${cls}" data-l="近 3 個生產月 vs 平常">${bar}<b>${
+        pct == null ? '—' : (pct > 0 ? '+' : '') + pct + '%'}</b></td>
       <td class="st"><div class="lamp ${s.status}"><b>${LAMP[s.status]}</b>
         <span class="why">${s.statusWhy}</span></div></td></tr>`;
   }).join('');
@@ -1319,15 +1393,19 @@ function renderOverview() {
   const dot = cls => `<span class="lamp ${cls}" style="display:inline-flex"></span>`;
   const lim = Math.round(t.ARROW * 100);
   $('lampLegend').innerHTML =
-    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）最近 3 個生產月都比自己平常慢 ${lim}% 以上，
-     或最近三個月出現離群批次　·　
-     ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）批次之間落差偏大（變異係數 &gt; ${t.CV_WATCH}%）　·　
+    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）近 3 個生產月都比自己平常慢 ${lim}% 以上，
+     或離群批次佔 <b>${t.OUT_RATE_ALERT}%</b> 以上（且至少 ${t.OUT_MIN_ALERT} 批）　·　
+     ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）離群批次佔 ${t.OUT_RATE_WATCH}% 以上，
+     或批次之間落差偏大（變異係數 &gt; ${t.CV_WATCH}%）　·　
      ${dot('ok')} <b>正常</b>（${c.ok || 0} 支）　·　
      ${dot('thin')} <b>批次太少</b>（${c.thin || 0} 支）全年不到 ${t.MIN_BATCHES} 批，不做判定
      <br><span style="color:var(--ink-3)">
+     判定看的是離群<b>比率</b>，不是「有沒有離群批次」——
+     全廠近三個生產月的離群率中位數就有 20%，有一兩批離群本來就是常態；
+     舊規則只要 1 批就亮紅，結果近六成品項標異常，燈號等於沒有作用。<br>
      「近 3 個生產月」是<b>該品項自己有生產的月份</b>，不是月曆月份 ——
-     很多品項不是每月都做，用月曆月份會失真。箭頭在 ±${lim}% 以內顯示為灰色，
-     與燈號用同一個門檻，所以不會出現「箭頭紅、狀態正常」而沒有說明的情況。</span>`;
+     很多品項不是每月都做，用月曆月份會失真。橫條刻度為 ±30%，
+     ±${lim}% 以內為灰色，與燈號用同一個門檻。</span>`;
 }
 $('tabFreq').onclick = () => { tab = 'freq'; syncTabs(); };
 $('tabVol').onclick = () => { tab = 'vol'; syncTabs(); };
@@ -1775,15 +1853,19 @@ function buildReport(ym) {
 
   const slow = list.filter(g => g.vs !== null && g.vs <= -10)
                    .sort((a, b) => a.vs - b.vs).slice(0, 4);
+  // 四支品項寫成一段會黏成一團，看的人得逐字切開才知道哪個數字配哪支。
+  // 一支一列，品號、品名、幅度各自對齊。
   if (slow.length) pts.push({ who: '製造',
     t: `${slow.length} 支品項低於平常水準 10% 以上`,
-    d: slow.map(g => `${withName(g.s)} ${g.vs}%`).join('；') });
+    rows: slow.map(g => [g.s, cut(nameOf(g.s), 16), g.vs + '%']) });
 
-  if (odd.length) pts.push({ who: '製造',
-    t: `${odd.length} 批需要說明`,
-    d: `最嚴重的是 ${withName(odd.slice().sort((a, b) => b.gap - a.gap)[0].s)}`
-       + `（${odd.slice().sort((a, b) => b.gap - a.gap)[0].kind === 'lo' ? '低' : '高'}於平常 `
-       + `${odd.slice().sort((a, b) => b.gap - a.gap)[0].gap}%）` });
+  if (odd.length) {
+    const worst = odd.slice().sort((a, b) => b.gap - a.gap).slice(0, 3);
+    pts.push({ who: '製造',
+      t: `${odd.length} 批需要說明`,
+      rows: worst.map(x => [x.s, cut(nameOf(x.s), 16),
+        `${x.d}　${x.kind === 'lo' ? '低' : '高'}於平常 ${x.gap}%`]) });
+  }
 
   if (heavy.length) pts.push({ who: '業務・生管',
     t: `${withName(heavy[0].s)} 用掉 ${heavy[0].hShare}% 工時，只產出 ${heavy[0].bShare}% 數量`,
@@ -1822,7 +1904,9 @@ function buildReport(ym) {
 
   const head = pts.slice(0, 6).map((x, i) => `<tr>
     <td class="no">${'①②③④⑤⑥'[i]}</td>
-    <td><div class="t">${x.t}</div>${x.d ? `<div class="d">${x.d}</div>` : ''}</td>
+    <td><div class="t">${x.t}</div>${x.d ? `<div class="d">${x.d}</div>` : ''}${
+      x.rows ? `<ul class="hlist">${x.rows.map(r =>
+        `<li><b>${r[0]}</b><span>${esc(r[1])}</span><em>${r[2]}</em></li>`).join('')}</ul>` : ''}</td>
     <td class="who">${x.who ? `<span>${x.who}</span>` : ''}</td></tr>`).join('');
 
   return `
