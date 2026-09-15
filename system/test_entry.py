@@ -36,6 +36,9 @@ def make_router(existing_batches):
         if "/rest/v1/sku_stats" in u:
             return r.fulfill(status=200, content_type="application/json", body=json.dumps(SKUS))
         if "/rest/v1/batches" in u:
+            if m == "GET" and "source=eq.import" in u:
+                return r.fulfill(status=200, content_type="application/json",
+                                 body=json.dumps([{"prod_date": "2026-08-31"}]))
             if m == "GET" and "sku_code=eq." in u:
                 return r.fulfill(status=200, content_type="application/json", body=json.dumps([
                     {"prod_date":"2026-08-29","start_time":"08:00:00","end_time":"09:30:00",
@@ -83,6 +86,8 @@ def make_router(existing_batches):
                 {"prod_date":"2026-09-02","batches":0,"bottles":0,"hours":0,"no_operation":True},
                 {"prod_date":"2026-09-03","batches":2,"bottles":900,"hours":3.0,"no_operation":False},
             ]))
+        if "/rest/v1/day_summary" in u and "2026-08" in u:
+            return r.fulfill(status=200, content_type="application/json", body="[]")
         return r.continue_()
     return route
 
@@ -273,6 +278,20 @@ with sync_playwright() as p:
     check("待補天數顯示在按鈕上", "待補" in pg.inner_text("#gapBtn"), pg.inner_text("#gapBtn"))
     check("未來日期不可點", pg.locator("#cal .cell.future[data-d]").count() == 0,
           pg.locator("#cal .cell.future[data-d]").count())
+
+    print("\n── 匯入期間的空白日不算漏登 ──")
+    pg.click("#prevMon")           # 切到 2026-08，那是匯入的期間
+    pg.wait_for_timeout(700)
+    check("切到上個月", "8 月" in pg.inner_text("#calTitle"), pg.inner_text("#calTitle"))
+    check("匯入期間沒有紅色待補", pg.locator("#cal .cell.miss").count() == 0,
+          pg.locator("#cal .cell.miss").count())
+    check("空白工作日標為歷史空白", pg.locator("#cal .cell.hist").count() > 0,
+          pg.locator("#cal .cell.hist").count())
+    check("摘要的待補為 0", "待補 0" in pg.inner_text("#calSub"), pg.inner_text("#calSub"))
+    check("圖例說明匯入期間的規則", "2026-08-31" in pg.inner_text(".legend"),
+          pg.inner_text(".legend")[-120:])
+    pg.click("#nextMon")
+    pg.wait_for_timeout(700)
 
     print("\n── Excel 貼上 ──")
     pg.evaluate("""() => {

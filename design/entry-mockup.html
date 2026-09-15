@@ -315,6 +315,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .cell.today{border:1px dashed var(--rule-2)}
 .cell.has{background:var(--accent-wash);border-color:rgba(10,127,112,.4);color:var(--accent)}
 .cell.none{background:var(--raised);color:var(--ink-3)}
+/* 匯入期間的空白日：來源是 Excel，當時沒有生產。不是漏登，不該標紅。 */
+.cell.hist{background:var(--sunk);color:var(--ink-4)}
 .cell.miss{background:var(--signal-wash);border-color:rgba(180,84,26,.45);color:var(--signal)}
 .cell.sel{border:2px solid var(--ink);color:var(--ink);font-weight:500;background:#fff}
 .cell .n{font-size:9.5px;opacity:.85}
@@ -515,7 +517,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <span><i class="l-has"></i>已登記</span>
         <span><i class="l-none"></i>無作業</span>
         <span><i class="l-miss"></i>待補</span>
-        <span>六日不計入待補。國定假日請按「本日無包裝作業」。</span>
+        <span>六日不計入待補。國定假日請按「本日無包裝作業」。<br>
+          系統上線前（<span id="impThru">—</span> 以前）的空白日視為當日無生產，不列待補。</span>
       </div>
       <div class="exp">
         <span class="hint">匯出紀錄</span>

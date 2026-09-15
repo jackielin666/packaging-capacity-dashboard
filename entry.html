@@ -288,6 +288,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .cell.today{border:1px dashed var(--rule-2)}
 .cell.has{background:var(--accent-wash);border-color:rgba(10,127,112,.4);color:var(--accent)}
 .cell.none{background:var(--raised);color:var(--ink-3)}
+/* 匯入期間的空白日：來源是 Excel，當時沒有生產。不是漏登，不該標紅。 */
+.cell.hist{background:var(--sunk);color:var(--ink-4)}
 .cell.miss{background:var(--signal-wash);border-color:rgba(180,84,26,.45);color:var(--signal)}
 .cell.sel{border:2px solid var(--ink);color:var(--ink);font-weight:500;background:#fff}
 .cell .n{font-size:9.5px;opacity:.85}
@@ -491,7 +493,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <span><i class="l-has"></i>已登記</span>
         <span><i class="l-none"></i>無作業</span>
         <span><i class="l-miss"></i>待補</span>
-        <span>六日不計入待補。國定假日請按「本日無包裝作業」。</span>
+        <span>六日不計入待補。國定假日請按「本日無包裝作業」。<br>
+          系統上線前（<span id="impThru">—</span> 以前）的空白日視為當日無生產，不列待補。</span>
       </div>
       <div class="exp">
         <span class="hint">匯出紀錄</span>
@@ -715,7 +718,8 @@ var state = {
   stats: {},         // code -> {mean_rate, batches}
   rows: [],          // 畫面上的批次列
   dayStatus: null,   // daily_status 那一列
-  days: {}           // 'YYYY-MM-DD' -> day_summary
+  days: {},          // 'YYYY-MM-DD' -> day_summary
+  importedThrough: null   // 匯入的歷史資料到哪一天為止
 };
 var uid = 0;
 
@@ -779,7 +783,10 @@ function boot() {
   return Promise.all([
     api('members?select=display_name,role&user_id=eq.' + id),
     api('sku_stats?select=code,name,container,batches,mean_rate,median_rate,last_date'
-        + '&active=is.true&order=batches.desc')
+        + '&active=is.true&order=batches.desc'),
+    // 匯入的歷史資料到哪一天為止，決定月曆從哪天開始才算漏登
+    api('batches?select=prod_date&source=eq.import&order=prod_date.desc&limit=1')
+      .catch(function () { return []; })
   ]).then(function (res) {
     var me = res[0] && res[0][0];
     if (!me) throw new Error('這個帳號還沒有被指派角色，請聯絡系統管理者。');
@@ -790,6 +797,8 @@ function boot() {
     $('who').textContent = me.display_name + '（' + (ROLE[me.role] || me.role) + '）';
 
     // 品項下拉。常做的排前面，現場打前兩碼就能選到。
+    state.importedThrough = (res[2] && res[2][0]) ? res[2][0].prod_date : null;
+
     var dl = $('skuList'), html = '';
     res[1].forEach(function (s) {
       state.skus[s.code] = s;
@@ -1333,6 +1342,9 @@ function dayKind(d) {
   if (d > today())          return 'future';
   if (isWeekend(d))         return 'weekend';
   if (d === today())        return 'today';   // 今天還沒過完，不算漏登
+  // 系統上線前的資料整批從 Excel 匯入，而 Excel 沒有「那天沒生產」這種紀錄。
+  // 那段期間的空白日就是沒生產 —— 標成待補只會產生查不出答案的假工作。
+  if (state.importedThrough && d <= state.importedThrough) return 'hist';
   return 'miss';
 }
 
@@ -1352,7 +1364,8 @@ function renderCal() {
   for (var day = 1; day <= lastDay; day++) {
     var d = m + '-' + String(day).padStart(2, '0');
     var k = dayKind(d);
-    if (k === 'has') nHas++; else if (k === 'none') nNone++; else if (k === 'miss') nMiss++;
+    if (k === 'has') nHas++; else if (k === 'none' || k === 'hist') nNone++;
+    else if (k === 'miss') nMiss++;
     var s = state.days[d];
     var sub = (k === 'has') ? (s.batches + ' 批')
             : (k === 'none') ? '休'
@@ -1378,6 +1391,8 @@ function renderCal() {
     + '<i class="t-none" style="width:' + (nNone / lastDay * 100).toFixed(1) + '%"></i>'
     + '<i class="t-miss" style="width:' + (nMiss / lastDay * 100).toFixed(1) + '%"></i>';
   $('gapBtn').textContent = nMiss ? '跳到待補　' + nMiss + ' 天' : '跳到待補';
+  var it = $('impThru');
+  if (it) it.textContent = state.importedThrough || '—';
 }
 
 /** 往回找最早一個還沒處理的工作日。接單式生產不是每天都做，所以找不到很正常。 */
@@ -1390,6 +1405,9 @@ function findGap() {
         if (r.batches > 0 || r.no_operation) done[r.prod_date] = true;
       });
       var d = from, t = today();
+      if (state.importedThrough && d <= state.importedThrough) {
+        d = addDays(state.importedThrough, 1);     // 匯入期間沒有漏登可言
+      }
       while (d < t) {
         if (!isWeekend(d) && !done[d]) return d;
         d = addDays(d, 1);
