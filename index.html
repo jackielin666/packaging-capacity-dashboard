@@ -141,6 +141,8 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   font-variant-numeric:tabular-nums}
 .rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
 .rtab td.nm{color:var(--ink-2);font-size:11.5px}
+/* 報表同樣帶品名。注意這是 td 底下的 span，與上一行的整格 td.nm 是兩回事 */
+.rtab td .nm{display:block;font-size:10px;font-weight:400;color:var(--ink-3);line-height:1.45}
 .rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
 .hilite{border:1.5px solid var(--ink);border-radius:5px;margin:18px 0 6px;overflow:hidden}
 .hilite .hd{background:var(--ink);color:var(--paper);font-family:"Noto Serif TC",serif;
@@ -216,8 +218,15 @@ tbody tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;
   font-variant-numeric:tabular-nums;white-space:nowrap}
 td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
+/* 品號底下帶一行品名。只給品號的表，要先去查對照表才看得懂在講哪支產品 ——
+   那一步就是現場不看報表的原因。品名用內文字體、放小一級，不跟品號搶。 */
+td.sku .nm{display:block;margin-top:1px;font-family:"Noto Sans TC","PingFang TC",sans-serif;
+  font-weight:400;font-size:11.5px;letter-spacing:0;color:var(--ink-3);white-space:normal}
 tbody tr.clickable{cursor:pointer}
 tbody tr.clickable:hover{background:var(--accent-wash)}
+.skuname{display:flex;align-items:baseline;gap:10px;margin:0 0 14px;flex-wrap:wrap}
+.skuname b{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600;letter-spacing:.02em}
+.skuname span{font-family:"Noto Serif TC",serif;font-size:17px;font-weight:600;color:var(--ink-2)}
 .lamp{white-space:nowrap;font-size:12.5px;display:flex;align-items:baseline;gap:7px}
 .lamp b{font-weight:600}
 .lamp .why{color:var(--ink-3);font-size:11.5px;font-weight:400}
@@ -440,7 +449,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <div class="tw">
       <table id="overviewTable">
         <thead><tr>
-          <th>品號</th><th class="n">生產天數</th><th class="n">包裝量</th>
+          <th>品號 / 品名</th><th class="n">生產天數</th><th class="n">包裝量</th>
           <th class="n opt">批次</th><th class="n">平常水準<i>單位/hr</i></th>
           <th class="n opt">每千瓶工時<i>hr</i></th>
           <th class="n">近 3 個生產月 vs 平常</th><th>狀態</th>
@@ -454,16 +463,17 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
 <section>
   <div class="sec-head"><div class="sec-num">02</div><h2>單一品項分析</h2></div>
-  <p class="sec-sub">從上面點一支進來，或直接選。網址會帶 <span class="mono">?sku=</span>，可以單獨把某一支的連結貼給該線負責人。</p>
+  <p class="sec-sub">從上面點一支進來，或直接選；搜尋框品號、品名都找得到。網址會帶 <span class="mono">?sku=</span>，可以單獨把某一支的連結貼給該線負責人。</p>
   <div class="body">
     <div class="bar">
       <label for="skuSearch">搜尋</label>
-      <input type="search" id="skuSearch" placeholder="輸入品號，例如 D03" autocomplete="off">
+      <input type="search" id="skuSearch" placeholder="品號或品名，例如 D03、花生" autocomplete="off">
       <label for="selMain">品項</label><select id="selMain"></select>
       <label>比較 A</label><select id="selCmpA"></select>
       <label>比較 B</label><select id="selCmpB"></select>
     </div>
     <div class="fig-n" id="searchNote" style="margin:-8px 0 16px"></div>
+    <div class="skuname" id="skuName"></div>
     <div class="skukpi" id="skuKpi"></div>
 
     <div class="fig">
@@ -982,6 +992,25 @@ const E = window.PackingEngine;
 
 const state = { R: null, source: '', skuMeta: {} };
 
+/* ── 品名 ──
+   批次紀錄裡只有品號，品名在 skus 主檔。只給品號的畫面，看的人得先去翻對照表
+   才知道在講哪支產品 —— 那一步就是報表沒人看的原因。所以凡是出現品號的地方
+   都把品名帶出來。圖表的圖例除外：那裡寬度有限，塞進去會互相蓋住。 */
+const esc = v => String(v).replace(/[&<>"]/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nameOf = code => (state.skuMeta[code] || {}).name || '';
+/** 表格用：品名換行放在品號底下，欄寬不會被撐開 */
+const skuName = code => {
+  const n = nameOf(code);
+  return n ? `<span class="nm">${esc(n)}</span>` : '';
+};
+const cut = (v, n) => v.length > n ? v.slice(0, n - 1) + '…' : v;
+/** 內文用：品號後面接品名。品名本身常帶括號（規格），所以不再加一層括號 */
+const withName = code => {
+  const n = nameOf(code);
+  return n ? `${code}　${cut(n, 14)}` : code;
+};
+
 /* ─────────── 共用繪圖工具 ─────────── */
 
 function tipOn(el, tip, hits, textOf) {
@@ -1191,7 +1220,9 @@ const KPI_EXPLAIN = {
         算法：取該品項所有批次的產能，找出第 75 名的水準（也就是每四批就有一批達得到）<br>
         再假設每一批都做到那個水準，需要的工時比現在少多少
       </div>
-      <p>目前貢獻最大的三支：${top.map(s => `<b class="mono">${s.sku}</b> ${f1(s.save)} h`).join('、')}。</p>
+      <p>目前貢獻最大的三支：${top.map(s =>
+        `<b class="mono">${s.sku}</b>${nameOf(s.sku) ? ' ' + esc(cut(nameOf(s.sku), 12)) : ''} ${f1(s.save)} h`
+      ).join('、')}。</p>
       <p><span class="warn">⚠ ${fmt(m.saveAll)} 小時是理論上限，不是承諾。</span>
       實務上能拿到三到五成就算成功 —— 因為並不是每一批落後都有辦法補救。</p>
       <p><b>而且不是每一項都是包裝單位能決定的：</b></p>
@@ -1272,7 +1303,7 @@ function renderOverview() {
     const cls = pct == null ? 'flat' : pct <= -lim ? 'dn' : pct >= lim ? 'up' : 'flat';
     const arrow = pct == null ? '—' : pct <= -lim ? '▼' : pct >= lim ? '▲' : '▬';
     return `<tr class="clickable" data-goto="${s.sku}">
-      <td class="sku">${s.sku}</td>
+      <td class="sku">${s.sku}${skuName(s.sku)}</td>
       <td class="n" data-l="生產天數">${s.d}</td>
       <td class="n" data-l="包裝量">${fmt(s.b)}</td>
       <td class="n opt" data-l="批次">${s.n}</td>
@@ -1311,7 +1342,8 @@ function syncTabs() {
 
 function optionFor(sku) {
   const k = state.R.skus.find(x => x.sku === sku);
-  return `<option value="${sku}">${sku}　${fmt(k.b)} 瓶 / ${k.d} 天</option>`;
+  const n = nameOf(sku);
+  return `<option value="${sku}">${sku}　${n ? cut(n, 16) + '　' : ''}${fmt(k.b)} 瓶 / ${k.d} 天</option>`;
 }
 
 function fillSelects() {
@@ -1325,7 +1357,7 @@ function fillSelects() {
   ['selCmpA', 'selCmpB'].forEach(id => $(id).innerHTML = groups(true));
 }
 
-/** 搜尋框：輸入品號即時縮小「品項」下拉的範圍；只剩一支就直接切過去 */
+/** 搜尋框：輸入品號或品名即時縮小「品項」下拉的範圍；只剩一支就直接切過去 */
 function applySearch() {
   const q = $('skuSearch').value.trim().toUpperCase();
   const current = $('selMain').value;
@@ -1337,15 +1369,17 @@ function applySearch() {
     note.textContent = '';
     return;
   }
-  const hits = state.R.skus.filter(s => s.sku.toUpperCase().includes(q));
+  const hits = state.R.skus.filter(s =>
+    s.sku.toUpperCase().includes(q) || nameOf(s.sku).toUpperCase().includes(q));
   if (!hits.length) {
-    note.innerHTML = `找不到品號含「<b>${q}</b>」的品項，下拉維持原本的全部 ${state.R.skus.length} 支。`;
+    note.innerHTML = `找不到品號或品名含「<b>${esc(q)}</b>」的品項，`
+      + `下拉維持原本的全部 ${state.R.skus.length} 支。`;
     return;
   }
   $('selMain').innerHTML = hits.map(s => optionFor(s.sku)).join('');
   const keep = hits.some(s => s.sku === current) ? current : hits[0].sku;
   $('selMain').value = keep;
-  note.innerHTML = `符合「<b>${q}</b>」的有 <b>${hits.length}</b> 支`
+  note.innerHTML = `符合「<b>${esc(q)}</b>」的有 <b>${hits.length}</b> 支`
     + (hits.length === 1 ? '，已直接切換。' : '，請從「品項」下拉選擇。');
   if (keep !== current) goto(keep);
 }
@@ -1359,8 +1393,10 @@ function renderSku(sku) {
     ['每千瓶工時', s.hPer1k.toFixed(2), '小時'], ['可省工時', f1(s.save), '小時'],
   ].map(([k, v, u]) =>
     `<div><div class="k">${k}</div><div class="v">${v}<span class="u">${u}</span></div></div>`).join('');
-  $('dotTitle').textContent = `${sku}　每一批的產能，依時間排列`;
-  $('scatterTitle').textContent = `${sku}　批次工時與產出`;
+  const nm = nameOf(sku);
+  $('skuName').innerHTML = `<b>${sku}</b>${nm ? `<span>${esc(nm)}</span>` : ''}`;
+  $('dotTitle').textContent = `${sku}${nm ? '　' + nm : ''}　每一批的產能，依時間排列`;
+  $('scatterTitle').textContent = `${sku}${nm ? '　' + nm : ''}　批次工時與產出`;
 
   const cmp = [$('selCmpA').value, $('selCmpB').value]
     .filter(v => v && v !== sku)
@@ -1464,8 +1500,8 @@ function renderAlerts() {
       <p class="why">${x.why}</p>
       <div class="tw"><table><tbody>
         ${x.items.map(it => `<tr class="clickable" data-goto="${it.sku}">
-          <td class="sku" style="width:110px">${it.sku}</td>
-          <td style="width:42%">${it.value}</td>
+          <td class="sku" style="width:150px">${it.sku}${skuName(it.sku)}</td>
+          <td style="width:38%">${it.value}</td>
           <td style="color:var(--ink-3)">${it.detail}</td></tr>`).join('')}
       </tbody></table></div>
     </div>`).join('')
@@ -1701,7 +1737,7 @@ function buildReport(ym) {
   </div>`;
 
   const t1 = list.slice(0, 12).map(g => `<tr>
-    <td><b>${g.s}</b></td><td class="num">${g.n}</td><td class="num">${fmt(g.b)}</td>
+    <td><b>${g.s}</b>${skuName(g.s)}</td><td class="num">${g.n}</td><td class="num">${fmt(g.b)}</td>
     <td class="num">${f1(g.h)}</td><td class="num">${g.hShare}%</td>
     <td class="num">${fmt(g.rate)}</td>
     <td class="num">${g.usual ? fmt(g.usual) : '—'}</td>
@@ -1711,14 +1747,14 @@ function buildReport(ym) {
   const ODD_MAX = 10;   // 報表是拿來做決定的；要逐筆查帳請到儀表板
   const t2 = odd.slice().sort((a, b) => b.gap - a.gap).slice(0, ODD_MAX)
     .sort((a, b) => a.d < b.d ? -1 : 1).map(x => `<tr>
-    <td>${x.d}</td><td><b>${x.s}</b></td><td class="num">${f1(x.h)}</td>
+    <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td><td class="num">${f1(x.h)}</td>
     <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
     <td class="num">${fmt(x.usual)}</td>
     <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td>
     </tr>`).join('');
 
   const t3 = heavy.map(g => `<tr>
-    <td><b>${g.s}</b></td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
+    <td><b>${g.s}</b>${skuName(g.s)}</td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
     <td class="num">${f1(1000 / (g.rate || 1))}</td><td class="num">${fmt(g.b)}</td></tr>`).join('');
 
   /* 本月重點：主管拿到報表的前十秒只想知道三件事 ——
@@ -1741,16 +1777,16 @@ function buildReport(ym) {
                    .sort((a, b) => a.vs - b.vs).slice(0, 4);
   if (slow.length) pts.push({ who: '製造',
     t: `${slow.length} 支品項低於平常水準 10% 以上`,
-    d: slow.map(g => `${g.s} ${g.vs}%`).join('　') });
+    d: slow.map(g => `${withName(g.s)} ${g.vs}%`).join('；') });
 
   if (odd.length) pts.push({ who: '製造',
     t: `${odd.length} 批需要說明`,
-    d: `最嚴重的是 ${odd.slice().sort((a, b) => b.gap - a.gap)[0].s}`
+    d: `最嚴重的是 ${withName(odd.slice().sort((a, b) => b.gap - a.gap)[0].s)}`
        + `（${odd.slice().sort((a, b) => b.gap - a.gap)[0].kind === 'lo' ? '低' : '高'}於平常 `
        + `${odd.slice().sort((a, b) => b.gap - a.gap)[0].gap}%）` });
 
   if (heavy.length) pts.push({ who: '業務・生管',
-    t: `${heavy[0].s} 用掉 ${heavy[0].hShare}% 工時，只產出 ${heavy[0].bShare}% 數量`,
+    t: `${withName(heavy[0].s)} 用掉 ${heavy[0].hShare}% 工時，只產出 ${heavy[0].bShare}% 數量`,
     d: '瓶型與接單方式決定了它就是慢，接單時要先把工時成本估進去' });
 
   if (over.length) pts.push({ who: '生管排班',
@@ -1766,7 +1802,7 @@ function buildReport(ym) {
   const totPH = labList.reduce((a, x) => a + x.personHours, 0) || 1;
   const totKG = labList.reduce((a, x) => a + x.kg, 0) || 1;
   const labRows = labList.map(g => `<tr>
-    <td><b>${g.sku}</b></td>
+    <td><b>${g.sku}</b>${skuName(g.sku)}</td>
     <td class="num">${fmt(g.personHours)}</td>
     <td class="num">${(100 * g.personHours / totPH).toFixed(1)}%</td>
     <td class="num">${(100 * g.kg / totKG).toFixed(1)}%</td>
@@ -1776,7 +1812,7 @@ function buildReport(ym) {
 
   const quadRows = quads.filter(q => q.kind === 'over' || q.kind === 'short')
     .sort((a, b) => a.d < b.d ? -1 : 1).slice(0, 10).map(q => `<tr>
-    <td>${q.d}</td><td><b>${q.s}</b></td>
+    <td>${q.d}</td><td><b>${q.s}</b>${skuName(q.s)}</td>
     <td class="num">${q.n}</td>
     <td class="num">${(labS.get(q.s) && labS.get(q.s).avgHead || 0).toFixed(1)}</td>
     <td class="num ${q.lineLow ? 'lo' : ''}">${fmt(q.line)}</td>
@@ -1807,7 +1843,7 @@ function buildReport(ym) {
 
   <h3><span class="n">02</span>當月產出品項（依包裝量排序）</h3>
   <table class="rtab"><thead><tr>
-    <th>品號</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
+    <th>品號 / 品名</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
     <th class="num">工時佔比</th>
     <th class="num">當月產能<i>單位/hr</i></th>
     <th class="num">平常水準<i>單位/hr</i></th><th class="num">差異</th>
@@ -1819,7 +1855,7 @@ function buildReport(ym) {
 
   <h3><span class="n">03</span>需要說明的批次</h3>
   ${odd.length ? `<table class="rtab"><thead><tr>
-    <th>日期</th><th>品號</th><th class="num">工時</th><th class="num">瓶數</th>
+    <th>日期</th><th>品號 / 品名</th><th class="num">工時</th><th class="num">瓶數</th>
     <th class="num">當批產能<i>單位/hr</i></th>
     <th class="num">平常水準<i>單位/hr</i></th><th>情況</th>
   </tr></thead><tbody>${t2}</tbody></table>
@@ -1831,7 +1867,7 @@ function buildReport(ym) {
 
   <h3><span class="n">04</span>吃工時但產量不高的品項</h3>
   ${heavy.length ? `<table class="rtab"><thead><tr>
-    <th>品號</th><th class="num">產量佔比</th><th class="num">工時佔比</th>
+    <th>品號 / 品名</th><th class="num">產量佔比</th><th class="num">工時佔比</th>
     <th class="num">每千瓶工時</th><th class="num">當月包裝量</th>
   </tr></thead><tbody>${t3}</tbody></table>
   <div class="rep-note"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
@@ -1853,7 +1889,7 @@ function buildReport(ym) {
       <div class="d">${lab.withHead} / ${lab.n} 批</div></div>
   </div>
   <table class="rtab"><thead><tr>
-    <th>品號</th><th class="num">人時</th><th class="num">人時佔比</th>
+    <th>品號 / 品名</th><th class="num">人時</th><th class="num">人時佔比</th>
     <th class="num">公斤佔比</th><th class="num">單位／人·hr</th>
     <th class="num">公斤／人·hr</th><th class="num">平均人數</th>
   </tr></thead><tbody>${labRows}</tbody></table>
@@ -1864,7 +1900,7 @@ function buildReport(ym) {
     要比人力花在哪，請看「公斤／人·hr」。</div>
   ${quadRows ? `<div style="margin-top:14px"></div>
   <table class="rtab"><thead><tr>
-    <th>日期</th><th>品號</th><th class="num">人數</th><th class="num">平常派</th>
+    <th>日期</th><th>品號 / 品名</th><th class="num">人數</th><th class="num">平常派</th>
     <th class="num">線體產能</th><th class="num">單位／人·hr</th><th>情況</th><th>負責</th>
   </tr></thead><tbody>${quadRows}</tbody></table>
   <div class="rep-note">同一個「這批慢」，原因可能完全不同。

@@ -117,6 +117,26 @@ with sync_playwright() as p:
     # 假資料總工時 66 hr（D0310 26 + B2011 40）
     check("KPI 換成資料庫的數字", "66" in kpi, kpi[:160])
 
+    # ── 品名：只給品號的表，看的人要先去翻對照表才知道在講哪支產品 ──
+    print("\n── 品號旁邊帶出品名 ──")
+    ov = pg.inner_text("#tbOverview")
+    check("品項總覽帶出品名", "草莓蒟蒻餡" in ov and "花生" in ov, ov[:200])
+    check("總覽表頭寫明品號 / 品名", "品名" in pg.inner_text("#overviewTable thead"))
+    check("單一品項標題有品名",
+          "草莓蒟蒻餡" in pg.inner_text("#skuName") or "花生" in pg.inner_text("#skuName"),
+          pg.inner_text("#skuName"))
+    check("圖表標題有品名", "蒟蒻" in pg.inner_text("#dotTitle") or "花生" in pg.inner_text("#dotTitle"),
+          pg.inner_text("#dotTitle"))
+    check("下拉選單有品名", "蒟蒻" in pg.inner_text("#selMain"), pg.inner_text("#selMain")[:160])
+    # 搜尋品名要找得到 —— 現場記得住「花生」，不見得記得住 B2011
+    pg.fill("#skuSearch", "花生")
+    pg.wait_for_timeout(400)
+    check("可以用品名搜尋", "1" in pg.inner_text("#searchNote")
+          and pg.eval_on_selector("#selMain", "el => el.value") == "B2011",
+          pg.inner_text("#searchNote"))
+    pg.fill("#skuSearch", "")
+    pg.wait_for_timeout(400)
+
     for w in (390, 768, 1440):
         pg.set_viewport_size({"width": w, "height": 900})
         pg.wait_for_timeout(250)
@@ -199,6 +219,9 @@ with sync_playwright() as p:
     pg3.wait_for_timeout(600)
     check("完整性段落讀得到資料", "應登記工作日" in pg3.inner_text("#repChk"),
           pg3.inner_text("#repChk")[:120])
+
+    check("月報表格也帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
+    check("月報表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html("#repBody"))
 
     print("\n── 月報的本月重點 ──")
     hl = pg3.inner_text("#repBody .hilite")
