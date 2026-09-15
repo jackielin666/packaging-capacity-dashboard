@@ -16,6 +16,13 @@ for d in range(1, 16):
 for d in range(1, 16):
     LIVE.append({"sku_code": "B2011", "prod_date": "2026-09-%02d" % d,
                  "hours": 2.5, "bottles": 2000 + d, "headcount": 3})
+# 刻意放幾批異常，才測得到離群與四象限的判定
+LIVE.append({"sku_code": "D0310", "prod_date": "2026-09-16",
+             "hours": 2.0, "bottles": 120, "headcount": 5})    # 線體與人均都低
+LIVE.append({"sku_code": "D0310", "prod_date": "2026-09-17",
+             "hours": 1.5, "bottles": 390, "headcount": 9})    # 線體正常、人均低
+LIVE.append({"sku_code": "B2011", "prod_date": "2026-09-18",
+             "hours": 2.5, "bottles": 1300, "headcount": 2})   # 線體低、人均正常
 
 calls = {"auth": 0, "batches": 0}
 
@@ -31,6 +38,12 @@ def route(r):
                              body=json.dumps({"error_description": "Invalid login credentials"}))
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(
             {"access_token": JWT, "refresh_token": "rt", "expires_in": 3600}))
+    if "/rest/v1/month_status" in u:
+        return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+            {"ym":"2026-09","is_imported":False,"workdays":13,"logged_days":12,
+             "no_op_days":0,"blank_days":1,"missing_days":1,"batches":33,
+             "with_headcount":33,"head_pct":100},
+        ]))
     if "/rest/v1/skus" in u:
         return r.fulfill(status=200, content_type="application/json", body=json.dumps([
             {"code":"D0310","name":"草莓蒟蒻餡(1*6kg)","container":"PE袋",
@@ -96,12 +109,13 @@ with sync_playwright() as p:
     pg.click("#lgBtn"); pg.wait_for_timeout(1500)
     check("視窗關閉", pg.locator("#lg[hidden]").count() == 1)
     src = pg.inner_text("#srcNow")
-    check("來源標出資料庫與最後日期", "資料庫" in src and "2026-09-15" in src, src)
+    check("來源標出資料庫與最後日期", "資料庫" in src and "2026-09-18" in src, src)
     check("確實去讀了資料庫", calls["batches"] >= 1, calls)
     check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
     check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
     kpi = pg.inner_text(".kpis")
-    check("KPI 換成資料庫的數字", "5,880" in kpi or "60" in kpi, kpi[:120])
+    # 假資料總工時 66 hr（D0310 26 + B2011 40）
+    check("KPI 換成資料庫的數字", "66" in kpi, kpi[:160])
 
     for w in (390, 768, 1440):
         pg.set_viewport_size({"width": w, "height": 900})
@@ -146,7 +160,7 @@ with sync_playwright() as p:
     pg3.on("pageerror", lambda e: errs.append(str(e)))
     pg3.route("**/*", route)
     pg3.goto(PAGE)
-    pg3.wait_for_selector("#repMonth option", timeout=8000)
+    pg3.wait_for_selector("#repMonth option", state="attached", timeout=8000)
 
     opts = pg3.locator("#repMonth option").count()
     check("月份選單有內容", opts >= 1, opts)
@@ -182,8 +196,31 @@ with sync_playwright() as p:
     check("月報表頭標出產能單位", "單位/hr" in heads, heads[:200])
     check("月報平常水準說明是中位數", "中位數" in body, body[:900])
     check("有資料完整性段落", "資料完整性" in body, body[-300:])
-    check("未登入時誠實說明無法檢核", "未登入" in pg3.inner_text("#repChk"),
-          pg3.inner_text("#repChk"))
+    pg3.wait_for_timeout(600)
+    check("完整性段落讀得到資料", "應登記工作日" in pg3.inner_text("#repChk"),
+          pg3.inner_text("#repChk")[:120])
+
+    print("\n── 月報的本月重點 ──")
+    hl = pg3.inner_text("#repBody .hilite")
+    check("有本月重點區塊", "本月重點" in hl, hl[:60])
+    check("第一條講整體產能", "整體產能" in hl, hl[:120])
+    check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務")), hl[:400])
+    rows_hl = pg3.locator("#repBody .rtab.hl tbody tr").count()
+    check("重點不超過 6 條", 1 <= rows_hl <= 6, rows_hl)
+
+    print("\n── 月報的人均產能 ──")
+    check("有人均產能段落", "人均產能" in body, body[:1200])
+    check("兩個人均指標都在", "單位／人·hr" in body and "公斤／人·hr" in body, body[:1500])
+    check("hr 沒有被強制變成大寫 HR", "人·HR" not in body,
+          [l for l in body.split("\n") if "人·HR" in l][:2])
+    check("標出人數覆蓋率", "人數覆蓋率" in body or "覆蓋率" in body, body[:1500])
+    check("說明兩者差別來自包裝規格", "包裝規格" in body, body[-1500:])
+    check("四象限診斷有出現",
+          "線體正常但人均偏低" in body or "線體偏低但人均正常" in body, body[-1500:])
+    check("診斷標出負責單位", "生管排班" in body, body[-1500:])
+    check("需要說明的批次最多 10 筆",
+          pg3.locator("#repBody .rtab").nth(2).locator("tbody tr").count() <= 10,
+          pg3.locator("#repBody .rtab").nth(2).locator("tbody tr").count())
     check("沒有跑出多餘的引號或加號", "' + '" not in body and "+ '" not in body,
           [l for l in body.split("\n") if "+ '" in l][:2])
     kpitxt = pg3.inner_text("#repBody .rep-kpi")

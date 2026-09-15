@@ -126,13 +126,15 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   border:1px solid var(--rule)}
 .rep-kpi div{background:var(--sunk);padding:10px 12px}
 .rep-kpi .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-3)}
+  text-transform:none;color:var(--ink-3)}
 .rep-kpi .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
 .rep-kpi .d{font-size:10.5px;margin-top:1px}
 .rep-kpi .d.up{color:var(--accent)} .rep-kpi .d.dn{color:var(--signal)}
 .rtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
 .rtab th{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  /* 標籤是中英混排，轉大寫會把 hr 變成 HR，看起來像另一個單位。
+     這裡必須寫 none —— 只是不宣告的話，會落回通用的 th{} 規則。 */
+  text-transform:none;color:var(--ink-3);text-align:left;font-weight:400;
   padding:6px 7px;border-bottom:1px solid var(--rule-2);background:var(--sunk)}
 .rtab th.num{text-align:right}
 .rtab td{padding:6px 7px;border-bottom:1px solid var(--rule);
@@ -140,6 +142,20 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
 .rtab td.nm{color:var(--ink-2);font-size:11.5px}
 .rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
+.hilite{border:1.5px solid var(--ink);border-radius:5px;margin:18px 0 6px;overflow:hidden}
+.hilite .hd{background:var(--ink);color:var(--paper);font-family:"Noto Serif TC",serif;
+  font-weight:600;font-size:13.5px;padding:8px 14px;letter-spacing:.06em}
+.rtab.hl{margin:0}
+.rtab.hl td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+.rtab.hl tr:last-child td{border-bottom:0}
+.rtab.hl td.no{width:26px;font-family:"IBM Plex Mono",monospace;color:var(--accent);
+  font-size:13px;padding-right:0}
+.rtab.hl td .t{font-size:13px;color:var(--ink);line-height:1.5}
+.rtab.hl td .d{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.rtab.hl td.who{width:82px;text-align:right}
+.rtab.hl td.who span{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:3px;
+  background:var(--signal-wash);color:var(--signal);border:1px solid rgba(180,84,26,.35);
+  white-space:nowrap}
 .rep-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
   font-size:11.5px;color:var(--ink-2);margin-top:8px}
 .rep-foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--rule);
@@ -316,60 +332,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 [hidden]{display:none!important}
 
-/* ── 月報 ── */
-.rep-wrap{position:fixed;inset:0;background:var(--raised);z-index:70;overflow:auto}
-.rep-bar{position:sticky;top:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-  background:var(--ink);color:var(--paper);padding:11px 20px;z-index:2}
-.rep-bar .lbl{color:rgba(242,243,240,.6)}
-.rep-bar .now{flex:1;color:var(--paper);font-size:13.5px}
-.rep-bar .btn{border-color:rgba(255,255,255,.45);background:transparent;color:var(--paper)}
-.rep-bar .btn:first-of-type{background:var(--paper);color:var(--ink);border-color:var(--paper)}
-.rep-page{background:#fff;max-width:196mm;margin:22px auto;padding:16mm 15mm;
-  box-shadow:0 2px 14px rgba(0,0,0,.12);color:var(--ink)}
-.rep-page h1{font-size:23px;margin:0}
-.rep-page .meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.09em;
-  color:var(--ink-3);text-transform:uppercase}
-.rep-page .stamp{display:flex;justify-content:space-between;align-items:flex-end;
-  border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;gap:14px;
-  flex-wrap:wrap}
-.rep-page h3{font-size:14.5px;margin:22px 0 8px;padding-bottom:5px;
-  border-bottom:1px solid var(--rule-2)}
-.rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
-  margin-right:8px}
-.rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
-.rep-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
-  border:1px solid var(--rule)}
-.rep-kpi div{background:var(--sunk);padding:10px 12px}
-.rep-kpi .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-3)}
-.rep-kpi .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
-.rep-kpi .d{font-size:10.5px;margin-top:1px}
-.rep-kpi .d.up{color:var(--accent)} .rep-kpi .d.dn{color:var(--signal)}
-.rtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
-.rtab th{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
-  padding:6px 7px;border-bottom:1px solid var(--rule-2);background:var(--sunk)}
-.rtab th.num{text-align:right}
-.rtab td{padding:6px 7px;border-bottom:1px solid var(--rule);
-  font-variant-numeric:tabular-nums}
-.rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
-.rtab td.nm{color:var(--ink-2);font-size:11.5px}
-.rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
-.rep-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
-  font-size:11.5px;color:var(--ink-2);margin-top:8px}
-.rep-foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--rule);
-  font-size:10.5px;color:var(--ink-3)}
-.rep-empty{font-size:12.5px;color:var(--ink-3);padding:8px 0}
-
-@media print {
-  body > *:not(.rep-wrap){display:none!important}
-  .rep-wrap{position:static;background:#fff;overflow:visible}
-  .rep-bar{display:none!important}
-  .rep-page{box-shadow:none;margin:0;max-width:none;padding:0}
-  .rep-page h3{break-after:avoid}
-  .rtab{break-inside:auto}
-  .rtab tr{break-inside:avoid}
-  @page{size:A4;margin:14mm}
 }
 /* 手機上表格橫向捲動會把「狀態」擠出畫面 —— 改成一列一張卡片 */
 @media(max-width:760px){
@@ -1565,6 +1527,107 @@ $('selCalc').onchange = () => {
 };
 $('qtySlider').oninput = calc;
 
+/* ─────────── 人力（人均產能）───────────
+   線體產能回答「這條線跑多快」，人均產能回答「每個人做出多少」。
+   同樣的線體產能，用 3 個人和 6 個人做出來，人力成本差一倍。
+
+   兩個人均指標並存，因為它們回答不同的問題：
+     單位/人·hr = 每個人每小時處理幾件 → 作業強度，只跟自己比
+     kg/人·hr   = 每個人每小時產出多重 → 產出價值，可以跨品項比
+   兩者的比值剛好是該品項的每件重量 —— 差別來自包裝規格，不是人的努力。
+
+   人數是慢慢補登的，所以每個數字都必須附覆蓋率。只拿「有填人數的那幾批」
+   代表整支品項會有選擇偏誤，讀的人要看得到自己在信什麼。 */
+
+const HEAD_MIN_PCT = 80;     // 覆蓋率低於此不出人均數字
+const HEAD_MIN_N   = 3;      // 批次數太少也不出
+
+const kgOf = sku => (state.skuMeta[sku] || {}).kg || 0;
+
+/** 一組批次的人力彙總。只計入有填人數的批次。 */
+function labourOf(rows) {
+  const h = rows.filter(x => x.n > 0);
+  const ph = h.reduce((a, x) => a + x.h * x.n, 0);
+  const units = h.reduce((a, x) => a + x.b, 0);
+  const kg = h.reduce((a, x) => a + x.b * kgOf(x.s), 0);
+  return {
+    n: rows.length, withHead: h.length,
+    pct: rows.length ? Math.round(100 * h.length / rows.length) : 0,
+    personHours: ph, units, kg,
+    perUnit: ph > 0 ? units / ph : null,
+    perKg: ph > 0 ? kg / ph : null,
+    avgHead: h.length ? h.reduce((a, x) => a + x.n, 0) / h.length : null,
+    usable: h.length >= HEAD_MIN_N
+            && rows.length > 0
+            && (100 * h.length / rows.length) >= HEAD_MIN_PCT,
+  };
+}
+
+/** 依品項彙總人力。傳入的 rows 可以是全部批次，也可以是某個月的。 */
+function labourBySku(rows) {
+  const g = new Map();
+  rows.forEach(x => {
+    if (!g.has(x.s)) g.set(x.s, []);
+    g.get(x.s).push(x);
+  });
+  const out = new Map();
+  g.forEach((list, sku) => out.set(sku, { sku, ...labourOf(list) }));
+  return out;
+}
+
+/**
+ * 每一批落在四個象限的哪一個。這是人均產能真正的價值 ——
+ * 它把「這批慢」這一個警訊，拆成兩種原因不同、負責單位也不同的問題。
+ *
+ *   線體低 + 人均低   → 真的不順（卡料、機器、新手）      製造
+ *   線體低 + 人均正常 → 人力不足，人做得跟平常一樣          生管排班
+ *   線體正常 + 人均低 → 人力過剩，加了人但線沒有更快        生管排班
+ *   線體正常 + 人均正常 → 沒事
+ *
+ * 基準都用該品項自己的中位數，跟畫面上其他地方同一套。
+ */
+const Q_LOW = 0.85;      // 低於自己中位數的 85% 才算偏低
+
+function quadrants(rows) {
+  const bySku = new Map();
+  rows.forEach(x => {
+    if (!bySku.has(x.s)) bySku.set(x.s, []);
+    bySku.get(x.s).push(x);
+  });
+
+  const med = arr => {
+    const a = arr.slice().sort((x, y) => x - y);
+    if (!a.length) return null;
+    const m = a.length >> 1;
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  };
+
+  const out = [];
+  bySku.forEach((list, sku) => {
+    const withHead = list.filter(x => x.n > 0);
+    if (withHead.length < 5) return;                       // 樣本太少不判定
+    const mLine = med(withHead.map(x => x.b / x.h));
+    const mPP   = med(withHead.map(x => x.b / (x.h * x.n)));
+    if (!mLine || !mPP) return;
+
+    withHead.forEach(x => {
+      const line = x.b / x.h, pp = x.b / (x.h * x.n);
+      const lineLow = line < mLine * Q_LOW, ppLow = pp < mPP * Q_LOW;
+      out.push({
+        ...x, line, pp, mLine, mPP, lineLow, ppLow,
+        kind: lineLow && ppLow ? 'both' : lineLow ? 'short' : ppLow ? 'over' : 'ok',
+      });
+    });
+  });
+  return out;
+}
+
+const QUAD = {
+  both:  { t: '線體與人均都偏低', why: '那一批真的不順 —— 卡料、機器或新手', who: '製造' },
+  short: { t: '線體偏低但人均正常', why: '人做得跟平常一樣，是人派得比較少', who: '生管排班' },
+  over:  { t: '線體正常但人均偏低', why: '加了人，但線沒有更快', who: '生管排班' },
+};
+
 /* ─────────── 06 月報 ───────────
    給主管、業務與生管看的一頁式報表。用瀏覽器內建的列印功能存成 PDF，
    不引用任何外部套件 —— 工廠內網擋 CDN，多一個依賴就多一個開不起來的理由。
@@ -1639,13 +1702,15 @@ function buildReport(ym) {
 
   const t1 = list.slice(0, 12).map(g => `<tr>
     <td><b>${g.s}</b></td><td class="num">${g.n}</td><td class="num">${fmt(g.b)}</td>
-    <td class="num">${f1(g.h)}</td><td class="num">${fmt(g.rate)}</td>
+    <td class="num">${f1(g.h)}</td><td class="num">${g.hShare}%</td>
+    <td class="num">${fmt(g.rate)}</td>
     <td class="num">${g.usual ? fmt(g.usual) : '—'}</td>
     <td class="num ${g.vs === null ? '' : g.vs <= -10 ? 'lo' : g.vs >= 10 ? 'hi' : ''}">${
       g.vs === null ? '—' : (g.vs > 0 ? '+' : '') + g.vs + '%'}</td></tr>`).join('');
 
-  const ODD_MAX = 25;                       // 報表要能印出來，太長就失去「一頁看完」的意義
-  const t2 = odd.slice(0, ODD_MAX).map(x => `<tr>
+  const ODD_MAX = 10;   // 報表是拿來做決定的；要逐筆查帳請到儀表板
+  const t2 = odd.slice().sort((a, b) => b.gap - a.gap).slice(0, ODD_MAX)
+    .sort((a, b) => a.d < b.d ? -1 : 1).map(x => `<tr>
     <td>${x.d}</td><td><b>${x.s}</b></td><td class="num">${f1(x.h)}</td>
     <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
     <td class="num">${fmt(x.usual)}</td>
@@ -1656,10 +1721,83 @@ function buildReport(ym) {
     <td><b>${g.s}</b></td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
     <td class="num">${f1(1000 / (g.rate || 1))}</td><td class="num">${fmt(g.b)}</td></tr>`).join('');
 
+  /* 本月重點：主管拿到報表的前十秒只想知道三件事 ——
+     這個月好還是壞、哪幾件要處理、誰要處理。
+     所以每一條都是「數字 + 結論 + 負責單位」，自動產生，不靠人工寫。 */
+  const lab = labourOf(cur.rows);
+  const labS = labourBySku(cur.rows);
+  const quads = quadrants(cur.rows);
+  const over = quads.filter(q => q.kind === 'over');
+  const short = quads.filter(q => q.kind === 'short');
+
+  const pts = [];
+  pts.push({ t: `整體產能 ${fmt(cur.rate)} 單位/hr`
+    + (prev ? `，比${ymLabel(prevYm)}${cur.rate >= prev.rate ? '快' : '慢'} `
+              + Math.abs(Math.round(100 * (cur.rate / prev.rate - 1))) + '%' : '')
+    + `；包裝量 ${fmt(cur.B)}、工時 ${f1(cur.H)} hr`
+    + (lab.usable ? `、人時 ${fmt(lab.personHours)}` : '') });
+
+  const slow = list.filter(g => g.vs !== null && g.vs <= -10)
+                   .sort((a, b) => a.vs - b.vs).slice(0, 4);
+  if (slow.length) pts.push({ who: '製造',
+    t: `${slow.length} 支品項低於平常水準 10% 以上`,
+    d: slow.map(g => `${g.s} ${g.vs}%`).join('　') });
+
+  if (odd.length) pts.push({ who: '製造',
+    t: `${odd.length} 批需要說明`,
+    d: `最嚴重的是 ${odd.slice().sort((a, b) => b.gap - a.gap)[0].s}`
+       + `（${odd.slice().sort((a, b) => b.gap - a.gap)[0].kind === 'lo' ? '低' : '高'}於平常 `
+       + `${odd.slice().sort((a, b) => b.gap - a.gap)[0].gap}%）` });
+
+  if (heavy.length) pts.push({ who: '業務・生管',
+    t: `${heavy[0].s} 用掉 ${heavy[0].hShare}% 工時，只產出 ${heavy[0].bShare}% 數量`,
+    d: '瓶型與接單方式決定了它就是慢，接單時要先把工時成本估進去' });
+
+  if (over.length) pts.push({ who: '生管排班',
+    t: `${over.length} 批「線體正常但人均偏低」`,
+    d: '加了人，線沒有更快 —— 這類批次現行的產能警訊看不到' });
+  if (short.length) pts.push({ who: '生管排班',
+    t: `${short.length} 批「線體偏低但人均正常」`,
+    d: '人做得跟平常一樣，是人派得比較少，不是效率問題' });
+
+  /* 人力明細：只列覆蓋率足夠的品項，每一列都看得到它涵蓋幾批 */
+  const labList = [...labS.values()].filter(x => x.usable)
+    .sort((a, b) => b.personHours - a.personHours).slice(0, 10);
+  const totPH = labList.reduce((a, x) => a + x.personHours, 0) || 1;
+  const totKG = labList.reduce((a, x) => a + x.kg, 0) || 1;
+  const labRows = labList.map(g => `<tr>
+    <td><b>${g.sku}</b></td>
+    <td class="num">${fmt(g.personHours)}</td>
+    <td class="num">${(100 * g.personHours / totPH).toFixed(1)}%</td>
+    <td class="num">${(100 * g.kg / totKG).toFixed(1)}%</td>
+    <td class="num">${fmt(g.perUnit)}</td>
+    <td class="num">${fmt(g.perKg)}</td>
+    <td class="num">${g.avgHead.toFixed(1)}</td></tr>`).join('');
+
+  const quadRows = quads.filter(q => q.kind === 'over' || q.kind === 'short')
+    .sort((a, b) => a.d < b.d ? -1 : 1).slice(0, 10).map(q => `<tr>
+    <td>${q.d}</td><td><b>${q.s}</b></td>
+    <td class="num">${q.n}</td>
+    <td class="num">${(labS.get(q.s) && labS.get(q.s).avgHead || 0).toFixed(1)}</td>
+    <td class="num ${q.lineLow ? 'lo' : ''}">${fmt(q.line)}</td>
+    <td class="num ${q.ppLow ? 'lo' : ''}">${fmt(q.pp)}</td>
+    <td>${QUAD[q.kind].t}</td>
+    <td class="nm">${QUAD[q.kind].who}</td></tr>`).join('');
+
+  const head = pts.slice(0, 6).map((x, i) => `<tr>
+    <td class="no">${'①②③④⑤⑥'[i]}</td>
+    <td><div class="t">${x.t}</div>${x.d ? `<div class="d">${x.d}</div>` : ''}</td>
+    <td class="who">${x.who ? `<span>${x.who}</span>` : ''}</td></tr>`).join('');
+
   return `
   <div class="stamp">
     <div><div class="meta">包裝產能月報</div><h1>${ymLabel(ym)}</h1></div>
     <div class="meta">產出日期 ${new Date().toISOString().slice(0, 10)}<br>資料來源 ${state.source}</div>
+  </div>
+
+  <div class="hilite">
+    <div class="hd">本月重點</div>
+    <table class="rtab hl"><tbody>${head}</tbody></table>
   </div>
 
   <h3><span class="n">01</span>當月概況</h3>
@@ -1670,6 +1808,7 @@ function buildReport(ym) {
   <h3><span class="n">02</span>當月產出品項（依包裝量排序）</h3>
   <table class="rtab"><thead><tr>
     <th>品號</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
+    <th class="num">工時佔比</th>
     <th class="num">當月產能<i>單位/hr</i></th>
     <th class="num">平常水準<i>單位/hr</i></th><th class="num">差異</th>
   </tr></thead><tbody>${t1}</tbody></table>
@@ -1684,7 +1823,7 @@ function buildReport(ym) {
     <th class="num">當批產能<i>單位/hr</i></th>
     <th class="num">平常水準<i>單位/hr</i></th><th>情況</th>
   </tr></thead><tbody>${t2}</tbody></table>
-  ${odd.length > ODD_MAX ? `<p>本月共 ${odd.length} 批偏離平常水準，上表列出最早的
+  ${odd.length > ODD_MAX ? `<p>本月共 ${odd.length} 批偏離平常水準，上表列出差距最大的
     ${ODD_MAX} 批；其餘請在儀表板上逐支品項查看。</p>` : ''}
   <div class="rep-note">判定門檻：低於該品項平常水準的 0.7 倍或高於 2.5 倍，且該品項全期至少 10 批
     （樣本太少不判定）。請製造單位就這幾批說明當天狀況。</div>`
@@ -1699,8 +1838,44 @@ function buildReport(ym) {
     提供給業務與生管參考：接單與排程時，這類品項的工時成本要先估進去。</div>`
   : '<div class="rep-empty">本月沒有工時佔比明顯高於產量佔比的品項。</div>'}
 
-  <h3><span class="n">05</span>資料完整性</h3>
-  <div id="repChk"><div class="rep-empty">未登入，無法檢核當月的登記完整性。</div></div>
+  <h3><span class="n">05</span>人均產能</h3>
+  ${lab.usable ? `
+  <div class="rep-kpi">
+    <div><div class="k">人時</div><div class="v">${fmt(lab.personHours)}</div>
+      <div class="d">平均配置 ${lab.avgHead.toFixed(1)} 人</div></div>
+    <div><div class="k">單位／人·hr</div><div class="v">${fmt(lab.perUnit)}</div>
+      <div class="d">作業強度</div></div>
+    <div><div class="k">公斤／人·hr</div><div class="v">${fmt(lab.perKg)}</div>
+      <div class="d">產出價值</div></div>
+    <div><div class="k">產出重量</div><div class="v">${fmt(lab.kg)}</div>
+      <div class="d">公斤</div></div>
+    <div><div class="k">人數覆蓋率</div><div class="v">${lab.pct}%</div>
+      <div class="d">${lab.withHead} / ${lab.n} 批</div></div>
+  </div>
+  <table class="rtab"><thead><tr>
+    <th>品號</th><th class="num">人時</th><th class="num">人時佔比</th>
+    <th class="num">公斤佔比</th><th class="num">單位／人·hr</th>
+    <th class="num">公斤／人·hr</th><th class="num">平均人數</th>
+  </tr></thead><tbody>${labRows}</tbody></table>
+  <div class="rep-note"><b>兩個數字要一起看。</b>「單位／人·hr」是每個人每小時處理幾件，
+    代表作業強度；「公斤／人·hr」是產出多少重量。兩者的倍數差距剛好等於該品項的每件重量
+    —— 也就是說，差別來自包裝規格，不是人的努力程度。<br>
+    <b>單位／人·hr 只跟自己比</b>，拿去跨品項排名等於在罵做小包裝的人；
+    要比人力花在哪，請看「公斤／人·hr」。</div>
+  ${quadRows ? `<div style="margin-top:14px"></div>
+  <table class="rtab"><thead><tr>
+    <th>日期</th><th>品號</th><th class="num">人數</th><th class="num">平常派</th>
+    <th class="num">線體產能</th><th class="num">單位／人·hr</th><th>情況</th><th>負責</th>
+  </tr></thead><tbody>${quadRows}</tbody></table>
+  <div class="rep-note">同一個「這批慢」，原因可能完全不同。
+    <b>線體偏低但人均正常</b>＝人派得少，人做得跟平常一樣，不是效率問題；
+    <b>線體正常但人均偏低</b>＝加了人但線沒更快，現行的產能警訊完全看不到這一類。</div>` : ''}
+  ` : `<div class="rep-empty">本月人數覆蓋率 ${lab.pct}%（${lab.withHead} / ${lab.n} 批），
+    未達 ${HEAD_MIN_PCT}%，不足以計算人均產能。<br>
+    只用「有填人數的那幾批」代表整月會有選擇偏誤，寧可不出數字。</div>`}
+
+  <h3><span class="n">06</span>資料完整性</h3>
+  <div id="repChk"><div class="rep-empty">讀取中…</div></div>
 
   <div class="rep-foot">工時一律由起訖時間推算，不接受人工填寫。本報表由包裝產能系統自動產生。</div>`;
 }
