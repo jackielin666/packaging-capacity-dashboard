@@ -114,7 +114,9 @@ with sync_playwright() as p:
     pg.click("#loginBtn")
     pg.wait_for_selector("#appView:not([hidden])", timeout=8000)
     check("登入後進入主畫面", pg.is_visible("#rows"))
-    check("顯示使用者與角色", "測試專員" in pg.inner_text("#who"), pg.inner_text("#who"))
+    who = pg.inner_text("#who").strip()
+    check("頂欄顯示登入者姓名", who == "測試專員", who)
+    check("姓名後面不再掛角色", "（" not in who and "(" not in who, who)
 
     print("\n── 時間輸入與自動計算 ──")
     row = pg.locator("#rows tr").first

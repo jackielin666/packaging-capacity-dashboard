@@ -812,8 +812,7 @@ function boot() {
     state.role = me.role;
     state.name = me.display_name;
 
-    var ROLE = { operator: '輸入專員', manager: '主管', viewer: '檢視者' };
-    $('who').textContent = me.display_name + '（' + (ROLE[me.role] || me.role) + '）';
+    $('who').textContent = me.display_name;
 
     // 品項下拉。常做的排前面，現場打前兩碼就能選到。
     state.importedThrough = (res[2] && res[2][0]) ? res[2][0].prod_date : null;

@@ -132,9 +132,24 @@ with sync_playwright() as p:
     check("確實去讀了資料庫", calls["batches"] >= 1, calls)
     check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
     check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
-    kpi = pg.inner_text(".kpis")
-    # 假資料總工時 234 hr（三支品項 × 三個月）
-    check("KPI 換成資料庫的數字", "234" in kpi, kpi[:160])
+    # 期間預設是最新的月份，KPI 只算那個月（9 月共 90 hr）
+    check("期間預設最新月份", "2026 年 9 月" in pg.inner_text("#periodNow"),
+          pg.inner_text("#periodNow"))
+    kpi = pg.inner_text("#periodKpi")
+    check("概況是本期的數字", "90" in kpi, kpi[:160])
+    check("有本期重點", pg.locator("#hiliteBox .rtab.hl tr").count() > 0)
+    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 2,
+          pg.locator("section.noprint").count())
+    check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
+    # 切到全期，整頁跟著變
+    pg.select_option("#periodSel", "all:")
+    pg.wait_for_timeout(700)
+    check("切到全期後期間跟著變", "全期" in pg.inner_text("#periodNow"),
+          pg.inner_text("#periodNow"))
+    check("全期的數字涵蓋三個月", "234" in pg.inner_text("#periodKpi"),
+          pg.inner_text("#periodKpi")[:160])
+    pg.select_option("#periodSel", "m:2026-09")
+    pg.wait_for_timeout(700)
 
     # ── 品名：只給品號的表，看的人要先去翻對照表才知道在講哪支產品 ──
     print("\n── 品號旁邊帶出品名 ──")
@@ -177,9 +192,7 @@ with sync_playwright() as p:
     # 一次只看一支
     check("已移除品項比較 A/B", pg.locator("#selCmpA").count() == 0
           and pg.locator("#selCmpB").count() == 0)
-    # 名詞定義只有一份，儀表板與月報共用
-    pg.eval_on_selector(".defs", "e => e.open = true")
-    pg.wait_for_timeout(250)
+    # 名詞定義只有一份（第 11 節），畫面與 PDF 共用
     dfs = pg.inner_text("#defsBox")
     for term in ("平常水準", "合理目標", "離群下限", "全廠水準", "公斤／人·hr"):
         check("定義表有「%s」" % term, term in dfs, dfs[:120])
@@ -231,8 +244,9 @@ with sync_playwright() as p:
     src = pg2.inner_text("#srcNow")
     check("開頁即自動讀資料庫", "資料庫" in src, src)
     pg2.wait_for_timeout(600)
-    check("頂欄顯示登入者與角色", "測試主管" in pg2.inner_text("#dashWho")
-          and "主管" in pg2.inner_text("#dashWho"), pg2.inner_text("#dashWho"))
+    who = pg2.inner_text("#dashWho").strip()
+    check("頂欄顯示登入者姓名", who == "測試主管", who)
+    check("姓名後面不再掛角色", "（" not in who and "(" not in who, who)
     check("不需要再按任何按鈕", calls["batches"] >= 1, calls)
     pg2.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
                         "fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/dash_live.png",
@@ -249,99 +263,95 @@ with sync_playwright() as p:
     pg3.on("pageerror", lambda e: errs.append(str(e)))
     pg3.route("**/*", route)
     pg3.goto(PAGE)
-    pg3.wait_for_selector("#repMonth option", state="attached", timeout=8000)
+    pg3.wait_for_selector("#periodSel option", state="attached", timeout=8000)
+    pg3.wait_for_timeout(1200)
 
-    opts = pg3.locator("#repMonth option").count()
-    check("月份選單有內容", opts >= 1, opts)
-    first = pg3.locator("#repMonth option").first.inner_text()
+    opts = pg3.locator("#periodSel option").count()
+    check("期間選單有月份、近三月與全期", opts >= 5, opts)
+    first = pg3.locator("#periodSel option").first.inner_text()
     check("最新的月份排最前面", "2026 年 9 月" in first, first)
 
-    pg3.select_option("#repMonth", "2026-09")
-    pg3.click("#repBtn")
-    pg3.wait_for_timeout(600)
-    check("月報預覽打開", pg3.is_visible("#repBody"))
-    body = pg3.inner_text("#repBody")
-    check("標題是所選月份", "2026 年 9 月" in body, body[:60])
-    check("有當月概況", "當月概況" in body)
-    check("只有一個月時不硬湊比較", "箭頭為與" in body or "當月概況" in body, body[:200])
-    check("有品項表", "當月產出品項" in body)
+    pg3.select_option("#periodSel", "m:2026-09")
+    pg3.wait_for_timeout(800)
+    body = pg3.inner_text(".wrap")
+    check("標題是所選期間", "2026 年 9 月" in pg3.inner_text("#periodNow"),
+          pg3.inner_text("#periodNow"))
+    check("有本期概況", "本期概況" in body)
+    check("有品項狀態總覽", "品項狀態總覽" in body)
     check("有需要說明的批次", "需要說明的批次" in body)
     import re as _re
     check("情況欄標出差距百分比",
           _re.search(r"(低於|高於)平常 \d+%", body) is not None,
           [l for l in body.split("\n") if "於平常" in l][:3])
     check("有吃工時的品項段落", "吃工時但產量不高" in body)
-    check("標明責任歸屬", "不是包裝作業的問題" in body or "本月沒有工時佔比" in body)
-    check("標明資料來源", "資料來源" in body, body[:200])
+    check("標明責任歸屬", "不是包裝作業的問題" in body)
 
-    rows = pg3.locator("#repBody .rtab").first.locator("tbody tr").count()
+    rows = pg3.locator("#tbOverview tr").count()
     check("品項表有資料", rows > 0, rows)
+    # 9 月共 45 批
+    check("批次數與資料一致", "45" in pg3.inner_text("#periodKpi"),
+          pg3.inner_text("#periodKpi")[:160])
 
-    # 數字要跟資料庫對得起來：9 月共 45 批（月報只取當月，不受歷史月份影響）
-    check("批次數與資料一致", "45" in body, [l for l in body.split("\n") if "批次" in l][:2])
+    check("產生 PDF 按鈕存在", pg3.is_visible("#pdfBtn"))
+    check("列印抬頭帶入期間", "2026 年 9 月" in pg3.inner_html("#printHead"),
+          pg3.inner_html("#printHead")[:160])
+    check("表頭標出產能單位", "單位/hr" in pg3.inner_text("#overviewTable thead"),
+          pg3.inner_text("#overviewTable thead")[:200])
+    check("平常水準說明是中位數", "中位數" in body)
+    check("有資料完整性段落", "資料完整性" in body)
+    pg3.wait_for_timeout(700)
+    check("完整性段落讀得到資料", "應登記工作日" in pg3.inner_text("#chkBox"),
+          pg3.inner_text("#chkBox")[:120])
 
-    check("列印按鈕存在", pg3.is_visible("#repPrint"))
-    heads = pg3.inner_text("#repBody .rtab")
-    check("月報表頭標出產能單位", "單位/hr" in heads, heads[:200])
-    check("月報平常水準說明是中位數", "中位數" in body, body[:900])
-    check("有資料完整性段落", "資料完整性" in body, body[-300:])
-    pg3.wait_for_timeout(600)
-    check("完整性段落讀得到資料", "應登記工作日" in pg3.inner_text("#repChk"),
-          pg3.inner_text("#repChk")[:120])
+    check("表格帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
+    check("本期重點的品項是條列", pg3.locator("#hiliteBox .hlist li").count() > 0,
+          pg3.locator("#hiliteBox .hlist li").count())
+    check("帶同一份名詞定義", "數字怎麼算的" in body and "合理目標" in body)
 
-    check("月報表格也帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
-    check("本月重點的品項是條列", pg3.locator("#repBody .hilite .hlist li").count() > 0,
-          pg3.locator("#repBody .hilite .hlist li").count())
-
-    check("月報也帶同一份名詞定義", "數字怎麼算的" in body and "合理目標" in body, body[-400:])
-
-    print("\n── 月報的圖表 ──")
-    check("有本月批次落點圖", pg3.locator("#repBody .rep-fig svg").count() > 0)
-    figleg = pg3.inner_text("#repBody .rep-figleg")
+    print("\n── 圖表 ──")
+    check("有批次落點圖", pg3.locator("#oddBox .rep-fig svg").count() > 0)
+    figleg = pg3.inner_text("#oddBox .rep-figleg")
     check("落點圖說明 Y 軸是相對自己的倍率", "平常水準" in figleg, figleg[:160])
-    check("有人力分配橫條圖", pg3.locator("#repBody .lbt .lb i.ph").count() > 0,
-          pg3.locator("#repBody .lbt").count())
-    check("橫條圖同時畫人時與公斤", pg3.locator("#repBody .lbt .lb i.kg").count() > 0)
-    check("橫條圖標明收件者是業務與生管", "業務與生管" in pg3.inner_text("#repBody"),
-          "")
-    check("有月份 × 品項熱圖", pg3.locator("#repBody .heat tbody tr").count() > 0,
-          pg3.locator("#repBody .heat").count())
-    check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#repBody .heatleg"),
-          pg3.inner_text("#repBody .heatleg")[:120])
-    check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#repBody"))
-    check("月報表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html("#repBody"))
+    check("有人力分配橫條圖", pg3.locator("#labBox .lbt .lb i.ph").count() > 0,
+          pg3.locator("#labBox .lbt").count())
+    check("橫條圖同時畫人時與公斤", pg3.locator("#labBox .lbt .lb i.kg").count() > 0)
+    check("橫條圖標明收件者是業務與生管", "業務與生管" in pg3.inner_text("#labBox"), "")
+    check("有月份 × 品項熱圖", pg3.locator("#heatBox .heat tbody tr").count() > 0,
+          pg3.locator("#heatBox .heat").count())
+    check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#heatBox .heatleg"),
+          pg3.inner_text("#heatBox .heatleg")[:120])
+    check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#heatBox"))
+    check("表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html(".wrap"))
 
-    print("\n── 月報的本月重點 ──")
-    hl = pg3.inner_text("#repBody .hilite")
-    check("有本月重點區塊", "本月重點" in hl, hl[:60])
+    print("\n── 本期重點 ──")
+    hl = pg3.inner_text("#hiliteBox")
+    check("有本期重點區塊", "本期重點" in hl, hl[:60])
     check("第一條講整體產能", "整體產能" in hl, hl[:120])
-    check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務")), hl[:400])
-    rows_hl = pg3.locator("#repBody .rtab.hl tbody tr").count()
+    check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務", "管理層")), hl[:400])
+    rows_hl = pg3.locator("#hiliteBox .rtab.hl tbody tr").count()
     check("重點不超過 6 條", 1 <= rows_hl <= 6, rows_hl)
 
-    print("\n── 月報的人均產能 ──")
-    check("有人均產能段落", "人均產能" in body, body[:1200])
-    check("兩個人均指標都在", "單位／人·hr" in body and "公斤／人·hr" in body, body[:1500])
+    print("\n── 人均產能 ──")
+    lb = pg3.inner_text("#labBox")
+    check("有人均產能段落", "人力與工時分配" in body, body[:1500])
+    check("兩個人均指標都在", "單位／人·hr" in lb and "公斤／人·hr" in lb, lb[:600])
     check("hr 沒有被強制變成大寫 HR", "人·HR" not in body,
           [l for l in body.split("\n") if "人·HR" in l][:2])
-    check("標出人數覆蓋率", "人數覆蓋率" in body or "覆蓋率" in body, body[:1500])
-    check("說明兩者差別來自包裝規格", "包裝規格" in body, body[-1500:])
+    check("標出人數覆蓋率", "覆蓋率" in lb, lb[:600])
+    check("說明兩者差別來自包裝規格", "包裝規格" in lb, lb[-900:])
     check("四象限診斷有出現",
-          "線體正常但人均偏低" in body or "線體偏低但人均正常" in body, body[-1500:])
-    check("診斷標出負責單位", "生管排班" in body, body[-1500:])
-    check("需要說明的批次最多 10 筆",
-          pg3.locator("#repBody .rtab").nth(2).locator("tbody tr").count() <= 10,
-          pg3.locator("#repBody .rtab").nth(2).locator("tbody tr").count())
+          "線體正常但人均偏低" in lb or "線體偏低但人均正常" in lb, lb[-900:])
+    check("診斷標出負責單位", "生管排班" in lb, lb[-900:])
+    check("需要說明的批次最多 12 筆",
+          pg3.locator("#oddBox .rtab tbody tr").count() <= 12,
+          pg3.locator("#oddBox .rtab tbody tr").count())
     check("沒有跑出多餘的引號或加號", "' + '" not in body and "+ '" not in body,
           [l for l in body.split("\n") if "+ '" in l][:2])
-    kpitxt = pg3.inner_text("#repBody .rep-kpi")
+    kpitxt = pg3.inner_text("#periodKpi")
     check("KPI 的比較文字不會斷行", "對比上\n月" not in kpitxt, kpitxt[:120])
     pg3.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
                         "fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/report.png",
                    full_page=True)
-    pg3.keyboard.press("Escape")
-    pg3.wait_for_timeout(300)
-    check("Esc 可以關閉", pg3.locator("#rep[hidden]").count() == 1)
     ctx3.close()
 
     print("\n── console ──")

@@ -122,8 +122,8 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
   margin-right:8px}
 .rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
-.rep-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
-  border:1px solid var(--rule)}
+.rep-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule)}
 .rep-kpi div{background:var(--sunk);padding:10px 12px}
 .rep-kpi .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
   text-transform:none;color:var(--ink-3)}
@@ -188,11 +188,12 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rtab.hl td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
 /* 重點裡的品項清單：品號、品名、幅度三欄各自對齊，不要黏成一段 */
 .hlist{list-style:none;margin:5px 0 0;padding:0}
-.hlist li{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:baseline;
-  padding:2.5px 0;border-bottom:1px dotted var(--rule);font-size:11px}
+.rtab.hl{table-layout:fixed;width:100%}
+.hlist li{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:10px;
+  align-items:baseline;padding:2.5px 0;border-bottom:1px dotted var(--rule);font-size:11px}
 .hlist li:last-child{border-bottom:0}
 .hlist b{font-family:"IBM Plex Mono",monospace;font-weight:600}
-.hlist span{color:var(--ink-2)}
+.hlist span{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hlist em{font-style:normal;font-family:"IBM Plex Mono",monospace;color:var(--signal);
   white-space:nowrap}
 .rtab.hl tr:last-child td{border-bottom:0}
@@ -201,6 +202,7 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rtab.hl td .t{font-size:13px;color:var(--ink);line-height:1.5}
 .rtab.hl td .d{font-size:11.5px;color:var(--ink-3);margin-top:2px}
 .rtab.hl td.who{width:82px;text-align:right}
+.rtab.hl td.no{width:26px}
 .rtab.hl td.who span{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:3px;
   background:var(--signal-wash);color:var(--signal);border:1px solid rgba(180,84,26,.35);
   white-space:nowrap}
@@ -210,16 +212,28 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   font-size:10.5px;color:var(--ink-3)}
 .rep-empty{font-size:12.5px;color:var(--ink-3);padding:8px 0}
 
-@media print {
-  body > *:not(.rep-wrap){display:none!important}
-  .rep-wrap{position:static;background:#fff;overflow:visible}
-  .rep-bar{display:none!important}
-  .rep-page{box-shadow:none;margin:0;max-width:none;padding:0}
-  .rep-page h3{break-after:avoid}
-  .rtab{break-inside:auto}
-  .rtab tr{break-inside:avoid}
-  @page{size:A4;margin:14mm}
-}
+/* 期間列：整頁的總開關，所以釘在頂端 */
+.pbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--rule-2);border-radius:5px;
+  padding:11px 16px;margin:0 0 22px;box-shadow:0 1px 3px rgba(18,23,26,.06)}
+.pbar .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;
+  color:var(--ink-3)}
+.pbar select{font-size:14px;font-weight:600;padding:6px 10px}
+.pbar .now{flex:1;font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+.pbar .btn{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.printhead{display:none;margin-bottom:12px}
+.printhead .stamp{display:flex;justify-content:space-between;align-items:flex-end;
+  border-bottom:2px solid var(--ink);padding-bottom:7px}
+.printhead h1{font-size:21px;margin:0;font-family:"Noto Serif TC",serif}
+.printhead .meta{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;
+  color:var(--ink-3);text-align:right}
+.printhead .stamp>div:first-child .meta{text-align:left}
+/* 章節抬頭上的標記 */
+.sec-head .tool{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;
+  color:var(--ink-3);background:var(--raised);border-radius:10px;padding:3px 9px;white-space:nowrap}
+.sec-head .owner{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;
+  padding:3px 9px;border-radius:11px;background:var(--cool-wash);color:var(--cool);
+  border:1px solid rgba(63,111,168,.35);white-space:nowrap}
 .err b{font-family:"Noto Serif TC",serif}
 
 /* ── kpi ── */
@@ -436,6 +450,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   #overviewTable td.dv{display:grid;grid-template-columns:1fr 64px;align-items:center;gap:10px}
   #overviewTable td.dv .dvb{width:100%}
   #overviewTable td.dv b{margin:0;text-align:right}
+  #oddBox, #labBox, #heavyBox, #defsBox, #hiliteBox{overflow-x:auto}
   #overviewTable td.st{padding-top:8px;margin-top:6px;border-top:1px solid var(--rule)}
   #overviewTable td.st::before{content:"狀態"}
   .lamp{justify-content:flex-end}
@@ -443,6 +458,40 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ── 列印 ──
+   「產生 PDF」就是把這一頁印出來，所以畫面上看到的和寄出去的永遠是同一份，
+   不會有兩套內容各自走鐘。互動工具（單一品項鑽取、排程試算）不印 ——
+   印成紙沒有意義，寄給業務、生管的 PDF 也不該夾帶他們用不到的區塊。 */
+@media print {
+  /* 控制項在紙上按不動，只是佔位置 */
+  .topbar, .pbar, .src, .noprint, .modal, .seg, #toggleAll, .tip { display:none!important }
+  .printhead { display:block!important }
+  body { background:#fff; font-size:11px }
+  .wrap { max-width:none; padding:0 }
+  .mast { margin:0 }
+  .mast h1, .mast p, .eyebrow { display:none }
+  /* 螢幕上 50px 的章節間距在紙上是純粹的浪費 —— 一份月報從 11 頁縮到 8 頁 */
+  section { break-inside:auto; padding:0; margin:0 0 9px; border-top:0;
+            border-bottom:1px solid var(--rule); padding-bottom:9px }
+  section:last-of-type { border-bottom:0 }
+  .sec-head { margin-bottom:1px; gap:8px }
+  .sec-head h2 { font-size:14px }
+  .sec-num { font-size:9px }
+  .sec-sub { font-size:10px; margin:0 0 5px; max-width:none; line-height:1.5 }
+  .body { margin-left:0 }
+  .rep-kpi .v { font-size:16px }
+  .rep-note { font-size:9.5px; padding:6px 9px; margin-top:5px }
+  .hilite { margin:4px 0 0 }
+  .rtab td, .rtab th { padding:4px 6px }
+  .rep-figleg { font-size:9px; margin-bottom:5px }
+  h2, h3 { break-after:avoid }
+  tr { break-inside:avoid }
+  .hilite, .rep-fig, .heatwrap, .rep-kpi { break-inside:avoid }
+  .heatwrap { overflow:visible }
+  footer { font-size:9.5px }
+  @page { size:A4; margin:13mm }
+}
 </style>
 
 <div class="topbar">
@@ -465,16 +514,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   <div class="eyebrow" id="eyebrow">包裝工時記錄表</div>
   <h1>包裝產能與效率儀表板</h1>
   <p>先看常做與量大的品項有沒有異常，再點進去看是哪幾批出問題。每一支產品都只跟自己比 —— 瓶型不同，跨品項比產能沒有意義。</p>
-
-  <div class="rep-wrap" id="rep" hidden>
-  <div class="rep-bar">
-    <span class="lbl">月報預覽</span>
-    <span class="now" id="repTitle"></span>
-    <button class="btn" id="repPrint">列印／存成 PDF</button>
-    <button class="btn ghost" id="repClose">關閉</button>
-  </div>
-  <div class="rep-page" id="repBody"></div>
-</div>
 
 <div class="modal" id="lg" hidden>
   <div class="box">
@@ -507,18 +546,42 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <button class="btn ghost" id="liveBtn">重新讀取</button>
     <div class="privacy">
       資料直接來自包裝資料輸入系統的資料庫，每次開啟都是最新的。
-      要把數字給沒有帳號的人，請用下方「月報」產生 PDF 後寄出。
+      要把數字給沒有帳號的人，選好期間後按「產生 PDF」寄出即可 ——
+      PDF 就是目前這一頁，不是另外一份報表。
     </div>
     <div class="err" id="srcErr" hidden></div>
   </div>
 </header>
 
-<div class="kpis" id="kpis"></div>
-<div class="explain" id="explain" hidden></div>
+<!-- 期間列。整頁跟著它走 —— 廠務會議看的是當月，不是整年。
+     「產生 PDF」不是另外做一份報表，就是把目前這一頁印出來，
+     所以畫面上看到的和寄出去的永遠是同一份。 -->
+<div class="pbar" id="pbar">
+  <span class="lbl">期間</span>
+  <select id="periodSel" aria-label="報表期間"></select>
+  <span class="now" id="periodNow"></span>
+  <button class="btn" id="pdfBtn">產生 PDF</button>
+</div>
+
+<!-- 只在列印時出現的報表抬頭 -->
+<div class="printhead" id="printHead"></div>
 
 <section>
-  <div class="sec-head"><div class="sec-num">01</div><h2>品項總覽</h2></div>
-  <p class="sec-sub">先掃一眼常做的、量大的那幾支穩不穩。狀態燈號直接標在表上，不用點進去才知道。</p>
+  <div class="sec-head"><div class="sec-num">01</div><h2>本期重點</h2></div>
+  <p class="sec-sub">這一期好還是壞、哪幾件要處理、誰要處理。下面每一條都是自動產生的，不靠人工挑。</p>
+  <div class="body"><div id="hiliteBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">02</div><h2>本期概況</h2></div>
+  <p class="sec-sub">整體產能＝該期間總包裝量 ÷ 總工時。混了不同瓶型，只能看趨勢，跨品項比較沒有意義。</p>
+  <div class="body"><div id="periodKpi"></div><div class="fig-n" id="periodNote"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">03</div><h2>品項狀態總覽</h2></div>
+  <p class="sec-sub">數量欄位是本期的；<b>燈號與平常水準一律以全期資料判定</b> ——
+    一個月的樣本不足以定義什麼叫正常，拿當月跟當月自己比永遠比不出問題。</p>
   <div class="body">
     <div class="bar">
       <div class="seg" role="group">
@@ -531,29 +594,59 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <div class="tw">
       <table id="overviewTable">
         <colgroup>
-          <col style="width:18%"><col style="width:7%"><col style="width:9%">
-          <col class="opt" style="width:6%"><col style="width:9%">
-          <col class="opt" style="width:8%"><col style="width:12%">
-          <col style="width:12%"><col style="width:19%">
+          <col style="width:16%"><col style="width:6%"><col style="width:8%">
+          <col style="width:5%"><col style="width:7%"><col style="width:8%">
+          <col style="width:8%"><col style="width:11%">
+          <col style="width:11%"><col style="width:20%">
         </colgroup>
         <thead><tr>
-          <th>品號 / 品名</th><th class="n">生產<i>天數</i></th><th class="n">包裝量</th>
-          <th class="n opt">批次</th><th class="n">平常水準<i>單位/hr</i></th>
-          <th class="n opt">每千瓶<i>工時 hr</i></th>
-          <th class="c">逐月走勢<i>vs 平常</i></th>
-          <th class="c">近 3 個生產月<i>vs 平常</i></th><th>狀態</th>
+          <th>品號 / 品名</th>
+          <th class="n">本期<i>天數</i></th><th class="n">本期<i>包裝量</i></th>
+          <th class="n">本期<i>批次</i></th><th class="n">工時<i>佔比</i></th>
+          <th class="n">本期產能<i>單位/hr</i></th>
+          <th class="n">平常水準<i>單位/hr</i></th>
+          <th class="c">逐月走勢<i>全期 vs 平常</i></th>
+          <th class="c">本期<i>vs 平常</i></th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
       </table>
     </div>
     <div class="fig-n" id="lampLegend"></div>
-    <details class="defs"><summary>數字怎麼算的 —— 平常水準、合理目標、離群門檻的定義</summary>
-      <div id="defsBox"></div></details>
   </div>
 </section>
 
 <section>
-  <div class="sec-head"><div class="sec-num">02</div><h2>單一品項分析</h2></div>
+  <div class="sec-head"><div class="sec-num">04</div><h2>需要說明的批次</h2></div>
+  <p class="sec-sub">每一批一個點，縱軸是「這批 ÷ 該品項自己的平常水準」，所以不同瓶型可以畫在同一張圖上。
+    掉出淺綠色範圍的那幾批，請製造單位就當天狀況說明。</p>
+  <div class="body"><div id="oddBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">05</div><h2>人力與工時分配</h2></div>
+  <p class="sec-sub">人均產能要兩個數字一起看：「單位／人·hr」是作業強度，只能跟自己比；
+    「公斤／人·hr」是產出重量，是唯一可以跨品項比的。</p>
+  <div class="body"><div id="labBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">06</div><h2>吃工時但產量不高的品項</h2>
+    <span class="owner">給業務・生管</span></div>
+  <p class="sec-sub"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
+    接單與排程時，這類品項的工時成本要先估進去。</p>
+  <div class="body"><div id="heavyBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">07</div><h2>逐月走勢（月份 × 品項）</h2></div>
+  <p class="sec-sub">趨勢類的問題，表格永遠看不出來。這張圖固定看最近 12 個月，不隨上面的期間變動 ——
+    要看的就是「哪一支從哪個月開始變慢」。</p>
+  <div class="body"><div id="heatBox"></div></div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><div class="sec-num">08</div><h2>單一品項分析</h2>
+    <span class="tool">互動工具・不列入 PDF</span></div>
   <p class="sec-sub">從上面點一支進來，或直接選；搜尋框品號、品名都找得到。網址會帶 <span class="mono">?sku=</span>，可以單獨把某一支的連結貼給該線負責人。</p>
   <div class="body">
     <div class="bar">
@@ -584,8 +677,9 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   </div>
 </section>
 
-<section>
-  <div class="sec-head"><div class="sec-num">03</div><h2>排程試算</h2></div>
+<section class="noprint">
+  <div class="sec-head"><div class="sec-num">09</div><h2>排程試算</h2>
+    <span class="tool">互動工具・不列入 PDF</span></div>
   <p class="sec-sub">拖動下面的量，即時算出所需工時。用<b>這支產品自己的實績</b>換算，不用全廠平均。</p>
   <div class="body">
     <div class="calc">
@@ -602,38 +696,16 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 </section>
 
 <section>
-  <div class="sec-head"><div class="sec-num">04</div><h2>系統偵測到的提醒</h2></div>
-  <p class="sec-sub">這裡只放需要跨部門知道的兩件事。個別品項的提醒已經在上面第 02 節，看那支產品時才會出現。</p>
-  <div class="body" id="alerts"></div>
+  <div class="sec-head"><div class="sec-num">10</div><h2>資料完整性</h2></div>
+  <p class="sec-sub">要先知道資料齊不齊，才知道上面的數字能信到什麼程度。
+    一份沒說清楚涵蓋範圍的報表，比沒有報表更容易誤導。</p>
+  <div class="body"><div id="chkBox"></div></div>
 </section>
 
 <section>
-  <div class="sec-head"><div class="sec-num">05</div><h2>全廠趨勢</h2></div>
-  <p class="sec-sub">每一批都跟它自己那支產品的平常水準比，換算成倍率之後，所有品項就可以放在同一張圖上。</p>
-  <div class="body">
-    <div class="fig">
-      <div class="fig-t">每一批表現 vs 自己平常水準</div>
-      <div class="fig-s"><b>1.0 = 跟自己平常一樣</b>；0.8 = 比平常慢兩成。橫線是每個月的中位數。</div>
-      <div class="legend">
-        <span><i style="background:var(--accent)"></i>單一批次</span>
-        <span><i class="sq" style="background:var(--signal)"></i>每月中位數</span>
-      </div>
-      <div class="chart"><div id="cRel"></div><div class="tip" id="tRel"></div></div>
-      <div class="fig-n" id="relNote"></div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="sec-head"><div class="sec-num">06</div><h2>月報</h2></div>
-  <p class="lede">選一個月份產生報表，再用瀏覽器的「列印 → 另存為 PDF」存檔或寄出。
-    內容是該月的實際數字，不含互動元件。</p>
-  <div class="src" style="margin-top:14px">
-    <span class="lbl">月份</span>
-    <select id="repMonth"></select>
-    <button class="btn" id="repBtn">產生月報</button>
-    <span class="now" id="repHint"></span>
-  </div>
+  <div class="sec-head"><div class="sec-num">11</div><h2>數字怎麼算的</h2></div>
+  <p class="sec-sub">看不懂一個數字就無法相信它。這裡是全部名詞的定義，儀表板與 PDF 共用同一份。</p>
+  <div class="body"><div id="defsBox"></div></div>
 </section>
 
 <footer>
@@ -1395,128 +1467,17 @@ function scatter(skus) {
       + `「可省工時」與排程試算用的就是它 —— 它是目標，不是判定門檻。</span>` : '');
 }
 
-/* ─────────── 05 全廠相對表現 ─────────── */
-
-function relChart() {
-  const el = $('cRel'), tip = $('tRel');
-  const months = state.R.meta.months, data = state.R.relative;
-  const W = 900, H = 380, L = 56, R = 20, T = 26, B = 46;
-  const pw = W - L - R, ph = H - T - B, bw = pw / months.length;
-  const hi = Math.min(Math.max(...data.map(d => d.rel)) * 1.05, 3);
-  const Y = v => T + ph - (Math.min(v, hi) / hi) * ph;
-  const muted = cssv('--ink-3'), rule = cssv('--rule'), acc = cssv('--accent');
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="每批表現相對自己平常水準">`;
-  for (let v = 0; v <= hi; v += 0.5) {
-    const one = Math.abs(v - 1) < 1e-9;
-    s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${one ? cssv('--ink-3') : rule}" stroke-width="${one ? 1.5 : 1}"/>`;
-    s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${v.toFixed(1)}</text>`;
-  }
-  s += `<text x="${L - 10}" y="${T - 10}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">倍率</text>`;
-
-  const idx = Object.fromEntries(months.map((m, i) => [m, i]));
-  const pts = data.map((d, i) => {
-    const seed = (i * 2654435761) % 1000 / 1000;
-    return { ...d, x: L + idx[d.m] * bw + bw * (0.2 + seed * 0.6) };
-  });
-  pts.forEach((p, i) => {
-    s += `<circle class="hit" data-i="${i}" cx="${p.x.toFixed(1)}" cy="${Y(p.rel).toFixed(1)}" r="3.2"
-      fill="${acc}" opacity=".5" style="cursor:crosshair"/>`;
-  });
-  state.R.relByMonth.forEach((m, i) => {
-    const x0 = L + i * bw + bw * 0.15, x1 = L + i * bw + bw * 0.85;
-    s += `<line x1="${x0}" y1="${Y(m.median)}" x2="${x1}" y2="${Y(m.median)}" stroke="${cssv('--signal')}" stroke-width="2.5" stroke-linecap="round"/>`;
-    s += `<text x="${L + i * bw + bw / 2}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${monthLabel(m.m)}</text>`;
-  });
-  el.innerHTML = s + '</svg>';
-  tipOn(el, tip, [...el.querySelectorAll('.hit')], h => {
-    const p = pts[+h.dataset.i];
-    const pct = Math.round((p.rel - 1) * 100);
-    return `<b>${p.s}</b>　${p.d}<br>${p.h.toFixed(2)} h　${fmt(p.b)} 瓶<br>
-      比自己平常 <b>${pct >= 0 ? '快' : '慢'} ${Math.abs(pct)}%</b>`;
-  });
-  const rb = state.R.relByMonth;
-  const first = rb[0], last = rb[rb.length - 1];
-  $('relNote').innerHTML =
-    `每月中位數由 ${first.median.toFixed(2)}（${monthLabel(first.m)}）變成 `
-    + `${last.median.toFixed(2)}（${monthLabel(last.m)}）。`
-    + `中位線往下代表整體變慢，點的上下散開變大代表批次之間落差變大。`;
-}
-
 /* ─────────── 畫面渲染 ─────────── */
 
-const KPI_EXPLAIN = {
-  save: () => {
-    const m = state.R.meta;
-    const top = [...state.R.skus].sort((a, b) => b.save - a.save).slice(0, 3);
-    return `<h3>「可省工時」是什麼意思？</h3>
-      <p><b>不是叫人做更快，是把落後的批次拉到這支產品自己平常就做得到的水準。</b>
-      每一支產品都跟自己比，不受瓶型差異影響。</p>
-      <div class="box">
-        算法：取該品項所有批次的產能，找出第 75 名的水準（也就是每四批就有一批達得到）<br>
-        再假設每一批都做到那個水準，需要的工時比現在少多少
-      </div>
-      <p>目前貢獻最大的三支：${top.map(s =>
-        `<b class="mono">${s.sku}</b>${nameOf(s.sku) ? ' ' + esc(cut(nameOf(s.sku), 12)) : ''} ${f1(s.save)} h`
-      ).join('、')}。</p>
-      <p><span class="warn">⚠ ${fmt(m.saveAll)} 小時是理論上限，不是承諾。</span>
-      實務上能拿到三到五成就算成功 —— 因為並不是每一批落後都有辦法補救。</p>
-      <p><b>而且不是每一項都是包裝單位能決定的：</b></p>
-      <div class="box">
-        縮小同品項批次落差（查落後批次的共同原因）　→　<b>包裝單位可控</b><br>
-        追查連續變慢的品項　　　　　　　　　　　　　→　<b>包裝單位可控</b><br>
-        批量大小、批次頻率（接單式生產、業務導向）　→　<b>需業務與生管配合</b>
-      </div>`;
-  },
-  rate: () => `<h3>整體產能、平常水準與每千瓶工時</h3>
-      <p><b>整體產能</b>＝總瓶數 ÷ 總工時，也就是全廠一小時包幾瓶。這是事實統計，
-      用來看全廠趨勢與估算成本。</p>
-      <p><b>平常水準</b>是另一回事 —— 它是該品項<b>每一批產能的中位數</b>，
-      也就是一半的批次做得到的速度。之所以不用總瓶數÷總工時來當它，是因為那是加權平均：
-      慢的批次佔用的工時多、權重就大，會把基準往下拉。實測 48 支樣本足夠的品項，
-      有 44 支的中位數高於加權平均，平均高出 12.4%。要問「這一批算不算慢」，
-      要跟中位數比才公道。</p>
-      <p><b>每千瓶工時</b>＝1000 ÷ 整體產能 —— 包一千瓶要花幾小時，
-      排程時可以直接乘上接單量。這是成本估算，所以沿用加權平均。</p>
-      <p>這兩個數字<b>只適合同一支產品自己跟自己比</b>。不同瓶型、不同規格，
-      本來就有快有慢，拿 A 產品的產能去要求 B 產品沒有意義。</p>`,
-  hours: () => `<h3>工時是怎麼算的</h3>
-      <p>＝（結束時間 − 起始時間）÷ 60，是<b>掛鐘時間</b>，不是人工時。</p>
-      <p>記錄表沒有作業人數欄位，所以這裡的「效率」代表<b>線體速率</b>，
-      不代表人均產出。<b>請不要拿這些數字去評比人員。</b></p>`,
-};
-
-function renderKpis() {
-  const m = state.R.meta;
-  const cards = [
-    ['總包裝量', (m.bottles / 10000).toFixed(1), '萬瓶', '', null],
-    ['總工時', fmt(m.hours), '小時', '', 'hours'],
-    ['整體產能', fmt(m.rate), '單位/hr', '', 'rate'],
-    ['每千瓶工時', m.hPer1k.toFixed(2), '小時', '', 'rate'],
-    ['可省工時', fmt(m.saveAll), `小時（${Math.round(100 * m.saveAll / m.hours)}%）`, 'hl', 'save'],
-  ];
-  $('kpis').innerHTML = cards.map(([k, v, u, cls, key]) =>
-    `<div class="kpi ${cls}"><div class="k">${k}</div>
-     <div class="v">${v}<span class="u">${u}</span></div>
-     ${key ? `<button class="ask" data-explain="${key}">這是什麼意思？</button>` : ''}</div>`).join('');
-}
-
-let openExplain = null;
+/* KPI 的展開說明整批移到第 11 節「數字怎麼算的」——
+   同一件事寫兩份，改了一邊忘了另一邊，最後沒有人知道哪個才算數。 */
 document.addEventListener('click', ev => {
-  const btn = ev.target.closest('[data-explain]');
-  const box = $('explain');
-  if (btn) {
-    const key = btn.dataset.explain;
-    if (openExplain === key) { box.hidden = true; openExplain = null; return; }
-    box.innerHTML = KPI_EXPLAIN[key]();
-    box.hidden = false; openExplain = key;
-    return;
-  }
   const row = ev.target.closest('[data-goto]');
   if (row) goto(row.dataset.goto);
 });
 
 /* ── 01 品項總覽 ── */
-let tab = 'freq', showAll = false;
+let tab = 'freq', showAll = false, lastStats = null;
 const TOP_N = 10;   // 總覽預設顯示的列數
 
 const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太少' };
@@ -1600,20 +1561,26 @@ function sparkSvg(s) {
   </svg>`;
 }
 
-function renderOverview() {
-  const skus = [...state.R.skus].sort((a, b) =>
+/* 數量欄位看選定的期間，燈號與平常水準永遠看全期 ——
+   一個月的樣本不足以定義什麼叫正常，拿當月跟當月自己比永遠比不出問題。 */
+function renderOverview(S) {
+  lastStats = S || lastStats;
+  if (!lastStats) return;
+  const rows = [...lastStats.list].sort((a, b) =>
     tab === 'freq' ? b.d - a.d || b.b - a.b : b.b - a.b);
-  const list = showAll ? skus : skus.slice(0, TOP_N);
-  $('tabNote').textContent = tab === 'freq'
-    ? `依生產天數排序 —— 天天在做的排前面`
-    : `依包裝量排序 —— 產量主力排前面`;
-  $('toggleAll').textContent = showAll ? `只看前 ${TOP_N} 支` : `顯示全部 ${skus.length} 支`;
+  const list = showAll ? rows : rows.slice(0, TOP_N);
+  $('tabNote').textContent = (tab === 'freq'
+    ? '依本期生產天數排序 —— 天天在做的排前面'
+    : '依本期包裝量排序 —— 產量主力排前面')
+    + `　·　本期共 ${rows.length} 支有生產`;
+  $('toggleAll').textContent = showAll ? `只看前 ${TOP_N} 支` : `顯示全部 ${rows.length} 支`;
 
-  $('tbOverview').innerHTML = list.map(s => {
+  $('tbOverview').innerHTML = list.map(g => {
+    const s = g.sku;                       // 全期統計，燈號與平常水準都從這裡來
+    if (!s || !s.sku) return '';
     // 轉色門檻刻意與燈號的「變慢」門檻同一個數字，否則會出現「箭頭紅、狀態正常」
     const lim = Math.round(E.thresholds.ARROW * 100);
-    const d = s.vsUsual;
-    const pct = d == null ? null : Math.round(d * 100);
+    const pct = g.vs;
     const cls = pct == null ? 'flat' : pct <= -lim ? 'dn' : pct >= lim ? 'up' : 'flat';
     // 只給數字要一列一列讀；配一條從中線長出來的橫條，一眼就掃得出哪幾支偏掉。
     // 刻度固定 ±30%，超過就頂到底，各列之間才比得起來。
@@ -1622,20 +1589,21 @@ function renderOverview() {
       : `<span class="dvb"><i class="${cls}" style="${pct < 0 ? 'right:50%' : 'left:50%'};width:${w}%"></i></span>`;
     return `<tr class="clickable" data-goto="${s.sku}">
       <td class="sku">${s.sku}${skuName(s.sku)}</td>
-      <td class="n" data-l="生產天數">${s.d}</td>
-      <td class="n" data-l="包裝量">${fmt(s.b)}</td>
-      <td class="n opt" data-l="批次">${s.n}</td>
+      <td class="n" data-l="本期天數">${g.d}</td>
+      <td class="n" data-l="本期包裝量">${fmt(g.b)}</td>
+      <td class="n" data-l="本期批次">${g.n}</td>
+      <td class="n" data-l="工時佔比">${g.hShare}%</td>
+      <td class="n" data-l="本期產能">${fmt(g.rate)}</td>
       <td class="n" data-l="平常水準">${fmt(s.med)}</td>
-      <td class="n opt" data-l="每千瓶工時">${s.hPer1k.toFixed(2)}</td>
       <td class="sp" data-l="逐月走勢">${sparkSvg(s)}</td>
-      <td class="dv delta ${cls}" data-l="近 3 個生產月 vs 平常">${bar}<b>${
+      <td class="dv delta ${cls}" data-l="本期 vs 平常">${bar}<b>${
         pct == null ? '—' : (pct > 0 ? '+' : '') + pct + '%'}</b></td>
       <td class="st"><div class="lamp ${s.status}"><b>${LAMP[s.status]}</b>
         <span class="why">${s.statusWhy}</span></div></td></tr>`;
   }).join('');
 
   const t = E.thresholds, c = {};
-  state.R.skus.forEach(s => c[s.status] = (c[s.status] || 0) + 1);
+  rows.forEach(g => { if (g.sku) c[g.sku.status] = (c[g.sku.status] || 0) + 1; });
   const dot = cls => `<span class="lamp ${cls}" style="display:inline-flex"></span>`;
   const lim = Math.round(t.ARROW * 100);
   $('lampLegend').innerHTML =
@@ -1644,7 +1612,7 @@ function renderOverview() {
      ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）離群批次佔 ${t.OUT_RATE_WATCH}% 以上，
      或批次之間落差偏大（變異係數 &gt; ${t.CV_WATCH}%）　·　
      ${dot('ok')} <b>正常</b>（${c.ok || 0} 支）　·　
-     ${dot('thin')} <b>批次太少</b>（${c.thin || 0} 支）全年不到 ${t.MIN_BATCHES} 批，不做判定
+     ${dot('thin')} <b>批次太少</b>（${c.thin || 0} 支）全期不到 ${t.MIN_BATCHES} 批，不做判定
      <br><span style="color:var(--ink-3)">
      判定看的是離群<b>比率</b>，不是「有沒有離群批次」——
      全廠近三個生產月的離群率中位數就有 20%，有一兩批離群本來就是常態；
@@ -1809,25 +1777,6 @@ function calc() {
      這就是排程要用品項別實績、不能用全廠平均的原因。`;
 }
 
-/* ── 04 提醒 ── */
-
-function renderAlerts() {
-  const a = state.R.alerts;
-  $('alerts').innerHTML = a.length ? a.map(x => `
-    <div class="alert-card ${x.level}">
-      <div class="top"><h3>${x.title}</h3><span class="owner">給 ${x.owner}</span></div>
-      <div class="rule">判定條件：${x.rule}</div>
-      <p class="why">${x.why}</p>
-      <div class="tw"><table><tbody>
-        ${x.items.map(it => `<tr class="clickable" data-goto="${it.sku}">
-          <td class="sku" style="width:150px">${it.sku}${skuName(it.sku)}</td>
-          <td style="width:38%">${it.value}</td>
-          <td style="color:var(--ink-3)">${it.detail}</td></tr>`).join('')}
-      </tbody></table></div>
-    </div>`).join('')
-    : `<div class="note ok"><h4>目前沒有需要跨部門處理的提醒</h4></div>`;
-}
-
 /* ─────────── 資料載入 ─────────── */
 
 function render() {
@@ -1838,7 +1787,9 @@ function render() {
     <b>${m.skuCount}</b> 個品項 · <b>${m.workDays}</b> 個作業日`;
   $('footMeta').textContent =
     `${state.source} · ${m.records} 筆 / ${m.skuCount} 品項 · ${m.period[0]} – ${m.period[1]}`;
-  renderKpis(); syncTabs(); fillSelects(); renderAlerts(); relChart();
+  fillSelects();
+  buildPeriodOptions();
+  renderPeriod();
   $('defsBox').innerHTML = defsHtml();
   $('skuSearch').value = ''; $('searchNote').textContent = '';
 
@@ -1849,7 +1800,6 @@ function render() {
   const s = state.R.skus.find(x => x.sku === initial);
   setSliderRange(s);
   renderSku(initial); calc();
-  $('explain').hidden = true; openExplain = null;
 }
 
 function goto(sku) {
@@ -1866,7 +1816,6 @@ function load(batches, source) {
   state.source = source;
   $('srcErr').hidden = true;
   render();
-  buildMonthOptions();
 }
 
 function showError(msg) {
@@ -2074,14 +2023,13 @@ const QUAD = {
 
 const ymLabel = m => `${m.slice(0, 4)} 年 ${+m.slice(5)} 月`;
 
-/* ── 本月批次落點圖 ──
+/* ── 批次落點圖 ──
    一張圖代替一頁表格。每一批一個點，Y 軸是「這批 ÷ 這支產品自己的平常水準」，
    所以不同瓶型可以畫在同一張圖上 —— 1.0 就是跟平常一樣，0.7 是離群門檻。
-   看的人不必逐列讀數字，直接看哪幾天的點掉到線下、以及有沒有集中在同一支產品。 */
-const MIN_REPORT_BATCHES = 10;   // 全期不到這麼多批就不判定離群，樣本撐不起門檻
-const REL_TOP = 1.8;        // Y 軸上限；再高的點釘在頂端並標成空心，避免壓扁主要區間
+   看的人不必逐列讀數字，直接看哪幾天的點掉到線下、以及有沒有集中在同一支產品。
+   橫軸是真實日期，所以單月、近三月、全期都畫得出來。 */
 
-function monthDotSvg(rows, skuOf, ym) {
+function oddDotSvg(rows, skuOf) {
   const pts = rows.map(x => {
     const s = skuOf.get(x.s);
     if (!s || !s.med || s.n < MIN_REPORT_BATCHES) return null;
@@ -2089,16 +2037,17 @@ function monthDotSvg(rows, skuOf, ym) {
   }).filter(Boolean);
   if (pts.length < 3) return '';
 
-  const W = 880, H = 300, L = 42, R = 92, T = 16, B = 34;
+  const W = 900, H = 300, L = 44, R = 96, T = 16, B = 36;
   const pw = W - L - R, ph = H - T - B;
-  const days = new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate();
-  const Xd = day => L + ((day - 0.5) / days) * pw;
-  const X = d => Xd(+d.slice(8));
+  const ds = pts.map(p => +new Date(p.d));
+  const t0 = Math.min(...ds), t1 = Math.max(...ds);
+  const span = Math.max(t1 - t0, 864e5);        // 全部同一天時避免除以零
+  const X = d => L + ((+new Date(d) - t0) / span) * pw;
   const Y = v => v > REL_TOP ? T + 5 : T + ph - (v / REL_TOP) * ph;
   const lo = E.thresholds.OUT_LO, hi = E.thresholds.OUT_HI;
 
   let g = `<svg viewBox="0 0 ${W} ${H}" role="img"
-    aria-label="${ymLabel(ym)}每一批相對自己平常水準的表現">`;
+    aria-label="每一批相對自己平常水準的表現">`;
   // 正常範圍：下限到上限。上限 2.5 倍通常在圖外，帶狀就填到頂。
   g += `<rect x="${L}" y="${Y(hi)}" width="${pw}" height="${Y(lo) - Y(hi)}"
          fill="var(--accent)" opacity=".06"/>`;
@@ -2113,21 +2062,32 @@ function monthDotSvg(rows, skuOf, ym) {
     g += `<text x="${L - 8}" y="${Y(v) + 3.5}" fill="var(--ink-3)" font-size="9.5"
            text-anchor="end" font-family="'IBM Plex Mono',monospace">${v.toFixed(1)}</text>`;
   }
-  // 日期刻度：每 5 天一格，太密在 A4 上會糊掉
-  for (let d = 1; d <= days; d += 5) {
-    const x = Xd(d);
+  // 日期刻度。單月標到「日」，跨月就只標月份 —— 否則 A4 上會糊成一片。
+  const days = span / 864e5, ticks = [];
+  if (days <= 40) {
+    for (let d = new Date(t0); +d <= t1; d.setDate(d.getDate() + 5)) ticks.push(new Date(d));
+  } else {
+    const f = new Date(t0);
+    for (let d = new Date(f.getFullYear(), f.getMonth(), 1); +d <= t1; d.setMonth(d.getMonth() + 1)) {
+      if (+d >= t0) ticks.push(new Date(d));
+    }
+  }
+  ticks.forEach(d => {
+    const x = X(d.toISOString().slice(0, 10));
+    if (x < L - 1 || x > W - R + 1) return;
     g += `<line x1="${x}" y1="${T}" x2="${x}" y2="${T + ph}" stroke="var(--rule)"
            stroke-dasharray="2 4"/>`;
-    g += `<text x="${x}" y="${T + ph + 16}" fill="var(--ink-3)" font-size="9.5"
-           text-anchor="middle" font-family="'IBM Plex Mono',monospace">${d}日</text>`;
-  }
+    g += `<text x="${x}" y="${T + ph + 17}" fill="var(--ink-3)" font-size="9.5"
+           text-anchor="middle" font-family="'IBM Plex Mono',monospace">${
+           days <= 40 ? d.getDate() + '日' : (d.getMonth() + 1) + '月'}</text>`;
+  });
   pts.forEach(p => {
     const out = p.rel < lo || p.rel > hi;
     const over = p.rel > REL_TOP;
     g += `<circle cx="${X(p.d)}" cy="${Y(p.rel)}" r="${out ? 5 : 3.2}"
       fill="${over ? 'none' : out ? 'var(--signal)' : 'var(--accent)'}"
       stroke="${over ? 'var(--signal)' : 'var(--surface)'}" stroke-width="1.3" opacity="${out ? 1 : .68}">
-      <title>${p.d}　${p.s}　${fmt(Math.round(p.b / p.h))} 單位/hr（平常 ${fmt(p.usual)}） ${
+      <title>${p.d}　${p.s}　${fmt(Math.round(p.b / p.h))} 單位/hr（平常 ${fmt(p.usual)}）　${
         Math.round(p.rel * 100)}%</title></circle>`;
   });
   const outN = pts.filter(p => p.rel < lo || p.rel > hi).length;
@@ -2141,15 +2101,8 @@ function monthDotSvg(rows, skuOf, ym) {
     </div>`;
 }
 
-function monthAgg(ym) {
-  const rows = state.R.batches.filter(x => x.m === ym);
-  const H = rows.reduce((a, x) => a + x.h, 0);
-  const B = rows.reduce((a, x) => a + x.b, 0);
-  return { ym, rows, n: rows.length, H, B,
-    rate: H > 0 ? B / H : 0,
-    days: new Set(rows.map(x => x.d)).size,
-    skus: new Set(rows.map(x => x.s)).size };
-}
+const MIN_REPORT_BATCHES = 10;   // 全期不到這麼多批就不判定離群，樣本撐不起門檻
+const REL_TOP = 1.8;        // Y 軸上限；再高的點釘在頂端並標成空心，避免壓扁主要區間
 
 const delta = (now, prev) => {
   if (!prev) return '';
@@ -2158,24 +2111,91 @@ const delta = (now, prev) => {
   return `<div class="d ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}%</div>`;
 };
 
-function buildReport(ym) {
+/* ═══════════ 期間 ═══════════
+   整頁跟著一個期間走。廠務會議看的是當月或當季，不是整年 ——
+   以前把「全年趨勢」和「當月報表」擺在同一頁，看的人得自己記得哪個數字是哪一段期間的。
+
+   但有一件事永遠用全期資料算：**平常水準與燈號**。
+   一個月的樣本不足以定義什麼叫正常，拿當月跟當月自己比，永遠比不出問題。 */
+
+let period = { kind: 'month', ym: null };
+
+function periodMonths() {
+  const ms = state.R.meta.months;
+  if (period.kind === 'all') return ms.slice();
+  if (period.kind === 'q') {
+    const i = ms.indexOf(period.ym);
+    return ms.slice(Math.max(0, i - 2), i + 1);
+  }
+  return [period.ym];
+}
+const periodRows = () => {
+  const set = new Set(periodMonths());
+  return state.R.batches.filter(x => set.has(x.m));
+};
+function periodLabel() {
+  const ms = periodMonths();
+  if (period.kind === 'all') return `全期（${ms.length} 個月）`;
+  if (period.kind === 'q') return `${ymLabel(ms[0])} – ${ymLabel(ms[ms.length - 1])}`;
+  return ymLabel(period.ym);
+}
+/** 上一段同樣長度的期間，用來算箭頭 */
+function prevRows() {
+  const ms = state.R.meta.months, cur = periodMonths();
+  if (period.kind === 'all') return null;
+  const i = ms.indexOf(cur[0]);
+  const prev = ms.slice(Math.max(0, i - cur.length), i);
+  if (!prev.length) return null;
+  const set = new Set(prev);
+  return { ms: prev, rows: state.R.batches.filter(x => set.has(x.m)) };
+}
+
+const agg = rows => {
+  const H = rows.reduce((a, x) => a + x.h, 0);
+  const B = rows.reduce((a, x) => a + x.b, 0);
+  return { rows, n: rows.length, H, B, rate: H > 0 ? B / H : 0,
+    days: new Set(rows.map(x => x.d)).size,
+    skus: new Set(rows.map(x => x.s)).size };
+};
+
+function buildPeriodOptions() {
+  const ms = state.R.meta.months;
+  const last = ms[ms.length - 1];
+  const opts = ms.slice().reverse().map(m => `<option value="m:${m}">${ymLabel(m)}</option>`);
+  opts.push(`<option value="q:${last}">近三個月（${ymLabel(ms[Math.max(0, ms.length - 3)])} 起）</option>`);
+  opts.push(`<option value="all:">全期（${ms.length} 個月）</option>`);
+  $('periodSel').innerHTML = opts.join('');
+  period = { kind: 'month', ym: last };
+  $('periodSel').value = 'm:' + last;
+}
+$('periodSel').onchange = () => {
+  const [kind, ym] = $('periodSel').value.split(':');
+  period = { kind: kind === 'm' ? 'month' : kind, ym: ym || state.R.meta.months.slice(-1)[0] };
+  renderPeriod();
+};
+$('pdfBtn').onclick = () => window.print();
+
+/* ═══════════ 期間內的彙總 ═══════════ */
+
+const ODD_MAX = 12;   // 表格是拿來做決定的；要逐筆查帳請用上面的圖與第 08 節
+
+function periodStats() {
   const R = state.R;
-  const cur = monthAgg(ym);
-  const months = R.meta.months;
-  const prevYm = months[months.indexOf(ym) - 1];
-  const prev = prevYm ? monthAgg(prevYm) : null;
   const skuOf = new Map(R.skus.map(s => [s.sku, s]));
+  const cur = agg(periodRows());
+  const pv = prevRows();
+  const prev = pv ? agg(pv.rows) : null;
 
   const byS = new Map();
   cur.rows.forEach(x => {
-    const g = byS.get(x.s) || { s: x.s, n: 0, b: 0, h: 0 };
-    g.n++; g.b += x.b; g.h += x.h;
+    const g = byS.get(x.s) || { s: x.s, n: 0, b: 0, h: 0, days: new Set() };
+    g.n++; g.b += x.b; g.h += x.h; g.days.add(x.d);
     byS.set(x.s, g);
   });
   const list = [...byS.values()].map(g => {
     const s = skuOf.get(g.s) || {};
     const rate = g.h > 0 ? g.b / g.h : 0;
-    return { ...g, rate, usual: s.med || 0,
+    return { ...g, d: g.days.size, rate, usual: s.med || 0, sku: s,
       vs: s.med ? Math.round(100 * (rate / s.med - 1)) : null,
       hShare: cur.H ? +(100 * g.h / cur.H).toFixed(1) : 0,
       bShare: cur.B ? +(100 * g.b / cur.B).toFixed(1) : 0 };
@@ -2185,7 +2205,8 @@ function buildReport(ym) {
     const s = skuOf.get(x.s);
     if (!s || s.n < MIN_REPORT_BATCHES) return null;
     const rate = x.b / x.h;
-    const kind = rate < s.med * 0.7 ? 'lo' : rate > s.med * 2.5 ? 'hi' : null;
+    const kind = rate < s.med * E.thresholds.OUT_LO ? 'lo'
+               : rate > s.med * E.thresholds.OUT_HI ? 'hi' : null;
     // 差距百分比一起算出來 —— 只說「低於平常」看不出嚴重程度，
     // 慢 25% 和慢 70% 要採取的行動完全不同。
     return kind ? { ...x, rate, usual: s.med, kind,
@@ -2195,55 +2216,45 @@ function buildReport(ym) {
   const heavy = list.filter(g => g.hShare >= 3 && g.hShare > g.bShare * 1.5)
                     .sort((a, b) => b.hShare - a.hShare).slice(0, 8);
 
-  const kpi = `<div class="rep-kpi">
-    <div><div class="k">包裝量</div><div class="v">${fmt(cur.B)}</div>${delta(cur.B, prev && prev.B)}</div>
-    <div><div class="k">工時</div><div class="v">${f1(cur.H)}</div>${delta(cur.H, prev && prev.H)}</div>
-    <div><div class="k">整體產能</div><div class="v">${fmt(cur.rate)}</div>${delta(cur.rate, prev && prev.rate)}</div>
-    <div><div class="k">批次</div><div class="v">${fmt(cur.n)}</div><div class="d">${cur.skus} 個品項</div></div>
-    <div><div class="k">作業日</div><div class="v">${cur.days}</div><div class="d">平均每日 ${f1(cur.H / (cur.days || 1))} 工時</div></div>
-  </div>`;
+  return { skuOf, cur, prev, prevLabel: pv ? (pv.ms.length === 1 ? ymLabel(pv.ms[0])
+    : `${ymLabel(pv.ms[0])} – ${ymLabel(pv.ms[pv.ms.length - 1])}`) : null, list, odd, heavy };
+}
 
-  const t1 = list.slice(0, 12).map(g => `<tr>
-    <td><b>${g.s}</b>${skuName(g.s)}</td><td class="num">${g.n}</td><td class="num">${fmt(g.b)}</td>
-    <td class="num">${f1(g.h)}</td><td class="num">${g.hShare}%</td>
-    <td class="num">${fmt(g.rate)}</td>
-    <td class="num">${g.usual ? fmt(g.usual) : '—'}</td>
-    <td class="num ${g.vs === null ? '' : g.vs <= -10 ? 'lo' : g.vs >= 10 ? 'hi' : ''}">${
-      g.vs === null ? '—' : (g.vs > 0 ? '+' : '') + g.vs + '%'}</td></tr>`).join('');
+/* ═══════════ 01 本期重點 ═══════════
+   主管拿到報表的前十秒只想知道三件事：這一期好還是壞、哪幾件要處理、誰要處理。
+   每一條都是「數字 + 結論 + 負責單位」，自動產生，不靠人工寫。 */
 
-  const ODD_MAX = 10;   // 報表是拿來做決定的；要逐筆查帳請到儀表板
-  const t2 = odd.slice().sort((a, b) => b.gap - a.gap).slice(0, ODD_MAX)
-    .sort((a, b) => a.d < b.d ? -1 : 1).map(x => `<tr>
-    <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td><td class="num">${f1(x.h)}</td>
-    <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
-    <td class="num">${fmt(x.usual)}</td>
-    <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td>
-    </tr>`).join('');
-
-  const t3 = heavy.map(g => `<tr>
-    <td><b>${g.s}</b>${skuName(g.s)}</td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
-    <td class="num">${f1(1000 / (g.rate || 1))}</td><td class="num">${fmt(g.b)}</td></tr>`).join('');
-
-  /* 本月重點：主管拿到報表的前十秒只想知道三件事 ——
-     這個月好還是壞、哪幾件要處理、誰要處理。
-     所以每一條都是「數字 + 結論 + 負責單位」，自動產生，不靠人工寫。 */
+function renderHilite(S) {
+  const { cur, prev, prevLabel, list, odd, heavy } = S;
   const lab = labourOf(cur.rows);
   const labS = labourBySku(cur.rows);
   const quads = quadrants(cur.rows);
   const over = quads.filter(q => q.kind === 'over');
   const short = quads.filter(q => q.kind === 'short');
-
   const pts = [];
+
   pts.push({ t: `整體產能 ${fmt(cur.rate)} 單位/hr`
-    + (prev ? `，比${ymLabel(prevYm)}${cur.rate >= prev.rate ? '快' : '慢'} `
+    + (prev ? `，比${prevLabel}${cur.rate >= prev.rate ? '快' : '慢'} `
               + Math.abs(Math.round(100 * (cur.rate / prev.rate - 1))) + '%' : '')
     + `；包裝量 ${fmt(cur.B)}、工時 ${f1(cur.H)} hr`
     + (lab.usable ? `、人時 ${fmt(lab.personHours)}` : '') });
 
-  const slow = list.filter(g => g.vs !== null && g.vs <= -10)
+  // 全廠整體水準。近期幾乎每一支都「比平常慢」時，原因多半在這裡，不在個別品項。
+  const pl = state.R.meta.plant || [];
+  const inP = new Set(periodMonths());
+  const pv = pl.filter(x => inP.has(x.m));
+  if (pv.length) {
+    const avg = pv.reduce((a, x) => a + x.rel, 0) / pv.length;
+    const off = Math.round((avg - 1) * 100);
+    if (Math.abs(off) >= 5) pts.push({ who: '管理層',
+      t: `全廠整體比常態${off < 0 ? '慢' : '快'} ${Math.abs(off)}%`,
+      d: off < 0 ? '這是全廠一起的變化，不是個別品項的問題 —— '
+                 + '下面的燈號已經扣掉這個漂移，只標出比大盤更差的品項'
+                 : '全廠整體優於常態' });
+  }
+
+  const slow = list.filter(g => g.vs !== null && g.vs <= -10 && g.n >= 3)
                    .sort((a, b) => a.vs - b.vs).slice(0, 4);
-  // 四支品項寫成一段會黏成一團，看的人得逐字切開才知道哪個數字配哪支。
-  // 一支一列，品號、品名、幅度各自對齊。
   if (slow.length) pts.push({ who: '製造',
     t: `${slow.length} 支品項低於平常水準 10% 以上`,
     rows: slow.map(g => [g.s, cut(nameOf(g.s), 16), g.vs + '%']) });
@@ -2267,7 +2278,73 @@ function buildReport(ym) {
     t: `${short.length} 批「線體偏低但人均正常」`,
     d: '人做得跟平常一樣，是人派得比較少，不是效率問題' });
 
-  /* 人力明細：只列覆蓋率足夠的品項，每一列都看得到它涵蓋幾批 */
+  const head = pts.slice(0, 6).map((x, i) => `<tr>
+    <td class="no">${'①②③④⑤⑥'[i]}</td>
+    <td><div class="t">${x.t}</div>${x.d ? `<div class="d">${x.d}</div>` : ''}${
+      x.rows ? `<ul class="hlist">${x.rows.map(r =>
+        `<li><b>${r[0]}</b><span>${esc(r[1])}</span><em>${r[2]}</em></li>`).join('')}</ul>` : ''}</td>
+    <td class="who">${x.who ? `<span>${x.who}</span>` : ''}</td></tr>`).join('');
+
+  $('hiliteBox').innerHTML = `<div class="hilite">
+    <div class="hd">本期重點　·　${periodLabel()}</div>
+    <table class="rtab hl"><tbody>${head}</tbody></table></div>`;
+  return { lab, labS, quads };
+}
+
+/* ═══════════ 02 本期概況 ═══════════ */
+
+function renderPeriodKpi(S, lab) {
+  const { cur, prev, prevLabel } = S;
+  $('periodKpi').innerHTML = `<div class="rep-kpi">
+    <div><div class="k">包裝量</div><div class="v">${fmt(cur.B)}</div>${delta(cur.B, prev && prev.B)}</div>
+    <div><div class="k">工時</div><div class="v">${f1(cur.H)}</div>${delta(cur.H, prev && prev.H)}</div>
+    <div><div class="k">整體產能</div><div class="v">${fmt(cur.rate)}</div>${delta(cur.rate, prev && prev.rate)}</div>
+    <div><div class="k">批次</div><div class="v">${fmt(cur.n)}</div><div class="d">${cur.skus} 個品項</div></div>
+    <div><div class="k">作業日</div><div class="v">${cur.days}</div><div class="d">平均每日 ${f1(cur.H / (cur.days || 1))} 工時</div></div>
+    ${lab.usable ? `<div><div class="k">人時</div><div class="v">${fmt(lab.personHours)}</div>
+      <div class="d">平均配置 ${lab.avgHead.toFixed(1)} 人</div></div>` : ''}
+  </div>`;
+  $('periodNote').innerHTML = prev
+    ? `箭頭為與<b>${prevLabel}</b>的比較。`
+    : '沒有可比較的前一段期間，因此不顯示箭頭。';
+}
+
+/* ═══════════ 04 需要說明的批次 ═══════════ */
+
+function renderOdd(S) {
+  const { odd, cur, skuOf } = S;
+  const t2 = odd.slice().sort((a, b) => b.gap - a.gap).slice(0, ODD_MAX)
+    .sort((a, b) => a.d < b.d ? -1 : 1).map(x => `<tr>
+    <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td><td class="num">${f1(x.h)}</td>
+    <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
+    <td class="num">${fmt(x.usual)}</td>
+    <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td>
+    </tr>`).join('');
+
+  $('oddBox').innerHTML = oddDotSvg(cur.rows, skuOf)
+    + (odd.length ? `<table class="rtab"><thead><tr>
+      <th>日期</th><th>品號 / 品名</th><th class="num">工時</th><th class="num">瓶數</th>
+      <th class="num">當批產能<i>單位/hr</i></th>
+      <th class="num">平常水準<i>單位/hr</i></th><th>情況</th>
+    </tr></thead><tbody>${t2}</tbody></table>
+    ${odd.length > ODD_MAX ? `<p>本期共 ${odd.length} 批偏離平常水準，上表列出差距最大的
+      ${ODD_MAX} 批；其餘請在第 08 節逐支品項查看。</p>` : ''}
+    <div class="rep-note">判定門檻：低於該品項平常水準的 ${E.thresholds.OUT_LO} 倍或高於
+      ${E.thresholds.OUT_HI} 倍，且該品項<b>全期</b>至少 ${MIN_REPORT_BATCHES} 批（樣本太少不判定）。
+      請製造單位就這幾批說明當天狀況。</div>`
+    : '<div class="rep-empty">本期沒有偏離平常水準的批次。</div>');
+}
+
+/* ═══════════ 05 人力與工時分配 ═══════════ */
+
+function renderLabour(S, lab, labS, quads) {
+  const { cur } = S;
+  if (!lab.usable) {
+    $('labBox').innerHTML = `<div class="rep-empty">本期人數覆蓋率 ${lab.pct}%
+      （${lab.withHead} / ${lab.n} 批），未達 ${HEAD_MIN_PCT}%，不足以計算人均產能。<br>
+      只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`;
+    return;
+  }
   const labList = [...labS.values()].filter(x => x.usable)
     .sort((a, b) => b.personHours - a.personHours).slice(0, 10);
   const totPH = labList.reduce((a, x) => a + x.personHours, 0) || 1;
@@ -2291,66 +2368,7 @@ function buildReport(ym) {
     <td>${QUAD[q.kind].t}</td>
     <td class="nm">${QUAD[q.kind].who}</td></tr>`).join('');
 
-  const head = pts.slice(0, 6).map((x, i) => `<tr>
-    <td class="no">${'①②③④⑤⑥'[i]}</td>
-    <td><div class="t">${x.t}</div>${x.d ? `<div class="d">${x.d}</div>` : ''}${
-      x.rows ? `<ul class="hlist">${x.rows.map(r =>
-        `<li><b>${r[0]}</b><span>${esc(r[1])}</span><em>${r[2]}</em></li>`).join('')}</ul>` : ''}</td>
-    <td class="who">${x.who ? `<span>${x.who}</span>` : ''}</td></tr>`).join('');
-
-  return `
-  <div class="stamp">
-    <div><div class="meta">包裝產能月報</div><h1>${ymLabel(ym)}</h1></div>
-    <div class="meta">產出日期 ${new Date().toISOString().slice(0, 10)}<br>資料來源 ${state.source}</div>
-  </div>
-
-  <div class="hilite">
-    <div class="hd">本月重點</div>
-    <table class="rtab hl"><tbody>${head}</tbody></table>
-  </div>
-
-  <h3><span class="n">01</span>當月概況</h3>
-  ${kpi}
-  <p>箭頭為與${prevYm ? ymLabel(prevYm) : '上月'}的比較。整體產能＝當月總包裝量 ÷ 總工時；
-     不同瓶型混在一起只能看趨勢，跨品項比較沒有意義。</p>
-
-  <h3><span class="n">02</span>當月產出品項（依包裝量排序）</h3>
-  <table class="rtab"><thead><tr>
-    <th>品號 / 品名</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
-    <th class="num">工時佔比</th>
-    <th class="num">當月產能<i>單位/hr</i></th>
-    <th class="num">平常水準<i>單位/hr</i></th><th class="num">差異</th>
-  </tr></thead><tbody>${t1}</tbody></table>
-  ${list.length > 12 ? `<p>另有 ${list.length - 12} 個品項未列出。</p>` : ''}
-  <div class="rep-note">「平常水準」是該品項全期每批產能的中位數 —— 一半的批次做得到。
-    差異超過 ±10% 才標色 ——
-    每一支產品只跟自己比，不跨品項排名。</div>
-
-  <h3><span class="n">03</span>需要說明的批次</h3>
-  ${monthDotSvg(cur.rows, skuOf, ym)}
-  ${odd.length ? `<table class="rtab"><thead><tr>
-    <th>日期</th><th>品號 / 品名</th><th class="num">工時</th><th class="num">瓶數</th>
-    <th class="num">當批產能<i>單位/hr</i></th>
-    <th class="num">平常水準<i>單位/hr</i></th><th>情況</th>
-  </tr></thead><tbody>${t2}</tbody></table>
-  ${odd.length > ODD_MAX ? `<p>本月共 ${odd.length} 批偏離平常水準，上表列出差距最大的
-    ${ODD_MAX} 批；其餘請在儀表板上逐支品項查看。</p>` : ''}
-  <div class="rep-note">判定門檻：低於該品項平常水準的 0.7 倍或高於 2.5 倍，且該品項全期至少 10 批
-    （樣本太少不判定）。請製造單位就這幾批說明當天狀況。</div>`
-  : '<div class="rep-empty">本月沒有偏離平常水準的批次。</div>'}
-
-  <h3><span class="n">04</span>吃工時但產量不高的品項</h3>
-  ${heavy.length ? `<table class="rtab"><thead><tr>
-    <th>品號 / 品名</th><th class="num">產量佔比</th><th class="num">工時佔比</th>
-    <th class="num">每千瓶工時</th><th class="num">當月包裝量</th>
-  </tr></thead><tbody>${t3}</tbody></table>
-  <div class="rep-note"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
-    提供給業務與生管參考：接單與排程時，這類品項的工時成本要先估進去。</div>`
-  : '<div class="rep-empty">本月沒有工時佔比明顯高於產量佔比的品項。</div>'}
-
-  <h3><span class="n">05</span>人均產能</h3>
-  ${lab.usable ? `
-  <div class="rep-kpi">
+  $('labBox').innerHTML = `<div class="rep-kpi">
     <div><div class="k">人時</div><div class="v">${fmt(lab.personHours)}</div>
       <div class="d">平均配置 ${lab.avgHead.toFixed(1)} 人</div></div>
     <div><div class="k">單位／人·hr</div><div class="v">${fmt(lab.perUnit)}</div>
@@ -2373,43 +2391,71 @@ function buildReport(ym) {
     —— 也就是說，差別來自包裝規格，不是人的努力程度。<br>
     <b>單位／人·hr 只跟自己比</b>，拿去跨品項排名等於在罵做小包裝的人；
     要比人力花在哪，請看「公斤／人·hr」。</div>
-  ${quadRows ? `<div style="margin-top:14px"></div>
+  ${quadRows ? `<div style="margin-top:16px"></div>
   <table class="rtab"><thead><tr>
     <th>日期</th><th>品號 / 品名</th><th class="num">人數</th><th class="num">平常派</th>
     <th class="num">線體產能</th><th class="num">單位／人·hr</th><th>情況</th><th>負責</th>
   </tr></thead><tbody>${quadRows}</tbody></table>
   <div class="rep-note">同一個「這批慢」，原因可能完全不同。
     <b>線體偏低但人均正常</b>＝人派得少，人做得跟平常一樣，不是效率問題；
-    <b>線體正常但人均偏低</b>＝加了人但線沒更快，現行的產能警訊完全看不到這一類。</div>` : ''}
-  ` : `<div class="rep-empty">本月人數覆蓋率 ${lab.pct}%（${lab.withHead} / ${lab.n} 批），
-    未達 ${HEAD_MIN_PCT}%，不足以計算人均產能。<br>
-    只用「有填人數的那幾批」代表整月會有選擇偏誤，寧可不出數字。</div>`}
+    <b>線體正常但人均偏低</b>＝加了人但線沒更快，現行的產能警訊完全看不到這一類。</div>` : ''}`;
+}
 
-  <h3><span class="n">06</span>逐月走勢（月份 × 品項）</h3>
-  ${heatmapHtml(R.skus, months.slice(-12), 18)}
+/* ═══════════ 06 吃工時但產量不高 ═══════════ */
 
-  <h3><span class="n">07</span>資料完整性</h3>
-  <div id="repChk"><div class="rep-empty">讀取中…</div></div>
+function renderHeavy(S) {
+  const { heavy } = S;
+  $('heavyBox').innerHTML = heavy.length ? `<table class="rtab"><thead><tr>
+      <th>品號 / 品名</th><th class="num">產量佔比</th><th class="num">工時佔比</th>
+      <th class="num">每千瓶工時</th><th class="num">本期包裝量</th>
+    </tr></thead><tbody>${heavy.map(g => `<tr>
+      <td><b>${g.s}</b>${skuName(g.s)}</td><td class="num">${g.bShare}%</td>
+      <td class="num">${g.hShare}%</td>
+      <td class="num">${f1(1000 / (g.rate || 1))}</td><td class="num">${fmt(g.b)}</td>
+    </tr>`).join('')}</tbody></table>`
+    : '<div class="rep-empty">本期沒有工時佔比明顯高於產量佔比的品項。</div>';
+}
 
-  <h3><span class="n">08</span>數字怎麼算的</h3>
-  ${defsHtml()}
+/* ═══════════ 整頁重畫 ═══════════ */
 
-  <div class="rep-foot">工時一律由起訖時間推算，不接受人工填寫。本報表由包裝產能系統自動產生。</div>`;
+function renderPeriod() {
+  const S = periodStats();
+  $('periodNow').textContent = `${periodLabel()}　·　${fmt(S.cur.n)} 批 · ${S.cur.skus} 個品項`;
+  $('printHead').innerHTML = `<div class="stamp">
+    <div><div class="meta">包裝產能報表</div><h1>${periodLabel()}</h1></div>
+    <div class="meta">產出日期 ${new Date().toISOString().slice(0, 10)}<br>
+      資料來源 ${state.source}</div></div>`;
+  const { lab, labS, quads } = renderHilite(S);
+  renderPeriodKpi(S, lab);
+  renderOverview(S);
+  renderOdd(S);
+  renderLabour(S, lab, labS, quads);
+  renderHeavy(S);
+  $('heatBox').innerHTML = heatmapHtml(state.R.skus, state.R.meta.months.slice(-12), 18);
+  fillCheck();
 }
 
 /**
- * 報表最後補上「這個月的資料齊不齊」。
- * 讀者要先知道資料完不完整，才知道前面的數字能信到什麼程度 ——
- * 一份沒說清楚涵蓋範圍的報表，比沒有報表更容易誤導。
+ * 10 資料完整性。
+ * 讀者要先知道資料完不完整，才知道前面的數字能信到什麼程度。
+ * 只有選單一月份時才問得到 —— month_status 是按月統計的。
  */
-async function fillReportCheck(ym) {
-  if (!sess || !sess.refresh) return;
+async function fillCheck() {
+  const box = $('chkBox');
+  if (period.kind !== 'month') {
+    box.innerHTML = `<div class="rep-empty">資料完整性是按月統計的。
+      請在上方把期間切到單一月份來查看。</div>`;
+    return;
+  }
+  if (!sess || !sess.refresh) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="rep-empty">讀取中…</div>';
+  const ym = period.ym;
   try {
     const r = (await dbGet(`month_status?select=*&ym=eq.${ym}`))[0];
-    if (!r) return;
-    const logged = r.logged_days + r.no_op_days;
+    if (period.ym !== ym) return;          // 使用者已經切走，別把舊結果蓋上去
+    if (!r) { box.innerHTML = `<div class="rep-empty">查不到 ${ymLabel(ym)} 的登記狀態。</div>`; return; }
     const okDays = r.missing_days === 0;
-    $('repChk').innerHTML = `<table class="rtab"><thead><tr>
+    box.innerHTML = `<table class="rtab"><thead><tr>
       <th class="num">應登記工作日</th><th class="num">已登記</th><th class="num">無作業</th>
       <th class="num">待補</th><th class="num">人數已填</th></tr></thead><tbody><tr>
       <td class="num">${r.workdays}</td>
@@ -2428,29 +2474,9 @@ async function fillReportCheck(ym) {
               + '以上數字尚未涵蓋那幾天。'
       }${r.head_pct !== null && r.head_pct < 100
           ? ' 人數尚未補齊，人均效率分析暫不適用本月。' : ''}</div>`;
-  } catch (e) { /* 讀不到就維持原本的說明，不要讓報表開不出來 */ }
-}
-
-function openReport(ym) {
-  $('repTitle').textContent = ymLabel(ym) + '　·　' + state.source;
-  $('repBody').innerHTML = buildReport(ym);
-  $('rep').hidden = false;
-  document.body.style.overflow = 'hidden';
-  fillReportCheck(ym);
-}
-const closeReport = () => { $('rep').hidden = true; document.body.style.overflow = ''; };
-
-$('repBtn').onclick = () => openReport($('repMonth').value);
-$('repClose').onclick = closeReport;
-$('repPrint').onclick = () => window.print();
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReport(); });
-
-/** 月份選單跟著資料重建，最新的月份排在最前面 */
-function buildMonthOptions() {
-  const ms = state.R.meta.months;
-  $('repMonth').innerHTML = ms.slice().reverse()
-    .map(m => `<option value="${m}">${ymLabel(m)}</option>`).join('');
-  $('repHint').textContent = ms.length ? `可選 ${ms.length} 個月份` : '';
+  } catch (e) {
+    box.innerHTML = '<div class="rep-empty">讀不到資料完整性，其餘數字不受影響。</div>';
+  }
 }
 
 /* ─────────── 從資料庫讀最新資料 ───────────
@@ -2540,8 +2566,7 @@ async function showWho() {
     if (!sub) return;
     const me = (await dbGet(`members?select=display_name,role&user_id=eq.${sub}`))[0];
     if (!me) return;
-    const ROLE = { operator: '輸入專員', manager: '主管', viewer: '檢視者' };
-    $('dashWho').textContent = `${me.display_name}（${ROLE[me.role] || me.role}）`;
+    $('dashWho').textContent = me.display_name;
     $('dashOut').hidden = false;
   } catch (e) { /* 顯示名稱失敗不影響看報表 */ }
 }
