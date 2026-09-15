@@ -36,6 +36,21 @@ def make_router(existing_batches):
         if "/rest/v1/sku_stats" in u:
             return r.fulfill(status=200, content_type="application/json", body=json.dumps(SKUS))
         if "/rest/v1/batches" in u:
+            if m == "GET" and "sku_code=eq." in u:
+                return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+                    {"prod_date":"2026-08-29","start_time":"08:00:00","end_time":"09:30:00",
+                     "hours":1.5,"bottles":450,"headcount":5,"abnormal_ok":False},
+                    {"prod_date":"2026-08-26","start_time":"10:00:00","end_time":"11:00:00",
+                     "hours":1.0,"bottles":60,"headcount":4,"abnormal_ok":True},
+                    {"prod_date":"2026-08-20","start_time":"13:00:00","end_time":"15:00:00",
+                     "hours":2.0,"bottles":520,"headcount":5,"abnormal_ok":False},
+                ]))
+            if m == "GET" and "prod_date=gte." in u and "prod_date=eq." not in u:
+                return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+                    {"prod_date":"2026-09-01","sku_code":"D0310","start_time":"08:00:00",
+                     "end_time":"09:30:00","hours":1.5,"bottles":450,"headcount":5,
+                     "abnormal_ok":False,"note":"含,逗號與\"引號"},
+                ]))
             if m == "POST":
                 body = json.loads(r.request.post_data or "[]")
                 captured["posts"].append(body)
@@ -69,7 +84,7 @@ def check(name, cond, extra=""):
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
-    pg = b.new_page(viewport={"width":1280,"height":1000})
+    pg = b.new_page(viewport={"width":1280,"height":1000}, accept_downloads=True)
     logs = []
     pg.on("console", lambda m: logs.append(m.type + ": " + m.text))
     pg.on("pageerror", lambda e: logs.append("PAGEERROR: " + str(e)))
@@ -280,6 +295,46 @@ with sync_playwright() as p:
     errs = [l for l in logs
             if ("PAGEERROR" in l or l.startswith("error"))
             and "ERR_FAILED" not in l]
+    print("\n── 品項歷史 ──")
+    pg.locator("#rows tr").first.locator("button.hist").click()
+    pg.wait_for_selector("#hist:not([hidden])", timeout=5000)
+    body = pg.inner_text("#histBody")
+    check("視窗打開", pg.is_visible("#histBody"))
+    check("標題含品號與品名", "D0310" in pg.inner_text("#histTitle")
+          and "草莓蒟蒻餡" in pg.inner_text("#histTitle"), pg.inner_text("#histTitle"))
+    check("顯示平均與中位數", "平均產能" in body and "中位數" in body, body[:80])
+    check("顯示偏低門檻", "偏低門檻" in body, body[:120])
+    check("分布帶有點", pg.locator("#histBody .strip i").count() >= 3,
+          pg.locator("#histBody .strip i").count())
+    check("這一批被標出來", pg.locator("#histBody .strip i.me").count() == 1)
+    check("偏低的批次被標記", pg.locator("#histBody .strip i.low").count() >= 1,
+          pg.locator("#histBody .strip i.low").count())
+    check("歷史明細列出三批", pg.locator("#histBody .htab tbody tr").count() == 3,
+          pg.locator("#histBody .htab tbody tr").count())
+    check("已確認的批次有標示", "已確認" in body, body[-200:])
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(200)
+    check("Esc 可以關閉", pg.locator("#hist[hidden]").count() == 1)
+
+    print("\n── 匯出 CSV ──")
+    pg.select_option("#expRange", "month")
+    with pg.expect_download() as dl:
+        pg.click("#expBtn")
+    d = dl.value
+    check("檔名有月份", "2026-09" in d.suggested_filename, d.suggested_filename)
+    raw = open(d.path(), "rb").read()
+    check("開頭有 BOM（Excel 才不會亂碼）", raw[:3] == b"\xef\xbb\xbf", raw[:6])
+    txt = raw.decode("utf-8-sig")
+    lines = txt.strip().split("\r\n")
+    check("有標題列與一筆資料", len(lines) == 2, lines)
+    check("標題含中文欄名", "生產日期" in lines[0] and "產能" in lines[0], lines[0])
+    check("帶出品名", "草莓蒟蒻餡" in lines[1], lines[1])
+    check("算出產能 300", ",300," in lines[1], lines[1])
+    check("含逗號的備註有加引號", '"含,逗號與""引號"""' in lines[1] or '含,逗號' in lines[1],
+          lines[1])
+    pg.wait_for_timeout(200)
+    check("顯示匯出筆數", "1 筆" in pg.inner_text("#expState"), pg.inner_text("#expState"))
+
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
     check("沒有 JS 錯誤", not errs, errs[:3])

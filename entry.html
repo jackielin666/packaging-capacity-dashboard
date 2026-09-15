@@ -168,6 +168,59 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
 .spacer{flex:1;min-width:8px}
 
+/* ── 品項歷史 ── */
+.hist{background:0;border:0;color:var(--accent);cursor:pointer;font:11px "Noto Sans TC",sans-serif;
+  padding:0 0 0 9px;text-decoration:underline;text-underline-offset:2px}
+.hist:hover{color:var(--ink)}
+.modal{position:fixed;inset:0;background:rgba(18,23,26,.45);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:50}
+.modal .box{background:var(--surface);border-radius:6px;width:100%;max-width:720px;
+  max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.modal .top{display:flex;align-items:flex-start;gap:14px;padding:20px 22px 16px;
+  border-bottom:1px solid var(--rule)}
+.modal .top h2{font-size:17px}
+.modal .top .sub{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.modal .x2{background:0;border:0;font-size:22px;color:var(--ink-3);cursor:pointer;
+  line-height:1;padding:2px 6px;border-radius:3px;margin-left:auto}
+.modal .x2:hover{background:var(--raised);color:var(--ink)}
+.modal .scroll{overflow:auto;padding:0 22px 20px}
+.hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:4px;margin:18px 0 0;overflow:hidden}
+.hstats div{background:var(--sunk);padding:11px 13px}
+.hstats .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+.hstats .v{font-family:"IBM Plex Mono",monospace;font-size:18px;font-weight:500;margin-top:2px}
+.strip{position:relative;height:58px;margin:18px 0 6px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--sunk)}
+.strip i{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;
+  border-radius:50%;background:var(--ink-4)}
+.strip i.low{background:var(--signal);width:9px;height:9px;margin:-4.5px 0 0 -4.5px}
+.strip i.high{background:var(--cool);width:9px;height:9px;margin:-4.5px 0 0 -4.5px}
+.strip i.me{background:var(--accent);width:13px;height:13px;margin:-6.5px 0 0 -6.5px;
+  box-shadow:0 0 0 3px var(--accent-wash)}
+.strip b{position:absolute;top:4px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+  color:var(--ink-3);font-weight:400;transform:translateX(-50%)}
+.strip s{position:absolute;top:0;bottom:0;width:1px;background:var(--rule-2);
+  text-decoration:none}
+.striplab{font-size:11.5px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap}
+.htab{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.htab th{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  padding:7px 9px;border-bottom:1px solid var(--rule-3);background:var(--sunk)}
+.htab th.num{text-align:right}
+.htab td{padding:8px 9px;border-bottom:1px solid #F0F2ED;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.htab td.num{text-align:right}
+.htab tr.me td{background:var(--accent-wash);font-weight:500}
+.htab .mk{font-size:11px;color:var(--ink-3)}
+.htab .mk.low{color:var(--signal)}
+.htab .mk.high{color:var(--cool)}
+
+/* ── 匯出 ── */
+.exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:0 20px 16px}
+.exp select{padding:7px 9px;border:1px solid var(--rule-2);border-radius:4px;background:#fff;
+  font:12.5px "Noto Sans TC",sans-serif;color:var(--ink)}
+
 /* ── 訊息 ── */
 .msg{padding:12px 16px;border-radius:0 4px 4px 0;font-size:13.5px;margin-top:18px}
 .msg.ok{background:var(--accent-wash);border-left:3px solid var(--accent)}
@@ -257,6 +310,11 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   .ck{flex-wrap:wrap}
   .cal{gap:3px;padding:10px}
   .cell{font-size:11px}
+  .modal{padding:0}
+  .modal .box{max-width:none;max-height:100vh;height:100vh;border-radius:0}
+  .hstats{grid-template-columns:1fr 1fr}
+  .exp{padding:0 14px 14px}
+  .exp select,.exp .btn{flex:1}
 }
 </style>
 <!-- ══ 載入中 ══ -->
@@ -399,6 +457,16 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <div class="tally" id="calSub">—</div>
       </div>
       <div class="cal" id="cal"></div>
+      <div class="exp">
+        <span class="hint">匯出紀錄</span>
+        <select id="expRange">
+          <option value="month">本月</option>
+          <option value="3m">近三個月</option>
+          <option value="all">全部</option>
+        </select>
+        <button class="btn ghost sm" id="expBtn">下載 CSV</button>
+        <span class="hint" id="expState"></span>
+      </div>
       <div class="legend">
         <span><i class="l-has"></i>已登記</span>
         <span><i class="l-none"></i>無作業</span>
@@ -407,6 +475,19 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       </div>
     </div>
 
+  </div>
+</div>
+
+<div class="modal" id="hist" hidden>
+  <div class="box">
+    <div class="top">
+      <div>
+        <h2 id="histTitle">—</h2>
+        <div class="sub" id="histSub"></div>
+      </div>
+      <button class="x2" id="histClose" title="關閉">×</button>
+    </div>
+    <div class="scroll" id="histBody"></div>
   </div>
 </div>
 
@@ -586,7 +667,28 @@ var state = {
 };
 var uid = 0;
 
-function canModify(d) { return state.role === 'manager' || d >= monthStart(); }
+/** 整筆都可以改的最早日期＝上個月 1 號。與資料庫的 editable_from_tw() 同一個定義。 */
+function editableFrom() {
+  var d = new Date();
+  return ymd(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+}
+function canModify(d) { return state.role === 'manager' || d >= editableFrom(); }
+
+/**
+ * 更早的資料只開放補人數。
+ * 理由：人數是階段 4 人均效率分析唯一的依據，補登會拖很久、不可能都落在當月；
+ * 但品項、日期、時間、瓶數是量測值，不該被無聲改掉。資料庫端也有同樣的把關。
+ */
+function canFillHead(d) { return state.role !== 'viewer'; }
+
+/** 這一列的修改存不存得進去。與資料庫的 guard_operator_scope() 同一套判斷。 */
+function editAllowed(r) {
+  if (!r.id) return true;                       // 新增不受月份限制
+  if (canModify(state.date)) return true;       // 上個月之後整筆都能改
+  if (!r.orig) return false;
+  return r.sku === r.orig.sku && r.start === r.orig.start
+      && r.end === r.orig.end && String(r.bottles) === String(r.orig.bottles);
+}
 
 function banner(kind, html) {
   var b = $('banner');
@@ -671,7 +773,9 @@ function loadDay(d) {
         start: String(b.start_time).slice(0, 5),
         end: String(b.end_time).slice(0, 5),
         bottles: b.bottles, head: b.headcount == null ? '' : b.headcount,
-        note: b.note || '', ok: !!b.abnormal_ok, dirty: false, deleted: false
+        note: b.note || '', ok: !!b.abnormal_ok, dirty: false, deleted: false,
+        orig: { sku: b.sku_code, start: String(b.start_time).slice(0, 5),
+                end: String(b.end_time).slice(0, 5), bottles: String(b.bottles) }
       };
     });
     state.dayStatus = (res[1] && res[1][0]) || null;
@@ -707,9 +811,9 @@ function renderDay() {
 
   // 「補登可以新增，但改舊資料要主管」是刻意的設計，寫清楚免得現場以為壞了
   if (!editable && state.role === 'operator') {
-    banner('info', '<b>' + d.slice(0, 7) + ' 是過去的月份</b>　'
-      + '你仍然可以<u>新增</u>補登的批次，但已經存在的資料要請主管修改，'
-      + '這樣歷史數字才不會被無聲改掉。');
+    banner('info', '<b>' + d.slice(0, 7) + ' 已經超過可修改的月份</b>　'
+      + '這一天你可以：<u>新增</u>漏掉的批次、在既有批次上<u>補人數</u>。<br>'
+      + '品項、時間、瓶數要請主管修改 —— 歷史的量測值不該被無聲改掉。');
     $('addRow').disabled = false;
   }
 
@@ -728,6 +832,8 @@ function renderRow(r, editable) {
   var tr = document.createElement('tr');
   var locked = r.id && !editable;
   if (locked) tr.className = 'locked';
+  // 舊資料整筆鎖住，但人數留著讓專員回頭補
+  var headOpen = locked && canFillHead(state.date);
 
   function cell(label, cls, inner) {
     var td = document.createElement('td');
@@ -736,16 +842,18 @@ function renderRow(r, editable) {
   }
   function inp(field, cls, ph, extra) {
     var v = r[field] === null || r[field] === undefined ? '' : r[field];
+    var off = locked && !(field === 'head' && headOpen);
     return '<input class="' + (cls || '') + '" data-f="' + field + '" '
          + 'value="' + String(v).replace(/"/g, '&quot;') + '" placeholder="' + (ph || '') + '" '
-         + (locked ? 'disabled ' : '') + (extra || '') + '>';
+         + (off ? 'disabled ' : '') + (extra || '') + '>';
   }
 
   var sku = state.skus[r.sku];
   var name = sku ? (sku.name + (sku.container ? '　·　' + sku.container : ''))
                  : (r.sku ? '查無此品號' : '');
   tr.appendChild(cell('品項', '', inp('sku', '', '打品號', 'list="skuList" autocapitalize="off" spellcheck="false"')
-    + '<div class="skuname">' + name + '</div>'));
+    + '<div class="skuname">' + name
+    + (sku ? '<button class="hist" type="button">歷史</button>' : '') + '</div>'));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
@@ -776,6 +884,9 @@ function renderRow(r, editable) {
       if (e.key === 'Enter') { e.preventDefault(); nextField(el); }
     });
   });
+
+  var hb = tr.querySelector('.hist');
+  if (hb) hb.addEventListener('click', function () { openHistory(r.sku, r); });
 
   tr.dataset.key = r.key;
   return tr;
@@ -872,12 +983,16 @@ function recalc() {
     if (bad) anyBad = true;
   });
 
-  var wantIns = false, wantEd = false;
+  var wantIns = false, wantEd = false, blockedRow = false;
   state.rows.forEach(function (r) {
-    if (r.deleted)            { if (r.id) wantEd = true; return; }
-    if (!r.dirty)             return;
-    if (r.id)                 wantEd = true;
-    else if (rowComplete(r))  wantIns = true;
+    if (r.deleted) {
+      if (!r.id) return;
+      if (canModify(state.date)) wantEd = true; else blockedRow = true;
+      return;
+    }
+    if (!r.dirty) return;
+    if (!r.id) { if (rowComplete(r)) wantIns = true; return; }
+    if (editAllowed(r)) wantEd = true; else blockedRow = true;
   });
 
   $('sumB').textContent = num(tb2);
@@ -885,15 +1000,13 @@ function recalc() {
   $('sumH').innerHTML   = num(th, 1) + '<small>h</small>';
   $('sumR').innerHTML   = (th > 0 ? num(Math.round(tq / th)) : '—') + '<small>/工時</small>';
 
-  var canIns = state.role === 'operator' || state.role === 'manager';
-  var canEd  = canIns && canModify(state.date);
-  var blocked = wantEd && !canEd;
-  var pending = pendingCount();
+  var canWrite = state.role === 'operator' || state.role === 'manager';
+  var pending  = pendingCount();
 
-  $('saveBtn').disabled = anyBad || blocked || !((wantIns && canIns) || (wantEd && canEd));
+  $('saveBtn').disabled = anyBad || blockedRow || !canWrite || !(wantIns || wantEd);
   $('saveBtn').textContent = pending ? '儲存本日　' + pending + ' 筆' : '儲存本日';
-  $('dirtyHint').textContent =
-      blocked ? '這個月份的既有資料要主管才能修改或刪除。' : '';
+  $('dirtyHint').textContent = blockedRow
+    ? '這一天只能補人數；品項、時間、瓶數的修改要請主管處理。' : '';
 
   renderChecks();
 }
@@ -902,9 +1015,10 @@ function recalc() {
 function pendingCount() {
   var n = 0;
   state.rows.forEach(function (r) {
-    if (r.deleted)  { if (r.id) n++; return; }
+    if (r.deleted)  { if (r.id && canModify(state.date)) n++; return; }
     if (!r.dirty)   return;
-    if (r.id || rowComplete(r)) n++;
+    if (r.id) { if (editAllowed(r)) n++; }
+    else if (rowComplete(r)) n++;
   });
   return n;
 }
@@ -1058,8 +1172,9 @@ $('saveBtn').addEventListener('click', function () {
   var d = state.date, ins = [], upd = [], del = [];
 
   state.rows.forEach(function (r) {
-    if (r.deleted) { if (r.id) del.push(r); return; }
+    if (r.deleted) { if (r.id && canModify(d)) del.push(r); return; }
     if (!rowComplete(r) || !r.dirty) return;
+    if (!editAllowed(r)) return;
     var payload = {
       sku_code: r.sku, prod_date: d,
       start_time: parseTime(r.start), end_time: parseTime(r.end),
@@ -1262,6 +1377,174 @@ $('rows').addEventListener('paste', function (e) {
   renderDay();
   banner('info', '<b>已貼上 ' + lines.length + ' 列</b>　'
     + '請確認品項與時間都對，再按儲存。欄位順序：品項／起始／結束／瓶數／人數。');
+});
+
+// ══ 匯出 ══════════════════════════════════════════════════
+/**
+ * 把紀錄存成 CSV 讓使用者自己決定放哪裡。
+ * 開頭加 BOM，否則 Excel 開啟時中文會變亂碼 —— 這是現場最常回報的問題。
+ */
+function toCsvText(rows) {
+  var cols = ['生產日期','品號','品名','起始','結束','工時','瓶數','人數','產能','已確認異常','備註'];
+  var out  = [cols.join(',')];
+
+  rows.forEach(function (b) {
+    var sku = state.skus[b.sku_code] || {};
+    var h = Number(b.hours);
+    var cells = [
+      b.prod_date, b.sku_code, sku.name || '',
+      String(b.start_time).slice(0, 5), String(b.end_time).slice(0, 5),
+      h.toFixed(2), b.bottles,
+      b.headcount == null ? '' : b.headcount,
+      h > 0 ? Math.round(b.bottles / h) : '',
+      b.abnormal_ok ? '是' : '', b.note || ''
+    ];
+    out.push(cells.map(function (v) {
+      v = String(v == null ? '' : v);
+      return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(','));
+  });
+  return '\ufeff' + out.join('\r\n') + '\r\n';
+}
+
+function download(name, text) {
+  var url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  var a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+$('expBtn').addEventListener('click', function () {
+  var mode = $('expRange').value, q = '', label = '';
+
+  if (mode === 'month') {
+    var m = state.calMonth;
+    var last = ymd(new Date(+m.slice(0, 4), +m.slice(5, 7), 0));
+    q = '&prod_date=gte.' + m + '-01&prod_date=lte.' + last;
+    label = m;
+  } else if (mode === '3m') {
+    var from = addDays(today(), -92);
+    q = '&prod_date=gte.' + from;
+    label = from + '_' + today();
+  } else {
+    label = '全部';
+  }
+
+  $('expBtn').disabled = true;
+  $('expState').textContent = '準備中…';
+
+  api('batches?select=prod_date,sku_code,start_time,end_time,hours,bottles,headcount,'
+      + 'abnormal_ok,note&order=prod_date.asc,start_time.asc' + q + '&limit=20000')
+    .then(function (rows) {
+      if (!rows.length) { $('expState').textContent = '這個範圍沒有資料。'; return; }
+      download('包裝紀錄_' + label + '.csv', toCsvText(rows));
+      $('expState').textContent = '已匯出 ' + num(rows.length) + ' 筆。';
+    })
+    .catch(function (e) { $('expState').textContent = '匯出失敗：' + e.message; })
+    .then(function () { $('expBtn').disabled = false; });
+});
+
+// ══ 品項歷史 ══════════════════════════════════════════════
+/**
+ * 點品號旁的「歷史」就看得到這支產品平常做多快。
+ * 目的很具體：畫面提醒「這批偏低」時，現場需要證據才能判斷要不要按「確認無誤」，
+ * 而不是憑印象。所以這裡直接把那一批放進歷史分布裡標出來。
+ */
+function openHistory(code, row) {
+  var sku = state.skus[code];
+  if (!sku) return;
+
+  $('histTitle').textContent = code + '　' + sku.name;
+  $('histSub').textContent = (sku.container || '') + '　載入中…';
+  $('histBody').innerHTML = '';
+  $('hist').hidden = false;
+
+  api('batches?select=prod_date,start_time,end_time,hours,bottles,headcount,abnormal_ok'
+      + '&sku_code=eq.' + encodeURIComponent(code)
+      + '&order=prod_date.desc,start_time.desc&limit=60')
+    .then(function (rows) { renderHistory(code, sku, rows, row); })
+    .catch(function (e) { $('histBody').innerHTML = '<div class="msg bad">讀取失敗：'
+      + e.message + '</div>'; });
+}
+
+function renderHistory(code, sku, rows, row) {
+  var st = state.stats[code] || {};
+  var mine = row ? rowRate(row) : null;
+
+  var rates = rows.map(function (b) { return b.bottles / Number(b.hours); })
+                  .filter(function (x) { return isFinite(x) && x > 0; });
+  var lo = st.mean_rate ? st.mean_rate * OUT_LO : null;
+  var hi = st.mean_rate ? st.mean_rate * OUT_HI : null;
+
+  $('histSub').textContent = (sku.container || '') + '　全期共 ' + num(st.batches || 0) + ' 批'
+    + (st.last_date ? '　·　最近一次 ' + st.last_date : '');
+
+  var h = '<div class="hstats">'
+    + '<div><div class="k">平均產能</div><div class="v">' + num(st.mean_rate) + '</div></div>'
+    + '<div><div class="k">中位數</div><div class="v">' + num(st.median_rate) + '</div></div>'
+    + '<div><div class="k">偏低門檻</div><div class="v">' + (lo ? num(Math.round(lo)) : '—') + '</div></div>'
+    + '<div><div class="k">這批</div><div class="v">'
+      + (mine ? num(Math.round(mine.rate)) : '—') + '</div></div>'
+    + '</div>';
+
+  // 分布帶：把最近這些批次的產能畫成一條線，這一批用大點標出來
+  if (rates.length) {
+    var mx = Math.max.apply(null, rates.concat(mine ? [mine.rate] : []));
+    var mn = Math.min.apply(null, rates.concat(mine ? [mine.rate] : []));
+    var pad = (mx - mn) * 0.08 || 1;
+    mx += pad; mn = Math.max(0, mn - pad);
+    var pos = function (v) { return ((v - mn) / (mx - mn) * 100).toFixed(2) + '%'; };
+
+    h += '<div class="strip">';
+    if (st.mean_rate && st.mean_rate > mn && st.mean_rate < mx) {
+      h += '<s style="left:' + pos(st.mean_rate) + '"></s>'
+         + '<b style="left:' + pos(st.mean_rate) + '">平均 ' + num(st.mean_rate) + '</b>';
+    }
+    if (lo && lo > mn && lo < mx) {
+      h += '<s style="left:' + pos(lo) + '"></s>'
+         + '<b style="left:' + pos(lo) + '">門檻 ' + num(Math.round(lo)) + '</b>';
+    }
+    rates.forEach(function (v) {
+      var c = (lo && v < lo) ? ' low' : (hi && v > hi) ? ' high' : '';
+      h += '<i class="' + c.trim() + '" style="left:' + pos(v) + '"></i>';
+    });
+    if (mine) h += '<i class="me" style="left:' + pos(mine.rate) + '"></i>';
+    h += '</div><div class="striplab">'
+      + '<span>每一點是一批，越右邊越快</span>'
+      + (mine ? '<span style="color:var(--accent)">●&nbsp;這一批</span>' : '')
+      + '<span style="color:var(--signal)">●&nbsp;偏低</span>'
+      + '<span style="color:var(--cool)">●&nbsp;偏高</span></div>';
+  }
+
+  h += '<table class="htab"><thead><tr><th>日期</th><th>時間</th>'
+     + '<th class="num">工時</th><th class="num">瓶數</th><th class="num">人數</th>'
+     + '<th class="num">產能</th><th></th></tr></thead><tbody>';
+
+  rows.forEach(function (b) {
+    var hh = Number(b.hours), rate = hh > 0 ? b.bottles / hh : null;
+    var mk = (rate && lo && rate < lo) ? 'low' : (rate && hi && rate > hi) ? 'high' : '';
+    h += '<tr><td>' + b.prod_date + '</td>'
+       + '<td>' + String(b.start_time).slice(0, 5) + '–' + String(b.end_time).slice(0, 5) + '</td>'
+       + '<td class="num">' + hh.toFixed(2) + '</td>'
+       + '<td class="num">' + num(b.bottles) + '</td>'
+       + '<td class="num">' + (b.headcount == null ? '—' : b.headcount) + '</td>'
+       + '<td class="num">' + (rate ? num(Math.round(rate)) : '—') + '</td>'
+       + '<td class="mk ' + mk + '">'
+         + (mk === 'low' ? '偏低' : mk === 'high' ? '偏高' : '')
+         + (b.abnormal_ok ? '　已確認' : '') + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  if (rows.length >= 60) h += '<p class="hint">只顯示最近 60 批。</p>';
+
+  $('histBody').innerHTML = h;
+}
+
+function closeHistory() { $('hist').hidden = true; }
+$('histClose').addEventListener('click', closeHistory);
+$('hist').addEventListener('click', function (e) { if (e.target === $('hist')) closeHistory(); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !$('hist').hidden) closeHistory();
 });
 
 // ══ 操作 ═══════════════════════════════════════════════════
