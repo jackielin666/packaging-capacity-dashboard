@@ -4,12 +4,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
 <style>
 :root{
-  --paper:#F2F3F0; --surface:#FCFCFB; --sunk:#EDEFEA; --raised:#E8EAE5;
-  --ink:#171C1A; --ink-2:#414A46; --ink-3:#6E7772;
-  --rule:#D5D9D2; --rule-2:#C3C8BF;
-  --accent:#0A8877; --signal:#C2571A; --cool:#3F6FA8;
-  --accent-wash:rgba(10,136,119,.10); --signal-wash:rgba(194,87,26,.10);
-  --cool-wash:rgba(63,111,168,.10);
+  /* 與輸入介面 entry.html 同一組色票 —— 兩個頁面顏色不同會讓整套系統看起來零散。
+     新色票量測後比舊的好：綠 3.93→4.56、橘 4.04→4.62，兩色都從「只夠當圖形」
+     進到文字可用的 WCAG AA（4.5:1）。紅綠色盲下的三色分離度也略為提高。 */
+  --paper:#F6F7F4; --surface:#FFFFFF; --sunk:#FBFCFA; --raised:#F3F4F0;
+  --ink:#12171A; --ink-2:#414A46; --ink-3:#6E7772; --ink-4:#8B948F;
+  --rule:#E6E9E2; --rule-2:#CDD2C8; --rule-3:#DCE0D9;
+  --accent:#0A7F70; --signal:#B4541A; --cool:#3F6FA8;
+  --accent-wash:rgba(10,127,112,.08); --signal-wash:rgba(180,84,26,.07);
+  --cool-wash:rgba(63,111,168,.08);
 }
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);

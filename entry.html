@@ -6,12 +6,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
 <style>
 :root{
-  --paper:#F2F3F0; --surface:#FCFCFB; --sunk:#EDEFEA; --raised:#E8EAE5;
-  --ink:#171C1A; --ink-2:#414A46; --ink-3:#6E7772;
-  --rule:#D5D9D2; --rule-2:#C3C8BF;
-  --accent:#0A8877; --signal:#C2571A; --cool:#3F6FA8;
-  --accent-wash:rgba(10,136,119,.10); --signal-wash:rgba(194,87,26,.10);
-  --cool-wash:rgba(63,111,168,.10);
+  --paper:#F6F7F4; --surface:#FFFFFF; --sunk:#FBFCFA; --raised:#F3F4F0;
+  --ink:#12171A; --ink-2:#414A46; --ink-3:#6E7772; --ink-4:#8B948F;
+  --rule:#E6E9E2; --rule-2:#CDD2C8; --rule-3:#DCE0D9;
+  --accent:#0A7F70; --signal:#B4541A; --cool:#3F6FA8;
+  --accent-wash:rgba(10,127,112,.08); --signal-wash:rgba(180,84,26,.07);
+  --cool-wash:rgba(63,111,168,.08);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -20,159 +20,248 @@ body{background:var(--paper);color:var(--ink);
   font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
-.wrap{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+.wrap{max-width:1020px;margin:0 auto;padding:26px 26px 60px}
 [hidden]{display:none!important}
 
 /* ── 按鈕 ── */
-.btn{font:500 13.5px/1 "Noto Sans TC",sans-serif;padding:10px 18px;border:1px solid var(--ink);
-  border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;white-space:nowrap}
-.btn:hover:not(:disabled){opacity:.88}
-.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn{font:500 12.5px/1 "Noto Sans TC",sans-serif;padding:9px 14px;border:1px solid var(--ink);
+  border-radius:4px;background:var(--ink);color:#F2F3F0;cursor:pointer;white-space:nowrap}
+.btn:hover:not(:disabled){opacity:.86}
+.btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-2)}
-.btn.sm{padding:7px 13px;font-size:12.5px}
+.btn.ghost:hover:not(:disabled){border-color:var(--ink-3);opacity:1}
+.btn.sm{padding:7px 13px;font-size:12px}
 .btn.danger{background:var(--surface);color:var(--signal);border-color:var(--signal)}
+.btn.primary{padding:10px 20px;font-size:13px}
 
 /* ── 登入 ── */
 .login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
-.login{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
-  padding:38px 34px;width:100%;max-width:380px}
-.login .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+.login{background:var(--surface);border:1px solid var(--rule-3);border-radius:5px;
+  padding:40px 36px;width:100%;max-width:390px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.login .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.18em;
   text-transform:uppercase;color:var(--ink-3)}
-.login h1{font-size:25px;margin:9px 0 26px}
+.login h1{font-size:26px;margin:10px 0 28px}
 .field{margin-bottom:16px}
 .field label{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
 .field input{width:100%;padding:11px 13px;border:1px solid var(--rule-2);border-radius:3px;
-  background:var(--paper);font:15px "IBM Plex Mono",monospace;color:var(--ink)}
+  background:#fff;font:15px "IBM Plex Mono",monospace;color:var(--ink)}
 .field input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
 .login .btn{width:100%;padding:12px}
 .note{font-size:12.5px;color:var(--ink-3);margin-top:18px;line-height:1.6}
 
 /* ── 頂欄 ── */
-.topbar{background:var(--ink);color:var(--paper);padding:13px 0}
-.topbar .in{max-width:1060px;margin:0 auto;padding:0 20px;display:flex;align-items:center;
-  gap:14px;flex-wrap:wrap}
-.topbar .t{font-family:"Noto Serif TC",serif;font-size:17px;font-weight:600;flex:1}
-.topbar .who{font-size:12.5px;opacity:.82}
-.topbar .btn{background:transparent;border-color:rgba(255,255,255,.35);color:var(--paper);
-  padding:6px 13px;font-size:12.5px}
+.topbar{background:var(--ink);color:#F2F3F0;height:54px;display:flex;align-items:center}
+.topbar .in{max-width:1020px;margin:0 auto;padding:0 26px;width:100%;display:flex;
+  align-items:center;gap:16px}
+.topbar .t{font-family:"Noto Serif TC",serif;font-size:16px;font-weight:600;letter-spacing:.04em}
+.topbar .code{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;
+  color:rgba(242,243,240,.45);flex:1}
+.topbar .who{font-size:12.5px;color:rgba(242,243,240,.7)}
+.topbar .btn{background:transparent;border-color:rgba(255,255,255,.28);color:#F2F3F0;
+  padding:6px 13px;font-size:12px}
 
 /* ── 日期列 ── */
-.daybar{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
-  margin-top:20px;overflow:hidden}
-.daybar .nav{display:flex;align-items:center;gap:10px;padding:14px 16px;flex-wrap:wrap}
-.daybar .arrow{width:34px;height:34px;padding:0;display:grid;place-items:center;font-size:15px}
-.daybar .date{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:500;
+.daybar{background:var(--surface);border:1px solid var(--rule-3);border-radius:5px;overflow:hidden}
+.daybar .nav{display:flex;align-items:center;gap:14px;padding:16px 20px;flex-wrap:wrap}
+.daybar .group{display:flex;border:1px solid var(--rule-2);border-radius:4px;overflow:hidden}
+.daybar .arrow{width:34px;height:34px;padding:0;border:0;border-radius:0;background:#fff;
+  color:var(--ink-2);font-size:14px;cursor:pointer}
+.daybar .group .arrow:first-child{border-right:1px solid var(--rule-2)}
+.daybar .dwrap{display:flex;align-items:baseline;gap:9px}
+.daybar .date{font-family:"IBM Plex Mono",monospace;font-size:23px;font-weight:500;
   letter-spacing:-.01em}
-.daybar .dow{font-size:13px;color:var(--ink-3);margin-left:2px}
+.daybar .dow{font-size:13px;color:var(--ink-3)}
+.daybar .tag{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  color:var(--accent);border:1px solid rgba(10,127,112,.4);background:var(--accent-wash);
+  border-radius:3px;padding:2px 6px}
 .daybar .spacer{flex:1;min-width:8px}
-.daybar input[type=date]{padding:8px 10px;border:1px solid var(--rule-2);border-radius:3px;
-  background:var(--paper);font:13.5px "IBM Plex Mono",monospace;color:var(--ink)}
-.daysum{display:flex;gap:0;border-top:1px solid var(--rule);background:var(--sunk);flex-wrap:wrap}
-.daysum div{padding:11px 16px;border-right:1px solid var(--rule);flex:1;min-width:110px}
-.daysum div:last-child{border-right:0}
-.daysum .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.09em;
+.daybar .acts{display:flex;gap:8px;flex-wrap:wrap}
+.daybar input[type=date]{padding:8px 10px;border:1px solid var(--rule-2);border-radius:4px;
+  background:#fff;font:12.5px "IBM Plex Mono",monospace;color:var(--ink)}
+.daysum{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);
+  background:var(--sunk)}
+.daysum>div{padding:13px 20px;border-right:1px solid var(--rule)}
+.daysum>div:last-child{border-right:0;background:var(--accent-wash)}
+.daysum .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--ink-3)}
-.daysum .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
-.daysum .v small{font-size:11.5px;color:var(--ink-3);margin-left:3px;font-weight:400}
+.daysum>div:last-child .k{color:var(--accent)}
+.daysum .v{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:500;margin-top:3px;
+  font-variant-numeric:tabular-nums}
+.daysum>div:last-child .v{color:var(--accent)}
+.daysum .v small{font-size:11.5px;color:var(--ink-3);margin-left:5px;font-weight:400}
+.daysum>div:last-child .v small{color:var(--accent);opacity:.7}
 
 /* ── 輸入表 ── */
-.panel{background:var(--surface);border:1px solid var(--rule);border-radius:4px;margin-top:18px}
-.panel > h2{font-size:16px;padding:15px 16px 0}
-.panel .sub{font-size:12.5px;color:var(--ink-3);padding:3px 16px 0}
-.grid{width:100%;border-collapse:collapse;margin-top:13px}
-.grid th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;
+.panel{background:var(--surface);border:1px solid var(--rule-3);border-radius:5px;margin-top:18px}
+.panel .head{display:flex;align-items:flex-end;gap:14px;padding:17px 20px 15px;flex-wrap:wrap}
+.panel > h2,.panel .head h2{font-size:16.5px}
+.panel .sub{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.panel .sub b{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:500}
+.panel .keys{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  letter-spacing:.04em;margin-left:auto}
+
+.grid{width:100%;border-collapse:collapse;table-layout:fixed}
+.grid th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
-  padding:0 8px 7px;border-bottom:1px solid var(--rule)}
-.grid th:first-child{padding-left:16px}
+  padding:8px 12px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule-3);
+  background:var(--sunk)}
+.grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
-.grid td{padding:4px 4px;border-bottom:1px solid var(--rule);vertical-align:middle}
-.grid td:first-child{padding-left:12px}
-.grid td:last-child{padding-right:12px}
-.grid tr.locked td{background:var(--sunk)}
-.grid input{width:100%;padding:8px 9px;border:1px solid transparent;border-radius:3px;
-  background:transparent;font:14px "IBM Plex Mono",monospace;color:var(--ink)}
-.grid input:hover:not(:disabled){border-color:var(--rule)}
-.grid input:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--paper)}
+.grid th:nth-child(6){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
+.grid td{padding:4px 8px;border-bottom:1px solid #F0F2ED;vertical-align:middle;height:52px}
+.grid td:first-child{padding-left:16px}
+.grid tr.locked td{background:var(--raised)}
+.grid input{width:100%;padding:7px 9px;border:1px solid transparent;border-radius:3px;
+  background:transparent;font:14px "IBM Plex Mono",monospace;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.grid input:hover:not(:disabled){border-color:var(--rule-2);background:#fff}
+.grid input:focus{outline:2px solid var(--accent);outline-offset:-2px;background:#fff;
+  border-color:transparent}
 .grid input:disabled{color:var(--ink-2)}
 .grid input.num{text-align:right}
-.grid input.bad{background:var(--signal-wash);border-color:var(--signal)}
+/* 表格內的錯誤只留一道邊框，原因寫在下方的系統檢查清單 */
+.grid input.bad{border:1.5px solid var(--signal);background:#fff}
 .grid .calc{font-family:"IBM Plex Mono",monospace;font-size:13.5px;text-align:right;
-  color:var(--ink-2);white-space:nowrap;padding-right:9px}
-.grid .flag{font-size:11.5px;white-space:nowrap;padding:0 9px 0 18px;text-align:left}
-.grid .flag.low{color:var(--signal)}
-.grid .flag.high{color:var(--cool)}
-.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px 6px;margin-top:-4px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
-.grid .x{background:0;border:0;color:var(--ink-3);cursor:pointer;font-size:17px;
+  color:var(--ink-3);white-space:nowrap;background:var(--paper)}
+.grid .flag{font-family:"IBM Plex Mono",monospace;font-size:13.5px;text-align:right;
+  white-space:nowrap;color:var(--ink)}
+/* 產能異常：數字後面一個空心點，不改字色、不上底色 */
+.grid .flag.low:after,.grid .flag.high:after{content:"";display:inline-block;width:7px;
+  height:7px;border-radius:50%;margin-left:7px;vertical-align:1px}
+.grid .flag.low:after{border:1.5px solid var(--signal)}
+.grid .flag.high:after{border:1.5px solid var(--cool)}
+.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid .x{background:0;border:0;color:var(--ink-4);cursor:pointer;font-size:16px;
   padding:4px 8px;line-height:1;border-radius:3px}
 .grid .x:hover{color:var(--signal);background:var(--signal-wash)}
 .grid .x:disabled{opacity:.25;cursor:not-allowed}
-.col-sku{width:29%} .col-t{width:11%} .col-n{width:12%} .col-h{width:8%} .col-x{width:42px}
-.panel .foot{display:flex;gap:11px;align-items:center;padding:14px 16px;flex-wrap:wrap}
+.panel .foot{display:flex;gap:10px;align-items:center;padding:14px 20px;flex-wrap:wrap;
+  background:var(--sunk);border-top:1px solid var(--rule);border-radius:0 0 5px 5px}
 .panel .foot .spacer{flex:1;min-width:8px}
 .hint{font-size:12px;color:var(--ink-3)}
 
+/* ── 系統檢查清單（新增） ── */
+.checks{padding:16px 20px 18px;background:var(--sunk);border-top:1px solid var(--rule)}
+.checks .hd{display:flex;align-items:center;gap:10px}
+.checks .hd .lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--ink-3)}
+.checks .hd .line{flex:1;height:1px;background:var(--rule)}
+.checks .hd .tally{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.checks .list{margin-top:12px;display:flex;flex-direction:column;gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.ck{display:flex;align-items:center;gap:12px;background:#fff;padding:12px 14px}
+.ck .mark{flex:none;width:16px;height:16px;display:grid;place-items:center;font-size:11px}
+.ck .body{flex:1;min-width:0}
+.ck .t{font-size:13px;color:var(--ink)}
+.ck .d{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.ck .acts{display:flex;gap:7px;flex-wrap:wrap}
+.ck.stop .mark{background:var(--signal);color:#fff;border-radius:3px}
+.ck.stop .btn{border-color:var(--signal);color:var(--signal);background:#fff}
+.ck.warn .mark{border:1.5px solid var(--signal);border-radius:50%}
+.ck.pass{padding:10px 14px}
+.ck.pass .mark{color:var(--accent);font-family:"IBM Plex Mono",monospace}
+.ck.pass .t{font-size:12.5px;color:var(--ink-3)}
+
+.spacer{flex:1;min-width:8px}
+
 /* ── 訊息 ── */
-.msg{padding:12px 16px;border-radius:0 3px 3px 0;font-size:13.5px;margin-top:14px}
+.msg{padding:12px 16px;border-radius:0 4px 4px 0;font-size:13.5px;margin-top:18px}
 .msg.ok{background:var(--accent-wash);border-left:3px solid var(--accent)}
 .msg.bad{background:var(--signal-wash);border-left:3px solid var(--signal)}
 .msg.info{background:var(--cool-wash);border-left:3px solid var(--cool)}
 .msg b{font-family:"Noto Serif TC",serif}
 
+/* ── 無作業 ── */
+.noop{display:flex;align-items:center;gap:16px;padding:15px 20px}
+.noop .body{flex:1}
+.noop h2{font-size:14.5px}
+
 /* ── 月曆 ── */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:13px 16px 16px}
+.calhead{display:flex;align-items:center;gap:14px;padding:18px 20px 0}
+.calbar{display:flex;align-items:center;gap:10px;padding:12px 20px 0}
+.calbar .track{flex:1;height:6px;border-radius:3px;background:var(--raised);display:flex;
+  overflow:hidden}
+.calbar .track i{display:block}
+.calbar .track .t-has{background:var(--accent)}
+.calbar .track .t-none{background:var(--rule-2)}
+.calbar .track .t-miss{background:var(--signal)}
+.calbar .tally{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:14px 20px 0}
 .cal .dowh{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3);
-  text-align:center;padding-bottom:3px}
-.cell{height:54px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);
+  text-align:center;padding-bottom:2px}
+.cell{height:50px;border:1px solid var(--rule);border-radius:3px;background:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-  cursor:pointer;padding:2px;font:13px "IBM Plex Mono",monospace}
-.cell:hover{border-color:var(--ink)}
+  cursor:pointer;padding:2px;font:13px "IBM Plex Mono",monospace;color:var(--ink-4)}
+.cell:hover{border-color:var(--ink-3)}
 .cell.blank{border:0;background:0;cursor:default}
-.cell.weekend{background:var(--raised);color:var(--ink-3)}
-.cell.future{opacity:.4;cursor:default}
-.cell.today{border:1px dashed var(--rule-2);color:var(--ink-3)}
-.cell.has{background:var(--accent-wash);border-color:var(--accent)}
-.cell.none{background:var(--sunk);color:var(--ink-3)}
-.cell.miss{background:var(--signal-wash);border-color:var(--signal);color:var(--signal)}
-.cell.sel{outline:2px solid var(--ink);outline-offset:1px}
-.cell .n{font-size:10px;opacity:.7}
-.legend{display:flex;gap:15px;flex-wrap:wrap;padding:0 16px 15px;font-size:12px;
-  color:var(--ink-2)}
-.legend i{display:inline-block;width:22px;height:13px;border-radius:2px;margin-right:6px;
+.cell.weekend{background:var(--raised);color:#7C857F}
+.cell.future{color:var(--ink-4);cursor:default}
+.cell.today{border:1px dashed var(--rule-2)}
+.cell.has{background:var(--accent-wash);border-color:rgba(10,127,112,.4);color:var(--accent)}
+.cell.none{background:var(--raised);color:var(--ink-3)}
+.cell.miss{background:var(--signal-wash);border-color:rgba(180,84,26,.45);color:var(--signal)}
+.cell.sel{border:2px solid var(--ink);color:var(--ink);font-weight:500;background:#fff}
+.cell .n{font-size:9.5px;opacity:.85}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:13px 20px 16px;font-size:11.5px;
+  color:var(--ink-3);align-items:center}
+.legend i{display:inline-block;width:20px;height:12px;border-radius:2px;margin-right:6px;
   vertical-align:-2px;border:1px solid var(--rule)}
-.legend .l-has{background:var(--accent-wash);border-color:var(--accent)}
-.legend .l-none{background:var(--sunk)}
-.legend .l-miss{background:var(--signal-wash);border-color:var(--signal)}
+.legend .l-has{background:var(--accent-wash);border-color:rgba(10,127,112,.4)}
+.legend .l-none{background:var(--raised)}
+.legend .l-miss{background:var(--signal-wash);border-color:rgba(180,84,26,.45)}
 
 /* ── 手機 ── */
 @media(max-width:720px){
-  .wrap{padding:0 14px 60px}
+  .wrap{padding:14px 14px 60px}
+  /* 頂欄在 390px 會把標題擠成兩行，把裝飾性的字拿掉、姓名縮小 */
+  .topbar{height:auto;padding:10px 0}
+  .topbar .in{gap:10px}
+  .topbar .t{font-size:15px;white-space:nowrap}
+  .topbar .code{display:none}
+  .topbar .who{font-size:11.5px;flex:1;text-align:right;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  /* 檢查項目的按鈕擠在文字旁邊會把說明壓成一條細柱，改成整排放到下面 */
+  /* 打勾符號要跟文字同一行，只有按鈕整排換到下面 */
+  .ck{flex-wrap:wrap}
+  .ck .acts{width:100%;display:flex}
+  .ck .acts .btn{flex:1}
+  .noop{flex-wrap:wrap}
+  .noop .btn{width:100%}
+  /* 月曆標題連同兩顆按鈕同一行放不下 */
+  .calhead{flex-wrap:wrap;padding:14px 14px 0}
+  .calhead h2{font-size:15px;flex:1 1 100%}
+  .calbar{padding:10px 14px 0}
+  .legend{padding:12px 14px 14px}
   .grid thead{display:none}
   .grid,.grid tbody,.grid tr,.grid td{display:block;width:100%}
   .grid tr{border-bottom:1px solid var(--rule-2);padding:10px 4px 12px;position:relative}
-  .grid td{border:0;padding:3px 8px}
+  .grid td{border:0;padding:3px 8px;height:auto}
   .grid td:before{content:attr(data-l);display:block;font-family:"IBM Plex Mono",monospace;
-    font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
-    margin-bottom:2px}
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    margin-bottom:3px}
   .grid td.pair,.grid td.calc,.grid td.flag{display:inline-block;width:50%;vertical-align:top}
-  .grid .flag{padding-left:8px}
-  .grid input{border-color:var(--rule)}
-  .grid .calc,.grid .flag{text-align:left;padding-left:8px}
+  .grid input{border-color:var(--rule-2);background:#fff;padding:11px 10px;font-size:15px}
+  .grid .calc,.grid .flag{text-align:left;background:0;padding-left:8px}
   .grid td.act{position:absolute;top:8px;right:4px;width:auto;padding:0}
   .grid td.act:before{content:none}
-  .daybar .date{font-size:18px}
-  .daysum div{min-width:50%;flex:none}
-  .daysum div:nth-child(2n){border-right:0}
-  .daysum div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  .grid .x{min-width:44px;min-height:44px}
+  .btn{min-height:44px}
+  .daybar .date{font-size:19px}
+  .daysum{grid-template-columns:1fr 1fr}
+  .daysum>div:nth-child(2n){border-right:0}
+  .daysum>div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  .ck{flex-wrap:wrap}
   .cal{gap:3px;padding:10px}
   .cell{font-size:11px}
 }
 </style>
-<!-- ══ 登入 ══ -->
+<!-- ══ 載入中 ══ -->
 <div class="login-wrap" id="bootView">
   <div class="login"><div class="eyebrow">包裝產能系統</div><h1>載入中…</h1></div>
 </div>
 
+<!-- ══ 登入 ══ -->
 <div class="login-wrap" id="loginView" hidden>
   <form class="login" id="loginForm" autocomplete="on">
     <div class="eyebrow">包裝產能系統</div>
@@ -200,6 +289,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   <div class="topbar">
     <div class="in">
       <div class="t">包裝資料輸入</div>
+      <div class="code">PACKING / ENTRY</div>
       <div class="who" id="who"></div>
       <button class="btn" id="logoutBtn">登出</button>
     </div>
@@ -210,16 +300,21 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
     <!-- 日期 -->
     <div class="daybar">
       <div class="nav">
-        <button class="btn ghost arrow" id="prevDay" title="前一天">←</button>
-        <div>
+        <div class="group">
+          <button class="btn ghost arrow" id="prevDay" title="前一天">←</button>
+          <button class="btn ghost arrow" id="nextDay" title="後一天">→</button>
+        </div>
+        <div class="dwrap">
           <span class="date" id="dateTxt">—</span>
           <span class="dow" id="dowTxt"></span>
+          <span class="tag" id="todayTag" hidden>TODAY</span>
         </div>
-        <button class="btn ghost arrow" id="nextDay" title="後一天">→</button>
-        <input type="date" id="datePick">
         <div class="spacer"></div>
-        <button class="btn ghost sm" id="todayBtn">今天</button>
-        <button class="btn ghost sm" id="gapBtn">跳到待補的日期</button>
+        <div class="acts">
+          <input type="date" id="datePick">
+          <button class="btn ghost sm" id="todayBtn">今天</button>
+          <button class="btn ghost sm" id="gapBtn">跳到待補</button>
+        </div>
       </div>
       <div class="daysum">
         <div><div class="k">批次</div><div class="v" id="sumB">0</div></div>
@@ -233,59 +328,80 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
     <!-- 輸入表 -->
     <div class="panel">
-      <h2>本日批次</h2>
-      <div class="sub">時間可以直接打 <b>0800</b>，離開欄位會自動變成 08:00。
-        工時和產能是系統算的，不用填。</div>
+      <div class="head">
+        <div>
+          <h2>本日批次</h2>
+          <div class="sub">時間直接打 <b>0800</b>，離開欄位自動變 08:00。工時、產能由系統計算。</div>
+        </div>
+        <div class="keys">ENTER 下一格　·　可從 Excel 整塊貼上</div>
+      </div>
 
       <table class="grid">
+        <colgroup>
+          <col style="width:26%"><col style="width:11%"><col style="width:11%">
+          <col style="width:11%"><col style="width:8%"><col style="width:8%">
+          <col style="width:21%"><col style="width:44px">
+        </colgroup>
         <thead>
           <tr>
-            <th class="col-sku">品項</th>
-            <th class="col-t">起始</th>
-            <th class="col-t">結束</th>
-            <th class="col-n num">瓶數</th>
-            <th class="col-h num">人數</th>
-            <th class="col-h num">工時</th>
-            <th class="col-n">產能</th>
-            <th class="col-x"></th>
+            <th>品項</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
+            <th class="num">人數</th><th class="num">工時</th><th class="num">產能</th><th></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
 
+      <!-- 系統檢查 -->
+      <div class="checks" id="checks" hidden>
+        <div class="hd">
+          <div class="lbl">系統檢查</div>
+          <div class="line"></div>
+          <div class="tally" id="checksTally"></div>
+        </div>
+        <div class="list" id="checksList"></div>
+      </div>
+
       <div class="foot">
         <button class="btn ghost sm" id="addRow">＋ 加一列</button>
-        <span class="hint" id="dirtyHint"></span>
+        <button class="btn ghost sm" id="pasteBtn">從 Excel 貼上</button>
         <div class="spacer"></div>
-        <button class="btn" id="saveBtn" disabled>儲存本日</button>
+        <span class="hint" id="dirtyHint"></span>
+        <button class="btn primary" id="saveBtn" disabled>儲存本日</button>
       </div>
     </div>
 
     <!-- 無作業 -->
     <div class="panel">
-      <h2>當天沒有包裝作業？</h2>
-      <div class="sub">按下去等於告訴系統「這天確實沒做，不是忘了登記」。
-        月底檢核只會抓「沒批次又沒按這個」的工作日。</div>
-      <div class="foot">
+      <div class="noop">
+        <div class="body">
+          <h2>當天沒有包裝作業？</h2>
+          <div class="sub">按下去等於告訴系統「這天確實沒做，不是忘了登記」。月底檢核只會抓「沒批次又沒按這個」的工作日。</div>
+        </div>
         <button class="btn ghost" id="noOpBtn">標記本日無包裝作業</button>
+      </div>
+      <div class="legend" style="padding-top:0">
         <span class="hint" id="noOpState"></span>
       </div>
     </div>
 
     <!-- 月曆 -->
     <div class="panel">
-      <h2 id="calTitle">補登進度</h2>
-      <div class="sub" id="calSub">—</div>
-      <div class="foot" style="padding-bottom:0">
+      <div class="calhead">
+        <h2 id="calTitle">補登進度</h2>
+        <div class="spacer"></div>
         <button class="btn ghost sm" id="prevMon">← 上個月</button>
         <button class="btn ghost sm" id="nextMon">下個月 →</button>
+      </div>
+      <div class="calbar">
+        <div class="track" id="calTrack"></div>
+        <div class="tally" id="calSub">—</div>
       </div>
       <div class="cal" id="cal"></div>
       <div class="legend">
         <span><i class="l-has"></i>已登記</span>
         <span><i class="l-none"></i>無作業</span>
         <span><i class="l-miss"></i>待補</span>
-        <span class="hint">六日不計入待補。國定假日請按「標記本日無包裝作業」。</span>
+        <span>六日不計入待補。國定假日請按「標記本日無包裝作業」。</span>
       </div>
     </div>
 
@@ -543,7 +659,7 @@ function loadDay(d) {
   banner(null);
 
   return Promise.all([
-    api('batches?select=id,sku_code,start_time,end_time,bottles,headcount,hours,note'
+    api('batches?select=id,sku_code,start_time,end_time,bottles,headcount,hours,note,abnormal_ok'
         + '&prod_date=eq.' + d + '&order=start_time.asc,id.asc'),
     api('daily_status?select=prod_date,no_operation,note&prod_date=eq.' + d)
   ]).then(function (res) {
@@ -553,7 +669,7 @@ function loadDay(d) {
         start: String(b.start_time).slice(0, 5),
         end: String(b.end_time).slice(0, 5),
         bottles: b.bottles, head: b.headcount == null ? '' : b.headcount,
-        note: b.note || '', dirty: false, deleted: false
+        note: b.note || '', ok: !!b.abnormal_ok, dirty: false, deleted: false
       };
     });
     state.dayStatus = (res[1] && res[1][0]) || null;
@@ -565,15 +681,16 @@ function loadDay(d) {
 
 function addRow() {
   state.rows.push({ key: ++uid, id: null, sku: '', start: '', end: '',
-                    bottles: '', head: '', note: '', dirty: true, deleted: false });
+                    bottles: '', head: '', note: '', ok: false,
+                    dirty: true, deleted: false });
 }
 
 // ══ 畫面：某一天 ═══════════════════════════════════════════
 function renderDay() {
   var d = state.date;
   $('dateTxt').textContent = d;
-  $('dowTxt').textContent = '（' + DOW[parseYmd(d).getDay()] + '）'
-                          + (d === today() ? ' 今天' : '');
+  $('dowTxt').textContent = '星期' + DOW[parseYmd(d).getDay()];
+  $('todayTag').hidden = (d !== today());
   $('datePick').value = d;
 
   var editable = canModify(d) && state.role !== 'viewer';
@@ -623,8 +740,10 @@ function renderRow(r, editable) {
   }
 
   var sku = state.skus[r.sku];
+  var name = sku ? (sku.name + (sku.container ? '　·　' + sku.container : ''))
+                 : (r.sku ? '查無此品號' : '');
   tr.appendChild(cell('品項', '', inp('sku', '', '打品號', 'list="skuList" autocapitalize="off" spellcheck="false"')
-    + '<div class="skuname">' + (sku ? sku.name : (r.sku ? '⚠ 查無此品號' : '')) + '</div>'));
+    + '<div class="skuname">' + name + '</div>'));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
@@ -681,9 +800,37 @@ function removeRow(r) {
 function rowBlank(r) {
   return !r.sku && !r.start && !r.end && String(r.bottles) === '' && String(r.head) === '';
 }
-function rowComplete(r) {
-  return !!(state.skus[r.sku] && parseTime(r.start) && parseTime(r.end)
-            && calcHours(parseTime(r.start), parseTime(r.end)) && +r.bottles > 0);
+/** 這一列還缺什麼。回傳空陣列代表可以存了。 */
+function rowIssues(r) {
+  var out = [], st = parseTime(r.start), en = parseTime(r.end);
+  if (!state.skus[r.sku])
+    out.push(r.sku ? '品號 ' + r.sku + ' 不在品項主檔內' : '還沒選品項');
+  if (!st) out.push('起始時間看不懂，直接打四碼例如 0800');
+  if (!en) out.push('結束時間看不懂，直接打四碼例如 0930');
+  else if (st && st === en) out.push('結束時間與起始相同，工時會算成 0');
+  if (!(+r.bottles > 0)) out.push('瓶數沒填，或不是大於 0 的數字');
+  return out;
+}
+function rowComplete(r) { return rowIssues(r).length === 0; }
+
+/** 這一列的工時與產能。資料不全就回 null。 */
+function rowRate(r) {
+  var h = calcHours(parseTime(r.start), parseTime(r.end)), b = +r.bottles;
+  if (!h || !(b > 0)) return null;
+  return { hours: h, rate: b / h };
+}
+
+/**
+ * 這一批的產能是不是偏離該品項平常水準。
+ * 門檻與儀表板同一組（平均 ×0.7 ／ ×2.5），批次數不足的品項不判定 ——
+ * 樣本太少，標了也沒有判斷力，只會變成雜訊。
+ */
+function rateFlag(r) {
+  var v = rowRate(r), s = state.stats[r.sku];
+  if (!v || !s || !s.mean_rate || s.batches < MIN_BATCHES) return null;
+  if (v.rate < s.mean_rate * OUT_LO) return 'low';
+  if (v.rate > s.mean_rate * OUT_HI) return 'high';
+  return null;
 }
 
 /**
@@ -698,30 +845,15 @@ function recalc() {
     var tr = tb.querySelector('tr[data-key="' + r.key + '"]');
     if (!tr) return;
     var cH = tr.children[5], cR = tr.children[6];
-    var st = parseTime(r.start), en = parseTime(r.end);
-    var h = calcHours(st, en);
-    var b = +r.bottles;
+    var v = rowRate(r), flag = rateFlag(r);
 
-    cH.textContent = h ? h.toFixed(2) : '—';
-    cR.textContent = '—'; cR.className = 'flag';
+    cH.textContent = v ? v.hours.toFixed(2) : '—';
+    // 表格裡只放數字加一個小圓點；偏低偏高的原因寫在下面的檢查清單，
+    // 表格才不會被說明文字撐開，也不會每一列都在喊。
+    cR.textContent = v ? num(Math.round(v.rate)) : '—';
+    cR.className = 'flag' + (flag && !r.ok ? ' ' + flag : '');
 
-    if (h && b > 0) {
-      var rate = b / h;
-      var s = state.stats[r.sku];
-      var txt = num(Math.round(rate));
-      if (s && s.mean_rate && s.batches >= MIN_BATCHES) {
-        var lo = s.mean_rate * OUT_LO, hi = s.mean_rate * OUT_HI;
-        if (rate < lo) {
-          cR.className = 'flag low';
-          txt += ' ⚠ 偏低（平常 ' + num(s.mean_rate) + '）';
-        } else if (rate > hi) {
-          cR.className = 'flag high';
-          txt += ' ⚠ 偏高（平常 ' + num(s.mean_rate) + '）';
-        }
-      }
-      cR.textContent = txt;
-      tb2++; tq += b; th += h;
-    }
+    if (v) { tb2++; tq += +r.bottles; th += v.hours; }
 
     // 半填的列要擋下來，不然存檔時才報錯很惱人
     var bad = !rowBlank(r) && !rowComplete(r);
@@ -754,12 +886,169 @@ function recalc() {
   var canIns = state.role === 'operator' || state.role === 'manager';
   var canEd  = canIns && canModify(state.date);
   var blocked = wantEd && !canEd;
+  var pending = pendingCount();
 
   $('saveBtn').disabled = anyBad || blocked || !((wantIns && canIns) || (wantEd && canEd));
+  $('saveBtn').textContent = pending ? '儲存本日　' + pending + ' 筆' : '儲存本日';
   $('dirtyHint').textContent =
-      anyBad  ? '有欄位沒填完或填錯，先補齊才能儲存。'
-    : blocked ? '這個月份的既有資料要主管才能修改或刪除。'
-    : (wantIns || wantEd) ? '有尚未儲存的變更。' : '';
+      blocked ? '這個月份的既有資料要主管才能修改或刪除。' : '';
+
+  renderChecks();
+}
+
+// ══ 系統檢查 ══════════════════════════════════════════════
+function pendingCount() {
+  var n = 0;
+  state.rows.forEach(function (r) {
+    if (r.deleted)  { if (r.id) n++; return; }
+    if (!r.dirty)   return;
+    if (r.id || rowComplete(r)) n++;
+  });
+  return n;
+}
+
+/**
+ * 同一支品項在同一天時間重疊 —— 同一個產品不會同時在兩個地方包裝，
+ * 多半是時間打錯。
+ *
+ * 刻意「不」檢查跨品項的重疊：11 個月的真實資料裡，243 個工作日中有
+ * 149 天出現跨品項重疊，因為多條線並行本來就是常態。把它當異常會天天
+ * 誤報，兩週後整塊檢查清單就會被當成雜訊忽略 —— 連真正的錯誤也一起。
+ * 同品項重疊在同一段期間只有 2 筆，而且兩筆看起來都是打錯。
+ */
+function overlaps() {
+  var live = state.rows.filter(function (r) { return !r.deleted && rowComplete(r); });
+  var out = [];
+  for (var i = 0; i < live.length; i++) {
+    for (var j = i + 1; j < live.length; j++) {
+      var a = live[i], b = live[j];
+      if (a.sku !== b.sku) continue;
+      var a1 = toMin(parseTime(a.start)), a2 = toMin(parseTime(a.end));
+      var b1 = toMin(parseTime(b.start)), b2 = toMin(parseTime(b.end));
+      if (a2 < a1) a2 += 1440;
+      if (b2 < b1) b2 += 1440;
+      if (a1 < b2 && b1 < a2) out.push([a, b]);
+    }
+  }
+  return out;
+}
+
+function buildChecks() {
+  var live   = state.rows.filter(function (r) { return !r.deleted; });
+  var filled = live.filter(function (r) { return !rowBlank(r); });
+  var good   = filled.filter(rowComplete);
+  var stops = [], warns = [], passes = [], over = overlaps();
+
+  // 阻擋型：這一列還不能存
+  filled.forEach(function (r) {
+    var why = rowIssues(r);
+    if (!why.length) return;
+    stops.push({
+      row: r,
+      title: (r.sku || '（未填品項）') + '　' + why[0],
+      detail: why.length > 1 ? '另外還有：' + why.slice(1).join('；')
+                             : '補齊之後這一列才能儲存。'
+    });
+  });
+
+  // 提醒型：同品項時間重疊
+  over.forEach(function (p) {
+    warns.push({
+      row: p[1],
+      title: p[0].sku + '　同一支品項的兩批時間重疊',
+      detail: p[0].start + '–' + p[0].end + '　與　' + p[1].start + '–' + p[1].end
+            + '　請確認時間有沒有打錯。不影響儲存。'
+    });
+  });
+
+  // 提醒型：產能偏離該品項平常水準
+  good.forEach(function (r) {
+    var f = rateFlag(r);
+    if (!f || r.ok) return;
+    var st = state.stats[r.sku], v = rowRate(r);
+    warns.push({
+      row: r, confirm: r,
+      title: r.sku + '　產能 ' + num(Math.round(v.rate)) + '／工時，'
+           + (f === 'low' ? '低於' : '高於') + '平常水準（平均 ' + num(st.mean_rate) + '）',
+      detail: '多半是瓶數或時間打錯。確認數字沒問題可以標記為正常，不影響儲存。'
+    });
+  });
+
+  // 提醒型：沒填人數。歷史資料多半沒有，所以不擋，但要提醒 ——
+  // 這是階段 4 人均效率分析唯一的依據。
+  var noHead = good.filter(function (r) { return String(r.head).trim() === ''; });
+  if (noHead.length) {
+    warns.push({
+      row: noHead[0],
+      title: noHead.length + ' 批沒有填人數',
+      detail: '人數是日後計算人均效率的依據，能補就補。不影響儲存。'
+    });
+  }
+
+  if (good.length) {
+    passes.push('品號 ' + good.length + ' 筆全部在品項主檔內');
+    if (!noHead.length) passes.push(good.length + ' 批都有填人數');
+  }
+  if (good.length > 1 && !over.length) passes.push('同一支品項沒有時間重疊的情形');
+
+  return { stops: stops, warns: warns, passes: passes };
+}
+
+function renderChecks() {
+  var c = buildChecks(), box = $('checks'), list = $('checksList');
+  var n = c.stops.length + c.warns.length + c.passes.length;
+  if (!n) { box.hidden = true; return; }
+  box.hidden = false;
+
+  var bits = [];
+  if (c.stops.length)  bits.push(c.stops.length + ' 項待處理');
+  if (c.warns.length)  bits.push(c.warns.length + ' 項待確認');
+  if (c.passes.length) bits.push(c.passes.length + ' 項通過');
+  $('checksTally').textContent = bits.join('　·　');
+
+  list.innerHTML = '';
+  c.stops.forEach(function (x)  { list.appendChild(ckRow('stop', '!', x)); });
+  c.warns.forEach(function (x)  { list.appendChild(ckRow('warn', '', x)); });
+  c.passes.forEach(function (t) { list.appendChild(ckRow('pass', '✓', { title: t })); });
+}
+
+function ckRow(kind, mark, x) {
+  var d = document.createElement('div');
+  d.className = 'ck ' + kind;
+  d.innerHTML = '<div class="mark"></div><div class="body"><div class="t"></div>'
+              + (x.detail ? '<div class="d"></div>' : '') + '</div><div class="acts"></div>';
+  d.querySelector('.mark').textContent = mark;
+  d.querySelector('.t').textContent = x.title;
+  if (x.detail) d.querySelector('.d').textContent = x.detail;
+
+  var acts = d.querySelector('.acts');
+  if (x.row) {
+    var go = document.createElement('button');
+    go.className = 'btn ghost sm';
+    go.textContent = (kind === 'stop') ? '前往修正' : '查看該列';
+    go.addEventListener('click', function () { focusRow(x.row); });
+    acts.appendChild(go);
+  }
+  if (x.confirm) {
+    var okb = document.createElement('button');
+    okb.className = 'btn ghost sm';
+    okb.textContent = '確認無誤';
+    okb.addEventListener('click', function () {
+      x.confirm.ok = true;
+      x.confirm.dirty = true;
+      recalc();                       // 記在這一列上，按「儲存本日」時一起寫進資料庫
+    });
+    acts.appendChild(okb);
+  }
+  return d;
+}
+
+function focusRow(r) {
+  var tr = $('rows').querySelector('tr[data-key="' + r.key + '"]');
+  if (!tr) return;
+  tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  var el = tr.querySelector('input.bad') || tr.querySelector('input:not([disabled])');
+  if (el) { el.focus(); el.select(); }
 }
 
 // ══ 儲存 ═══════════════════════════════════════════════════
@@ -773,7 +1062,8 @@ $('saveBtn').addEventListener('click', function () {
       sku_code: r.sku, prod_date: d,
       start_time: parseTime(r.start), end_time: parseTime(r.end),
       bottles: +r.bottles,
-      headcount: String(r.head).trim() === '' ? null : +r.head
+      headcount: String(r.head).trim() === '' ? null : +r.head,
+      abnormal_ok: !!r.ok
     };
     if (r.id) upd.push({ r: r, p: payload }); else ins.push(payload);
   });
@@ -890,19 +1180,30 @@ function renderCal() {
     var k = dayKind(d);
     if (k === 'has') nHas++; else if (k === 'none') nNone++; else if (k === 'miss') nMiss++;
     var s = state.days[d];
-    var sub = (k === 'has') ? (s.batches + ' 批') : (k === 'none' ? '休' : '');
-    html += '<button class="cell ' + k + (d === state.date ? ' sel' : '') + '" data-d="' + d + '">'
-          + '<span>' + day + '</span><span class="n">' + sub + '</span></button>';
+    var sub = (k === 'has') ? (s.batches + ' 批')
+            : (k === 'none') ? '休'
+            : (k === 'miss') ? '待補' : '';
+    var cls = 'cell ' + k + (d === state.date ? ' sel' : '');
+    // 未來的日期不給點 —— 還沒發生的事沒有東西可以登記
+    html += (k === 'future')
+      ? '<div class="' + cls + '"><span>' + day + '</span></div>'
+      : '<button class="' + cls + '" data-d="' + d + '">'
+        + '<span>' + day + '</span><span class="n">' + sub + '</span></button>';
   }
   cal.innerHTML = html;
 
   cal.querySelectorAll('.cell[data-d]').forEach(function (el) {
-    el.addEventListener('click', function () { loadDay(el.dataset.d); });
+    el.addEventListener('click', function () {
+      guardUnsaved(function () { loadDay(el.dataset.d); });
+    });
   });
 
-  $('calSub').innerHTML = '已登記 <b>' + nHas + '</b> 天　·　無作業 <b>' + nNone + '</b> 天　·　'
-    + (nMiss ? '待補 <b style="color:var(--signal)">' + nMiss + '</b> 天'
-             : '<b style="color:var(--accent)">沒有待補的日子</b>');
+  $('calSub').textContent = '已登記 ' + nHas + '　·　無作業 ' + nNone + '　·　待補 ' + nMiss;
+  $('calTrack').innerHTML =
+      '<i class="t-has"  style="width:' + (nHas  / lastDay * 100).toFixed(1) + '%"></i>'
+    + '<i class="t-none" style="width:' + (nNone / lastDay * 100).toFixed(1) + '%"></i>'
+    + '<i class="t-miss" style="width:' + (nMiss / lastDay * 100).toFixed(1) + '%"></i>';
+  $('gapBtn').textContent = nMiss ? '跳到待補　' + nMiss + ' 天' : '跳到待補';
 }
 
 /** 往回找最早一個還沒處理的工作日。接單式生產不是每天都做，所以找不到很正常。 */
@@ -997,6 +1298,14 @@ $('nextMon').addEventListener('click', function () {
   var d = parseYmd(state.calMonth + '-01'); d.setMonth(d.getMonth() + 1);
   loadMonth(ymd(d).slice(0, 7));
 });
+$('pasteBtn').addEventListener('click', function () {
+  var el = $('rows').querySelector('input:not([disabled])');
+  if (el) { el.focus(); el.select(); }
+  banner('info', '<b>從 Excel 貼上</b>　在 Excel 選取要貼的儲存格，'
+    + '欄位順序是<b>品項／起始／結束／瓶數／人數</b>，複製後回到這裡按 <b>Ctrl + V</b>。'
+    + '<br>游標已經放在第一格了。');
+});
+
 $('addRow').addEventListener('click', function () {
   addRow(); renderDay();
   var all = $('rows').querySelectorAll('tr:last-child input:not([disabled])');

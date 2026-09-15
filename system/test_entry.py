@@ -103,33 +103,56 @@ with sync_playwright() as p:
     en = row.locator('input[data-f="end"]').input_value()
     check("0800 → 08:00", st == "08:00", st)
     check("930 → 09:30", en == "09:30", en)
-    check("品名自動帶出", "草莓蒟蒻餡" in row.locator(".skuname").inner_text(),
+    check("品名與容器都帶出來", "草莓蒟蒻餡" in row.locator(".skuname").inner_text()
+          and "PE袋" in row.locator(".skuname").inner_text(),
           row.locator(".skuname").inner_text())
 
     cells = pg.locator("#rows tr").first.locator("td")
-    hrs = cells.nth(5).inner_text().strip()
-    rate = cells.nth(6).inner_text().strip()
-    check("工時 = 1.50", hrs == "1.50", hrs)
-    check("產能 = 300（450÷1.5）", rate.startswith("300"), rate)
-    check("300 在 D0310 正常範圍內，不標警告", "⚠" not in rate, rate)
+    check("工時 = 1.50", cells.nth(5).inner_text().strip() == "1.50",
+          cells.nth(5).inner_text())
+    check("產能欄只放數字，不放說明", cells.nth(6).inner_text().strip() == "300",
+          cells.nth(6).inner_text())
+    check("正常範圍不加狀態 class",
+          (cells.nth(6).get_attribute("class") or "").strip() == "flag",
+          cells.nth(6).get_attribute("class"))
 
-    print("\n── 異常提示 ──")
+    print("\n── 異常提示移到檢查清單 ──")
     row.locator('input[data-f="bottles"]').fill("120")
     row.locator('input[data-f="bottles"]').blur()
-    rate = pg.locator("#rows tr").first.locator("td").nth(6).inner_text()
-    check("80/工時 低於 256×0.7 → 標偏低", "偏低" in rate, rate)
+    cells = pg.locator("#rows tr").first.locator("td")
+    check("偏低時表格只多一個 low class", "low" in (cells.nth(6).get_attribute("class") or ""),
+          cells.nth(6).get_attribute("class"))
+    check("表格裡沒有說明文字", "偏低" not in cells.nth(6).inner_text(), cells.nth(6).inner_text())
+    checks_txt = pg.inner_text("#checksList")
+    check("檢查清單說明偏低的原因", "低於平常水準" in checks_txt, checks_txt[:120])
+    check("檢查清單帶出該品項的平均", "256" in checks_txt, checks_txt[:120])
 
-    row.locator('input[data-f="bottles"]').fill("1500")
+    print("\n── 確認無誤 ──")
+    warn = pg.locator("#checksList .ck.warn").first
+    check("有提醒型項目", warn.count() > 0)
+    check("提醒型有兩個按鈕", warn.locator("button").count() == 2,
+          warn.locator("button").count())
+    warn.locator("button", has_text="確認無誤").click()
+    pg.wait_for_timeout(250)
+    cells = pg.locator("#rows tr").first.locator("td")
+    check("確認後表格不再標記", "low" not in (cells.nth(6).get_attribute("class") or ""),
+          cells.nth(6).get_attribute("class"))
+    check("確認後清單不再列出", "低於平常水準" not in pg.inner_text("#checksList"))
+
+    row.locator('input[data-f="bottles"]').fill("450")
     row.locator('input[data-f="bottles"]').blur()
-    rate = pg.locator("#rows tr").first.locator("td").nth(6).inner_text()
-    check("1000/工時 高於 256×2.5 → 標偏高", "偏高" in rate, rate)
 
+    print("\n── 樣本不足的品項不示警 ──")
     row.locator('input[data-f="sku"]').fill("Z9999")
     row.locator('input[data-f="sku"]').blur()
-    rate = pg.locator("#rows tr").first.locator("td").nth(6).inner_text()
-    check("批次數不足的品項不標警告", "⚠" not in rate, rate)
+    row = pg.locator("#rows tr").first
+    row.locator('input[data-f="bottles"]').fill("60")
+    row.locator('input[data-f="bottles"]').blur()
+    cells = pg.locator("#rows tr").first.locator("td")
+    check("批次數不足不標記", (cells.nth(6).get_attribute("class") or "").strip() == "flag",
+          cells.nth(6).get_attribute("class"))
 
-    print("\n── 半填的列要擋下來 ──")
+    print("\n── 阻擋型檢查 ──")
     r0 = pg.locator("#rows tr").first
     r0.locator('input[data-f="sku"]').fill("D0310")
     r0.locator('input[data-f="sku"]').blur()
@@ -143,11 +166,17 @@ with sync_playwright() as p:
     r1 = pg.locator("#rows tr").nth(1)
     r1.locator('input[data-f="start"]').fill("1000")
     r1.locator('input[data-f="start"]').blur()
-    check("半填的列讓儲存鈕停用", pg.is_disabled("#saveBtn"))
-    check("提示說明原因", "補齊" in pg.inner_text("#dirtyHint"), pg.inner_text("#dirtyHint"))
-    check("錯誤欄位標紅", r1.locator("input.bad").count() > 0)
 
-    print("\n── 儲存 ──")
+    check("半填的列讓儲存鈕停用", pg.is_disabled("#saveBtn"))
+    stop = pg.locator("#checksList .ck.stop").first
+    check("清單列出阻擋原因", stop.count() > 0)
+    check("阻擋原因指名品項", "B2011" in stop.inner_text(), stop.inner_text())
+    check("阻擋項有前往修正", stop.locator("button", has_text="前往修正").count() == 1)
+    check("錯誤欄位標紅", r1.locator("input.bad").count() > 0)
+    check("統計列出待處理數", "待處理" in pg.inner_text("#checksTally"),
+          pg.inner_text("#checksTally"))
+
+    print("\n── 同品項時間重疊 ──")
     r1.locator('input[data-f="end"]').fill("1200")
     r1.locator('input[data-f="end"]').blur()
     r1 = pg.locator("#rows tr").nth(1)
@@ -155,6 +184,33 @@ with sync_playwright() as p:
     r1.locator('input[data-f="bottles"]').blur()
     r1.locator('input[data-f="head"]').fill("5")
     r1.locator('input[data-f="head"]').blur()
+
+    pg.click("#addRow")
+    r2 = pg.locator("#rows tr").nth(2)
+    for f, v in (("sku","B2011"),("start","1130"),("end","1300"),("bottles","900"),("head","5")):
+        el = pg.locator("#rows tr").nth(2).locator('input[data-f="%s"]' % f)
+        el.fill(v); el.blur()
+    warns = pg.locator("#checksList .ck.warn").all_inner_texts()
+    check("同品項重疊會提醒", any("時間重疊" in t for t in warns), warns)
+
+    print("\n── 跨品項重疊不該提醒（多線並行是常態）──")
+    el = pg.locator("#rows tr").nth(2).locator('input[data-f="sku"]')
+    el.fill("A1020"); el.blur()
+    warns = pg.locator("#checksList .ck.warn").all_inner_texts()
+    passes = pg.locator("#checksList .ck.pass").all_inner_texts()
+    check("換成別的品項後就不提醒", not any("時間重疊" in t for t in warns), warns)
+    check("並列為通過項目", any("沒有時間重疊" in t for t in passes), passes)
+
+    print("\n── 沒填人數的提醒 ──")
+    txt = pg.inner_text("#checksList")
+    check("提醒有幾批沒填人數", "沒有填人數" in txt, txt[:200])
+    el = pg.locator("#rows tr").first.locator('input[data-f="head"]')
+    el.fill("4"); el.blur()
+    txt = pg.inner_text("#checksList")
+    check("補齊後改列為通過", "都有填人數" in txt, txt[:200])
+
+    print("\n── 儲存 ──")
+    check("儲存鈕顯示筆數", "3 筆" in pg.inner_text("#saveBtn"), pg.inner_text("#saveBtn"))
     check("補齊後儲存鈕啟用", not pg.is_disabled("#saveBtn"))
 
     pg.click("#saveBtn")
@@ -162,24 +218,30 @@ with sync_playwright() as p:
     check("送出一個 POST", len(captured["posts"]) == 1, captured["posts"])
     if captured["posts"]:
         body = captured["posts"][0]
-        check("送出兩筆批次", len(body) == 2, body)
+        check("送出三筆批次", len(body) == 3, len(body))
         b0 = body[0]
         check("欄位名稱正確", set(b0) == {"sku_code","prod_date","start_time","end_time",
-                                          "bottles","headcount"}, list(b0))
+                                          "bottles","headcount","abnormal_ok"}, list(b0))
         check("不送 hours（資料庫自己算）", "hours" not in b0, list(b0))
+        check("不送確認時間（由資料庫蓋章）", "abnormal_ok_at" not in b0, list(b0))
         check("時間是 HH:MM", re.match(r"^\d\d:\d\d$", b0["start_time"]) is not None, b0)
-        check("沒填人數送 null", body[0]["headcount"] is None, body[0])
-        check("有填人數送數字", body[1]["headcount"] == 5, body[1])
+        check("人數送數字", body[1]["headcount"] == 5, body[1])
     check("顯示已儲存", "已儲存" in pg.inner_text("#banner"), pg.inner_text("#banner"))
 
     print("\n── 月曆 ──")
-    check("月曆有格子", pg.locator("#cal .cell[data-d]").count() >= 28)
+    check("月曆有格子", pg.locator("#cal .cell:not(.blank)").count() >= 28,
+          pg.locator("#cal .cell:not(.blank)").count())
     check("9/1 標為已登記", "has" in (pg.locator('#cal .cell[data-d="2026-09-01"]')
                                       .get_attribute("class") or ""))
     check("9/2 標為無作業", "none" in (pg.locator('#cal .cell[data-d="2026-09-02"]')
                                        .get_attribute("class") or ""))
     sub = pg.inner_text("#calSub")
     check("進度摘要有數字", "已登記" in sub and "待補" in sub, sub)
+    check("進度條有三段", pg.locator("#calTrack i").count() == 3,
+          pg.locator("#calTrack i").count())
+    check("待補天數顯示在按鈕上", "待補" in pg.inner_text("#gapBtn"), pg.inner_text("#gapBtn"))
+    check("未來日期不可點", pg.locator("#cal .cell.future[data-d]").count() == 0,
+          pg.locator("#cal .cell.future[data-d]").count())
 
     print("\n── Excel 貼上 ──")
     pg.evaluate("""() => {
