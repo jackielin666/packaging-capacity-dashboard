@@ -137,8 +137,10 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
 .grid th:nth-child(6){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
-.grid td{padding:4px 8px;border-bottom:1px solid #F0F2ED;vertical-align:middle;height:52px}
+.grid td{padding:9px 8px;border-bottom:1px solid #F0F2ED;vertical-align:top}
 .grid td:first-child{padding-left:16px}
+.grid td.calc,.grid td.flag{padding-top:17px}
+.grid td.act{padding-top:13px}
 .grid tr.locked td{background:var(--raised)}
 .grid input{width:100%;padding:7px 9px;border:1px solid var(--rule-2);border-radius:3px;
   background:#fff;font:14px "IBM Plex Mono",monospace;color:var(--ink);
@@ -160,7 +162,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   height:7px;border-radius:50%;margin-left:7px;vertical-align:1px}
 .grid .flag.low:after{border:1.5px solid var(--signal)}
 .grid .flag.high:after{border:1.5px solid var(--cool)}
-.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px;margin-top:1px;
+.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px;margin-top:4px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grid .x{background:0;border:0;color:var(--ink-4);cursor:pointer;font-size:16px;
   padding:4px 8px;line-height:1;border-radius:3px}
@@ -195,6 +197,60 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
 .spacer{flex:1;min-width:8px}
 
+/* ── 品項歷史 ── */
+.hist{background:0;border:0;color:var(--accent);cursor:pointer;font:11px "Noto Sans TC",sans-serif;
+  padding:0 0 0 9px;text-decoration:underline;text-underline-offset:2px}
+.hist:hover{color:var(--ink)}
+.modal{position:fixed;inset:0;background:rgba(18,23,26,.45);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:50}
+.modal .box{background:var(--surface);border-radius:6px;width:100%;max-width:720px;
+  max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.modal .top{display:flex;align-items:flex-start;gap:14px;padding:20px 22px 16px;
+  border-bottom:1px solid var(--rule)}
+.modal .top h2{font-size:17px}
+.modal .top .sub{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.modal .x2{background:0;border:0;font-size:22px;color:var(--ink-3);cursor:pointer;
+  line-height:1;padding:2px 6px;border-radius:3px;margin-left:auto}
+.modal .x2:hover{background:var(--raised);color:var(--ink)}
+.modal .scroll{overflow:auto;padding:0 22px 20px}
+.hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:4px;margin:18px 0 0;overflow:hidden}
+.hstats div{background:var(--sunk);padding:11px 13px}
+.hstats .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+.hstats .v{font-family:"IBM Plex Mono",monospace;font-size:18px;font-weight:500;margin-top:2px}
+.strip{position:relative;height:58px;margin:18px 0 6px;border:1px solid var(--rule);
+  border-radius:4px;background:var(--sunk)}
+.strip i{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;
+  border-radius:50%;background:var(--ink-4)}
+.strip i.low{background:var(--signal);width:9px;height:9px;margin:-4.5px 0 0 -4.5px}
+.strip i.high{background:var(--cool);width:9px;height:9px;margin:-4.5px 0 0 -4.5px}
+.strip i.me{background:var(--accent);width:13px;height:13px;margin:-6.5px 0 0 -6.5px;
+  box-shadow:0 0 0 3px var(--accent-wash)}
+.strip b{position:absolute;top:4px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+  color:var(--ink-3);font-weight:400;transform:translateX(-50%)}
+.strip s{position:absolute;top:0;bottom:0;width:1px;background:var(--rule-2);
+  text-decoration:none}
+.striplab{font-size:11.5px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap}
+.htab{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.htab th{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  padding:7px 9px;border-bottom:1px solid var(--rule-3);background:var(--sunk)}
+.htab th.num{text-align:right}
+.htab td{padding:8px 9px;border-bottom:1px solid #F0F2ED;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.htab td.num{text-align:right}
+.htab tr.me td{background:var(--accent-wash);font-weight:500}
+.htab .mk{font-size:11px;color:var(--ink-3)}
+.htab .mk.low{color:var(--signal)}
+.htab .mk.high{color:var(--cool)}
+
+/* ── 匯出 ── */
+.exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:0 20px 16px}
+.exp select,.exp .btn{height:34px;padding:0 13px;font:500 12.5px/1 "Noto Sans TC",sans-serif;
+  border-radius:4px;box-sizing:border-box}
+.exp select{border:1px solid var(--rule-2);background:#fff;color:var(--ink);font-weight:400}
+
 /* ── 訊息 ── */
 .msg{padding:12px 16px;border-radius:0 4px 4px 0;font-size:13.5px;margin-top:18px}
 .msg.ok{background:var(--accent-wash);border-left:3px solid var(--accent)}
@@ -203,9 +259,11 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .msg b{font-family:"Noto Serif TC",serif}
 
 /* ── 無作業 ── */
-.noop{display:flex;align-items:center;gap:16px;padding:15px 20px}
-.noop .body{flex:1}
-.noop h2{font-size:14.5px}
+.noop{display:flex;align-items:center;gap:14px;padding:14px 20px;background:var(--surface);
+  border:1px solid var(--rule-3);border-radius:5px;margin-top:14px;flex-wrap:wrap}
+.noop .q{font-family:"Noto Serif TC",serif;font-size:14.5px;font-weight:600}
+.noop .why{font-size:12.5px;color:var(--ink-3);flex:1;min-width:180px}
+.noop .st{font-size:12.5px;color:var(--accent)}
 
 /* ── 月曆 ── */
 .calhead{display:flex;align-items:center;gap:14px;padding:18px 20px 0}
@@ -284,6 +342,11 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   .ck{flex-wrap:wrap}
   .cal{gap:3px;padding:10px}
   .cell{font-size:11px}
+  .modal{padding:0}
+  .modal .box{max-width:none;max-height:100vh;height:100vh;border-radius:0}
+  .hstats{grid-template-columns:1fr 1fr}
+  .exp{padding:0 14px 14px}
+  .exp select,.exp .btn{flex:1}
 }
 </style>
 <!-- ══ 載入中 ══ -->
@@ -351,6 +414,14 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       </div>
     </div>
 
+    <!-- 先確認這天有沒有作業，再決定要不要往下登記 -->
+    <div class="noop">
+      <div class="q">這天有包裝作業嗎？</div>
+      <div class="why">沒有的話請按一下，否則這天會被算成漏登。</div>
+      <span class="st" id="noOpState">✓ 已有批次資料</span>
+      <button class="btn ghost" id="noOpBtn" disabled="">本日無包裝作業</button>
+    </div>
+
     <div class="msg" id="banner" hidden=""></div>
 
     <!-- 輸入表 -->
@@ -375,7 +446,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
             <th class="num">人數</th><th class="num">工時</th><th class="num">產能</th><th></th>
           </tr>
         </thead>
-        <tbody id="rows"><tr data-key="1"><td class="" data-l="品項"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">草莓蒟蒻餡(1*6kg)　·　PE袋</div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="08:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="09:30" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="380" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.50</td><td class="flag" data-l="產能">253</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="2"><td class="" data-l="品項"><input class="" data-f="sku" value="B2011" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">＃1花生(1*2.8kg)　·　馬口鐵</div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="09:30" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="12:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="2100" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">2.50</td><td class="flag" data-l="產能">840</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="3"><td class="" data-l="品項"><input class="" data-f="sku" value="A1020" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">大圓草莓-新(1*440g)　·　玻璃瓶</div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="13:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="14:20" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="1900" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="4" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.33</td><td class="flag" data-l="產能">1,425</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="4"><td class="" data-l="品項"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">草莓蒟蒻餡(1*6kg)　·　PE袋</div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="14:20" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="15:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="45" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">0.67</td><td class="flag low" data-l="產能">67</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr></tbody>
+        <tbody id="rows"><tr data-key="1"><td class="" data-l="品項"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">草莓蒟蒻餡(1*6kg)　·　PE袋<button class="hist" type="button">歷史</button></div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="08:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="09:30" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="380" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.50</td><td class="flag" data-l="產能">253</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="2"><td class="" data-l="品項"><input class="" data-f="sku" value="B2011" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">＃1花生(1*2.8kg)　·　馬口鐵<button class="hist" type="button">歷史</button></div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="09:30" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="12:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="2100" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">2.50</td><td class="flag" data-l="產能">840</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="3"><td class="" data-l="品項"><input class="" data-f="sku" value="A1020" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">大圓草莓-新(1*440g)　·　玻璃瓶<button class="hist" type="button">歷史</button></div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="13:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="14:20" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="1900" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="4" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.33</td><td class="flag" data-l="產能">1,425</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="4"><td class="" data-l="品項"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"><div class="skuname">草莓蒟蒻餡(1*6kg)　·　PE袋<button class="hist" type="button">歷史</button></div></td><td class="pair" data-l="起始"><input class="" data-f="start" value="14:20" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="15:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="45" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">0.67</td><td class="flag low" data-l="產能">67</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr></tbody>
       </table>
 
       <!-- 系統檢查 -->
@@ -396,20 +467,6 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       </div>
     </div>
 
-    <!-- 無作業 -->
-    <div class="panel">
-      <div class="noop">
-        <div class="body">
-          <h2>當天沒有包裝作業？</h2>
-          <div class="sub">按下去等於告訴系統「這天確實沒做，不是忘了登記」。月底檢核只會抓「沒批次又沒按這個」的工作日。</div>
-        </div>
-        <button class="btn ghost" id="noOpBtn" disabled="">標記本日無包裝作業</button>
-      </div>
-      <div class="legend" style="padding-top:0">
-        <span class="hint" id="noOpState">本日已有批次資料，不需要標記。</span>
-      </div>
-    </div>
-
     <!-- 月曆 -->
     <div class="panel">
       <div class="calhead">
@@ -423,6 +480,16 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <div class="tally" id="calSub">已登記 6　·　無作業 1　·　待補 3</div>
       </div>
       <div class="cal" id="cal"><div class="dowh">日</div><div class="dowh">一</div><div class="dowh">二</div><div class="dowh">三</div><div class="dowh">四</div><div class="dowh">五</div><div class="dowh">六</div><div class="cell blank"></div><div class="cell blank"></div><button class="cell has" data-d="2026-09-01"><span>1</span><span class="n">4 批</span></button><button class="cell has" data-d="2026-09-02"><span>2</span><span class="n">5 批</span></button><button class="cell has" data-d="2026-09-03"><span>3</span><span class="n">3 批</span></button><button class="cell none" data-d="2026-09-04"><span>4</span><span class="n">休</span></button><button class="cell weekend" data-d="2026-09-05"><span>5</span><span class="n"></span></button><button class="cell weekend" data-d="2026-09-06"><span>6</span><span class="n"></span></button><button class="cell has" data-d="2026-09-07"><span>7</span><span class="n">4 批</span></button><button class="cell has" data-d="2026-09-08"><span>8</span><span class="n">2 批</span></button><button class="cell has" data-d="2026-09-09"><span>9</span><span class="n">5 批</span></button><button class="cell miss" data-d="2026-09-10"><span>10</span><span class="n">待補</span></button><button class="cell miss" data-d="2026-09-11"><span>11</span><span class="n">待補</span></button><button class="cell weekend" data-d="2026-09-12"><span>12</span><span class="n"></span></button><button class="cell weekend" data-d="2026-09-13"><span>13</span><span class="n"></span></button><button class="cell miss" data-d="2026-09-14"><span>14</span><span class="n">待補</span></button><button class="cell today sel" data-d="2026-09-15"><span>15</span><span class="n"></span></button><div class="cell future"><span>16</span></div><div class="cell future"><span>17</span></div><div class="cell future"><span>18</span></div><div class="cell future"><span>19</span></div><div class="cell future"><span>20</span></div><div class="cell future"><span>21</span></div><div class="cell future"><span>22</span></div><div class="cell future"><span>23</span></div><div class="cell future"><span>24</span></div><div class="cell future"><span>25</span></div><div class="cell future"><span>26</span></div><div class="cell future"><span>27</span></div><div class="cell future"><span>28</span></div><div class="cell future"><span>29</span></div><div class="cell future"><span>30</span></div></div>
+      <div class="exp">
+        <span class="hint">匯出紀錄</span>
+        <select id="expRange">
+          <option value="month">本月</option>
+          <option value="3m">近三個月</option>
+          <option value="all">全部</option>
+        </select>
+        <button class="btn ghost sm" id="expBtn">下載 CSV</button>
+        <span class="hint" id="expState"></span>
+      </div>
       <div class="legend">
         <span><i class="l-has"></i>已登記</span>
         <span><i class="l-none"></i>無作業</span>
@@ -431,6 +498,19 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       </div>
     </div>
 
+  </div>
+</div>
+
+<div class="modal" id="hist" hidden="">
+  <div class="box">
+    <div class="top">
+      <div>
+        <h2 id="histTitle">—</h2>
+        <div class="sub" id="histSub"></div>
+      </div>
+      <button class="x2" id="histClose" title="關閉">×</button>
+    </div>
+    <div class="scroll" id="histBody"></div>
   </div>
 </div>
 
