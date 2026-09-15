@@ -195,6 +195,19 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .hist{background:0;border:0;color:var(--accent);cursor:pointer;font:11px "Noto Sans TC",sans-serif;
   padding:0 0 0 9px;text-decoration:underline;text-underline-offset:2px}
 .hist:hover{color:var(--ink)}
+.helpbody h3{font-size:14.5px;margin:20px 0 8px;padding-bottom:5px;
+  border-bottom:1px solid var(--rule)}
+.helpbody h3:first-child{margin-top:4px}
+.helpbody ol,.helpbody ul{margin:0;padding-left:20px}
+.helpbody li{margin:5px 0;font-size:13.5px;line-height:1.7}
+.helpbody p{font-size:13.5px;margin:9px 0}
+.helpbody .tip{color:var(--ink-3);font-size:12.5px}
+.helpbody .warn{color:var(--signal)}
+.helptab{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+.helptab td{padding:7px 9px;border-bottom:1px solid var(--rule);vertical-align:top;
+  line-height:1.65}
+.helptab td:first-child{width:104px;font-weight:600;white-space:nowrap;color:var(--ink-2)}
+.helptab tr:last-child td{border-bottom:0}
 .modal{position:fixed;inset:0;background:rgba(18,23,26,.45);display:flex;align-items:center;
   justify-content:center;padding:20px;z-index:50}
 .modal .box{background:var(--surface);border-radius:6px;width:100%;max-width:720px;
@@ -406,6 +419,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
     </nav>
       <div class="sp"></div>
       <div class="who" id="who"></div>
+      <button class="btn" id="helpBtn">操作說明</button>
       <button class="btn" id="logoutBtn">登出</button>
     </div>
   </div>
@@ -555,6 +569,71 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <button class="x2" id="histClose" title="關閉">×</button>
     </div>
     <div class="scroll" id="histBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="help" hidden>
+  <div class="box">
+    <div class="top">
+      <div>
+        <h2>操作說明</h2>
+        <div class="sub">按 <b>Enter</b> 或 <b>Esc</b> 關閉，回到剛才的畫面繼續登打。</div>
+      </div>
+      <button class="x2" id="helpClose" title="關閉">×</button>
+    </div>
+    <div class="scroll helpbody">
+
+      <h3>一、每天要做什麼</h3>
+      <ol>
+        <li><b>選日期</b> —— 左上角的日曆。可以補登前幾天，不一定要當天登打。</li>
+        <li><b>那天有生產</b>：逐批輸入品號、起始、結束、瓶數、人數。</li>
+        <li><b>那天沒有包裝作業</b>：直接勾「當日無包裝作業」，不必留空。<br>
+          <span class="tip">留空和「沒生產」是兩件事 —— 留空會一直掛在待補清單上。</span></li>
+        <li>確認下方檢查項目沒有紅色，按 <b>儲存</b>。</li>
+      </ol>
+
+      <h3>二、每一欄怎麼填</h3>
+      <table class="helptab"><tbody>
+        <tr><td>品號</td><td>打前兩三碼會跳出候選，選了之後<b>品名會自動帶出來</b>，
+          可以核對是不是那支產品。</td></tr>
+        <tr><td>起始 / 結束</td><td>填 <span class="mono">0830</span> 或
+          <span class="mono">08:30</span> 都可以。<b>工時由系統算</b>，不接受人工填寫 ——
+          這樣工時才不會因人而異。</td></tr>
+        <tr><td>瓶數</td><td>該批實際完成的數量。混包請分成兩列，不要相加。</td></tr>
+        <tr><td>人數</td><td>那一批實際作業的人數。<b>沒有這一欄就算不出人均產能</b>，
+          請務必填。</td></tr>
+        <tr><td>產能</td><td>系統自動算（瓶數 ÷ 工時），不用填。</td></tr>
+      </tbody></table>
+
+      <h3>三、看到提示怎麼辦</h3>
+      <table class="helptab"><tbody>
+        <tr><td><b class="warn">紅色</b></td><td>資料一定有問題，<b>不改不能存</b>。
+          例如結束時間早於起始時間。</td></tr>
+        <tr><td><b class="warn">黃色</b></td><td>「低於平常 xx%」之類的提醒。
+          <b>數字沒打錯的話，勾「已確認」就可以存</b> ——
+          系統不是在說你錯，是請你確認一下。</td></tr>
+        <tr><td>綠色</td><td>檢查通過。</td></tr>
+      </tbody></table>
+      <p>想知道某支產品平常是多少，<b>點品號</b>就會跳出它的歷史紀錄。</p>
+
+      <h3>四、補登舊資料</h3>
+      <ul>
+        <li>把日期切到那一天，照常輸入即可 —— 三天後才收到回報單也沒關係。</li>
+        <li><b>上上個月以前</b>的資料只開放補「人數」與「備註」，
+          品號、時間、瓶數不能再改。要更正請找主管。</li>
+        <li>日曆上標「待補」的就是還沒處理的工作日。</li>
+      </ul>
+
+      <h3>五、常見問題</h3>
+      <table class="helptab"><tbody>
+        <tr><td>存不進去</td><td>先看下方檢查清單有沒有紅色。全綠還是存不了，
+          多半是登入過期 —— 重新登入即可，已輸入的內容不會不見。</td></tr>
+        <tr><td>打錯了</td><td>當月與上個月可以直接改，改完再按儲存。</td></tr>
+        <tr><td>要交數字給別人</td><td>用下方「匯出記錄」下載，
+          或到「儀表板」選好期間按「產生 PDF」。</td></tr>
+      </tbody></table>
+
+    </div>
   </div>
 </div>
 
@@ -1741,7 +1820,41 @@ function renderHistory(code, sku, rows, row) {
 function closeHistory() { $('hist').hidden = true; }
 $('histClose').addEventListener('click', closeHistory);
 $('hist').addEventListener('click', function (e) { if (e.target === $('hist')) closeHistory(); });
+
+/* 操作說明。
+   現場是站著、手上還有回報單的時候在看這個 —— 打開要快，關掉更要快，
+   而且關掉之後游標要回到剛才那一格，不能讓人重找一次。 */
+// 記住最後停留的輸入格。不能在開啟時抓 document.activeElement ——
+// 那時焦點已經因為點擊跑到「操作說明」按鈕上了。
+var helpReturn = null;
+document.addEventListener('focusin', function (e) {
+  var el = e.target;
+  if (el && el.closest && el.closest('#rows, .daybar') &&
+      /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) helpReturn = el;
+});
+function openHelp() {
+  $('help').hidden = false;
+  $('helpClose').focus();
+}
+function closeHelp() {
+  if ($('help').hidden) return;
+  $('help').hidden = true;
+  // 回到剛才那一格。表格重畫過的話那個元素已經不在了，就退回第一格 ——
+  // 關掉說明之後焦點落在 body 上，等於要使用者自己再找一次。
+  var back = (helpReturn && document.body.contains(helpReturn))
+    ? helpReturn : $('rows').querySelector('input');
+  if (back) { try { back.focus(); } catch (err) { /* 沒得回就算了 */ } }
+}
+$('helpBtn').addEventListener('click', openHelp);
+$('helpClose').addEventListener('click', closeHelp);
+$('help').addEventListener('click', function (e) { if (e.target === $('help')) closeHelp(); });
+
 document.addEventListener('keydown', function (e) {
+  if (!$('help').hidden) {
+    // Enter 與 Esc 都關掉 —— 現場的人按 Enter 就是「好，繼續」
+    if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); closeHelp(); }
+    return;
+  }
   if (e.key === 'Escape' && !$('hist').hidden) closeHistory();
 });
 

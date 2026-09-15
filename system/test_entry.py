@@ -438,6 +438,31 @@ with sync_playwright() as p:
     check("點月份可跳到該月", "2026 年 7 月" in pg.inner_text("#calTitle"),
           pg.inner_text("#calTitle"))
 
+    print("\n── 操作說明 ──")
+    # 現場是站著看的：打開要快，關掉更要快，關掉後游標要回到剛才那一格
+    pg.wait_for_selector("#rows input", timeout=4000)
+    cells = pg.locator("#rows input")
+    cells.first.focus()
+    pg.wait_for_timeout(120)
+    check("有操作說明按鈕", pg.is_visible("#helpBtn"))
+    pg.click("#helpBtn")
+    pg.wait_for_timeout(300)
+    check("說明視窗打得開", pg.is_visible("#help"))
+    ht = pg.inner_text("#help")
+    for term in ("每天要做什麼", "當日無包裝作業", "人數", "補登舊資料", "紅色", "黃色"):
+        check("說明涵蓋「%s」" % term, term in ht, ht[:150])
+    check("說明寫明工時由系統算", "工時由系統算" in ht, ht[:400])
+    pg.keyboard.press("Enter")
+    pg.wait_for_timeout(300)
+    check("按 Enter 關掉說明", not pg.is_visible("#help"))
+    check("關掉後游標回到表格，不是落在 body",
+          pg.evaluate("!!document.activeElement.closest('#rows')"),
+          pg.evaluate("document.activeElement.outerHTML.slice(0,80)"))
+    pg.click("#helpBtn"); pg.wait_for_timeout(250)
+    pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
+    check("按 Esc 也關得掉", not pg.is_visible("#help"))
+    check("說明沒有把已輸入的內容清掉", pg.locator("#rows tr").count() > 0)
+
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
     check("沒有 JS 錯誤", not errs, errs[:3])
