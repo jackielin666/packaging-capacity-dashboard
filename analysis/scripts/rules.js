@@ -211,8 +211,13 @@ function guessStartYear(today = new Date()) {
 /* ══════════════ 3. 指標與規則 ══════════════ */
 
 const SHORT_BATCH_H = 1.0;   // 零星批次門檻
-// 離群批次：以該品項的平均產能（總瓶數÷總工時）為基準。
-// 用平均而非中位數，是因為畫面上顯示、圖上畫線的就是平均產能 —— 門檻可以被使用者驗證。
+// 離群批次：以該品項的「平常水準」為基準 —— 每批產能的中位數。
+//
+// 原本用的是總瓶數÷總工時。那是加權平均：慢批次佔用的工時多、權重就大，
+// 會把基準往下拉。48 支樣本足夠的品項裡有 44 支的中位數高於它，平均高出 12.4%，
+// 代表這個偏差是系統性的，不是個案。中位數才是「一般一批做得到的速度」。
+//
+// 門檻的可驗證性沒有變 —— 畫面上顯示、圖上畫線的同樣是這個中位數。
 const OUT_HI = 2.5, OUT_LO = 0.7;
 const CV_WATCH = 40;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
 const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
@@ -256,7 +261,7 @@ function analyse(batches) {
     const days = new Set(list.map(x => x.d)).size;
     const short = list.filter(x => x.h < SHORT_BATCH_H);
 
-    // 離群批次：跟這支產品自己的平均產能比
+    // 離群批次：跟這支產品自己的平常水準（中位數）比
     const outliers = list
       .filter(x => { const r = x.b / x.h; return r > rate * OUT_HI || r < rate * OUT_LO; })
       .map(x => ({ ...x, rate: x.b / x.h, recent: recent3.has(x.m) }))
@@ -409,7 +414,10 @@ global.PackingEngine = {
   thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES,
     // 箭頭轉紅／轉綠的門檻，刻意與 DECLINE 同一個數字，避免「箭頭紅、狀態正常」
     ARROW: Math.round((1 - DECLINE) * 100) / 100 },
+  // 基準用中位數而不是「總瓶數÷總工時」。後者是加權平均，慢批次佔用的工時多、
+  // 權重就大，會把基準往下拉 —— 48 支樣本足夠的品項裡有 44 支的中位數高於它，
+  // 平均高出 12.4%。中位數才代表「一般一批做得到的速度」。
   isOutlier: (batch, sku) => { const r = batch.b / batch.h;
-    return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
+    return r > sku.med * OUT_HI || r < sku.med * OUT_LO; },
 };
 })(window);

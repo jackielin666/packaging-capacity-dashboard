@@ -43,6 +43,10 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .btn:hover{opacity:.88}
 .btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-2)}
 .privacy{font-size:12px;color:var(--ink-3);width:100%;margin-top:2px}
+.u-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
+  font-size:12px}
+th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
+  color:var(--ink-3);font-weight:400;margin-top:1px;text-transform:none}
 .err{background:var(--signal-wash);border-left:3px solid var(--signal);padding:12px 16px;
   margin-top:12px;border-radius:0 3px 3px 0;font-size:13.5px}
 
@@ -400,15 +404,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 <div class="src">
     <span class="lbl">資料來源</span>
     <span class="now" id="srcNow"></span>
-    <label class="lbl" for="startYear">起始年度</label>
-    <select id="startYear" title="包裝日期欄沒有年份，這裡設定資料是從哪一年的 10 月開始"></select>
     <button class="btn" id="liveBtn">讀取最新資料</button>
-    <button class="btn ghost" id="pickFile">載入我的 Excel 檔</button>
-    <button class="btn ghost" id="resetFile" hidden>回到內建資料</button>
-    <input type="file" id="fileInput" accept=".xlsx" hidden>
+    <button class="btn ghost" id="resetFile" hidden>回到內建快照</button>
     <div class="privacy">
-      檔案只在你自己的瀏覽器裡計算，<b>不會上傳、不會保存</b>，關掉分頁就沒了。
-      格式需與現行「包裝工時記錄表」相同：每個工作表一個品項，欄位為 包裝日期／起始時間／結束時間／工時／瓶數。
+      資料由包裝資料輸入系統維護，已不再使用 Excel 交換。
+      登入後會自動顯示資料庫的最新內容；未登入時顯示內建快照。
     </div>
     <div class="err" id="srcErr" hidden></div>
   </div>
@@ -433,7 +433,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       <table id="overviewTable">
         <thead><tr>
           <th>品號</th><th class="n">生產天數</th><th class="n">包裝量</th>
-          <th class="n opt">批次</th><th class="n">平均產能</th><th class="n opt">每千瓶工時</th>
+          <th class="n opt">批次</th><th class="n">平常水準<i>單位/hr</i></th>
+          <th class="n opt">每千瓶工時<i>hr</i></th>
           <th class="n">近 3 個生產月 vs 平常</th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
@@ -459,7 +460,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
     <div class="fig">
       <div class="fig-t" id="dotTitle"></div>
-      <div class="fig-s">每一批一個點，橫軸是時間。虛線是這支產品自己的平均產能 —— 點掉到線下面很多的那幾批，就是要去查的。</div>
+      <div class="fig-s">每一批一個點，橫軸是時間。虛線是這支產品自己的平常水準 —— 點掉到線下面很多的那幾批，就是要去查的。</div>
       <div class="legend" id="dotLegend"></div>
       <div class="chart"><div id="cDots"></div><div class="tip" id="tDots"></div></div>
     </div>
@@ -529,7 +530,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
 <footer>
   <span id="footMeta"></span>
-  <span class="mono">資料只在本機計算 · 不會上傳</span>
+  <span class="mono">資料來自包裝資料輸入系統</span>
 </footer>
 
 </div>
@@ -537,8 +538,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 <script>
 /* 包裝產能儀表板 ── 計算引擎
  *
- * 這支檔案是儀表板唯一的計算來源：內建資料與使用者上傳的檔案都走同一條路，
- * 所以不會有「內建數字」跟「上傳後數字」對不起來的問題。
+ * 這支檔案是儀表板唯一的計算來源：內建快照與資料庫讀來的資料都走同一條路，
+ * 所以不會有「快照數字」跟「最新數字」算法對不起來的問題。
  *
  * 分成三段：
  *   1. readXlsx()  瀏覽器原生解 xlsx（zip + XML），不依賴任何外部套件
@@ -748,8 +749,13 @@ function guessStartYear(today = new Date()) {
 /* ══════════════ 3. 指標與規則 ══════════════ */
 
 const SHORT_BATCH_H = 1.0;   // 零星批次門檻
-// 離群批次：以該品項的平均產能（總瓶數÷總工時）為基準。
-// 用平均而非中位數，是因為畫面上顯示、圖上畫線的就是平均產能 —— 門檻可以被使用者驗證。
+// 離群批次：以該品項的「平常水準」為基準 —— 每批產能的中位數。
+//
+// 原本用的是總瓶數÷總工時。那是加權平均：慢批次佔用的工時多、權重就大，
+// 會把基準往下拉。48 支樣本足夠的品項裡有 44 支的中位數高於它，平均高出 12.4%，
+// 代表這個偏差是系統性的，不是個案。中位數才是「一般一批做得到的速度」。
+//
+// 門檻的可驗證性沒有變 —— 畫面上顯示、圖上畫線的同樣是這個中位數。
 const OUT_HI = 2.5, OUT_LO = 0.7;
 const CV_WATCH = 40;         // 批次落差警戒（%）。實測中位數 35%，25% 會標到八成品項
 const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
@@ -793,7 +799,7 @@ function analyse(batches) {
     const days = new Set(list.map(x => x.d)).size;
     const short = list.filter(x => x.h < SHORT_BATCH_H);
 
-    // 離群批次：跟這支產品自己的平均產能比
+    // 離群批次：跟這支產品自己的平常水準（中位數）比
     const outliers = list
       .filter(x => { const r = x.b / x.h; return r > rate * OUT_HI || r < rate * OUT_LO; })
       .map(x => ({ ...x, rate: x.b / x.h, recent: recent3.has(x.m) }))
@@ -934,7 +940,7 @@ function buildAlerts(skus, meta) {
         sku: s.sku,
         value: `近期比平常慢 ${Math.round(-100 * s.vsUsual)}%`,
         detail: `平常 ${s.med.toLocaleString()} → 最近 `
-              + `${s.months.slice(-3).map(m => m.rate.toLocaleString()).join(' / ')} 瓶/工時`,
+              + `${s.months.slice(-3).map(m => m.rate.toLocaleString()).join(' / ')} 單位/hr`,
       })),
     });
   }
@@ -946,8 +952,10 @@ global.PackingEngine = {
   thresholds: { SHORT_BATCH_H, OUT_HI, OUT_LO, CV_WATCH, DECLINE, DECLINE_MONTHS, MIN_BATCHES,
     // 箭頭轉紅／轉綠的門檻，刻意與 DECLINE 同一個數字，避免「箭頭紅、狀態正常」
     ARROW: Math.round((1 - DECLINE) * 100) / 100 },
+  // 基準用中位數而不是「總瓶數÷總工時」。後者是加權平均，慢批次佔用的工時多、
+  // 權重就大，會把基準往下拉；中位數才代表「一般一批做得到的速度」。
   isOutlier: (batch, sku) => { const r = batch.b / batch.h;
-    return r > sku.rate * OUT_HI || r < sku.rate * OUT_LO; },
+    return r > sku.med * OUT_HI || r < sku.med * OUT_LO; },
 };
 })(window);
 </script>
@@ -1021,7 +1029,7 @@ function dotChart(skus) {
     s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${rule}"/>`;
     s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${fmt(v)}</text>`;
   }
-  s += `<text x="${L - 10}" y="${T - 10}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">瓶/工時</text>`;
+  s += `<text x="${L - 10}" y="${T - 10}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">單位/hr</text>`;
 
   // 月份刻度
   const first = new Date(t0), months = [];
@@ -1034,16 +1042,16 @@ function dotChart(skus) {
     s += `<text x="${x}" y="${T + ph + 20}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="middle">${d.getUTCMonth() + 1}月</text>`;
   });
 
-  // 各品項的平均產能線，以及「低於平均 x 倍就算離群」的門檻線
+  // 各品項的平常水準線，以及「低於平常水準 x 倍就算離群」的門檻線
   const lo = E.thresholds.OUT_LO;
   skus.forEach((sk, si) => {
     const col = cssv(SERIES[si]);
     const sig = cssv('--signal');
     // 離群門檻線 —— 讓現場一眼看出哪些點掉到線下
-    s += `<line x1="${L}" y1="${Y(sk.rate * lo)}" x2="${W - R}" y2="${Y(sk.rate * lo)}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
-    s += label(W - R + 7, Y(sk.rate * lo) + 4, `離群門檻 ${fmt(sk.rate * lo)}`, sig);
-    s += `<line x1="${L}" y1="${Y(sk.rate)}" x2="${W - R}" y2="${Y(sk.rate)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".9"/>`;
-    s += label(W - R + 7, Y(sk.rate) + 4, `平均 ${fmt(sk.rate)}`, col);
+    s += `<line x1="${L}" y1="${Y(sk.med * lo)}" x2="${W - R}" y2="${Y(sk.med * lo)}" stroke="${sig}" stroke-width="1.2" stroke-dasharray="3 4" opacity=".75"/>`;
+    s += label(W - R + 7, Y(sk.med * lo) + 4, `離群門檻 ${fmt(sk.med * lo)}`, sig);
+    s += `<line x1="${L}" y1="${Y(sk.med)}" x2="${W - R}" y2="${Y(sk.med)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".9"/>`;
+    s += label(W - R + 7, Y(sk.med) + 4, `平常 ${fmt(sk.med)}`, col);
   });
 
   pts.forEach((p, i) => {
@@ -1189,9 +1197,16 @@ const KPI_EXPLAIN = {
         批量大小、批次頻率（接單式生產、業務導向）　→　<b>需業務與生管配合</b>
       </div>`;
   },
-  rate: () => `<h3>平均產能與每千瓶工時</h3>
-      <p><b>平均產能</b>＝總瓶數 ÷ 總工時，也就是一小時包幾瓶。
-      <b>每千瓶工時</b>是它的倒數 —— 包一千瓶要花幾小時，排程時可以直接乘上接單量。</p>
+  rate: () => `<h3>整體產能、平常水準與每千瓶工時</h3>
+      <p><b>整體產能</b>＝總瓶數 ÷ 總工時，也就是全廠一小時包幾瓶。這是事實統計，
+      用來看全廠趨勢與估算成本。</p>
+      <p><b>平常水準</b>是另一回事 —— 它是該品項<b>每一批產能的中位數</b>，
+      也就是一半的批次做得到的速度。之所以不用總瓶數÷總工時來當它，是因為那是加權平均：
+      慢的批次佔用的工時多、權重就大，會把基準往下拉。實測 48 支樣本足夠的品項，
+      有 44 支的中位數高於加權平均，平均高出 12.4%。要問「這一批算不算慢」，
+      要跟中位數比才公道。</p>
+      <p><b>每千瓶工時</b>＝1000 ÷ 整體產能 —— 包一千瓶要花幾小時，
+      排程時可以直接乘上接單量。這是成本估算，所以沿用加權平均。</p>
       <p>這兩個數字<b>只適合同一支產品自己跟自己比</b>。不同瓶型、不同規格，
       本來就有快有慢，拿 A 產品的產能去要求 B 產品沒有意義。</p>`,
   hours: () => `<h3>工時是怎麼算的</h3>
@@ -1205,7 +1220,7 @@ function renderKpis() {
   const cards = [
     ['總包裝量', (m.bottles / 10000).toFixed(1), '萬瓶', '', null],
     ['總工時', fmt(m.hours), '小時', '', 'hours'],
-    ['平均產能', fmt(m.rate), '瓶/工時', '', 'rate'],
+    ['整體產能', fmt(m.rate), '單位/hr', '', 'rate'],
     ['每千瓶工時', m.hPer1k.toFixed(2), '小時', '', 'rate'],
     ['可省工時', fmt(m.saveAll), `小時（${Math.round(100 * m.saveAll / m.hours)}%）`, 'hl', 'save'],
   ];
@@ -1257,7 +1272,7 @@ function renderOverview() {
       <td class="n" data-l="生產天數">${s.d}</td>
       <td class="n" data-l="包裝量">${fmt(s.b)}</td>
       <td class="n opt" data-l="批次">${s.n}</td>
-      <td class="n" data-l="平均產能">${fmt(s.rate)}</td>
+      <td class="n" data-l="平常水準">${fmt(s.med)}</td>
       <td class="n opt" data-l="每千瓶工時">${s.hPer1k.toFixed(2)}</td>
       <td class="n delta ${cls}" data-l="近 3 個生產月 vs 平常">${arrow}${pct == null ? '' : ' ' + (pct > 0 ? '+' : '') + pct + '%'}</td>
       <td class="st"><div class="lamp ${s.status}"><b>${LAMP[s.status]}</b>
@@ -1336,7 +1351,7 @@ function renderSku(sku) {
   if (!s) return;
   $('skuKpi').innerHTML = [
     ['包裝量', fmt(s.b), '瓶'], ['工時', f1(s.h), '小時'],
-    ['批次 / 天數', `${s.n}/${s.d}`, ''], ['平均產能', fmt(s.rate), '瓶/工時'],
+    ['批次 / 天數', `${s.n}/${s.d}`, ''], ['平常水準', fmt(s.med), '單位/hr'],
     ['每千瓶工時', s.hPer1k.toFixed(2), '小時'], ['可省工時', f1(s.save), '小時'],
   ].map(([k, v, u]) =>
     `<div><div class="k">${k}</div><div class="v">${v}<span class="u">${u}</span></div></div>`).join('');
@@ -1358,30 +1373,30 @@ function renderSkuNotes(s) {
 
   if (s.outliers.length) {
     const shown = s.outliers.slice(0, 8), more = s.outliers.length - shown.length;
-    const loLimit = Math.round(s.rate * E.thresholds.OUT_LO);
+    const loLimit = Math.round(s.med * E.thresholds.OUT_LO);
     cards.push(`<div class="note alert"><h4>離群批次 ${s.outliers.length} 批 — 建議請製造單位說明</h4>
-      <p>產能低於 <b>${fmt(loLimit)}</b> 瓶/工時（＝這支產品平均 ${fmt(s.rate)} 的
-      ${Math.round(E.thresholds.OUT_LO * 100)}%）或高於平均 ${E.thresholds.OUT_HI} 倍的批次。
+      <p>產能低於 <b>${fmt(loLimit)}</b> 單位/hr（＝這支產品平常水準 ${fmt(s.med)} 的
+      ${Math.round(E.thresholds.OUT_LO * 100)}%）或高於平常水準 ${E.thresholds.OUT_HI} 倍的批次。
       不是資料有誤，就是那天發生了特別的事。依日期新到舊排列。</p>
       <ul>${shown.map(o =>
         `<li><span>${o.d}${o.recent ? '　近期' : ''}</span>
-         <span>${fmt(o.rate)} 瓶/工時（${o.h.toFixed(2)}h・${fmt(o.b)}瓶）</span></li>`).join('')}</ul>
+         <span>${fmt(o.rate)} 單位/hr（${o.h.toFixed(2)}h・${fmt(o.b)}瓶）</span></li>`).join('')}</ul>
       ${more ? `<p style="margin:8px 0 0;font-size:12px">…另有 ${more} 批，圖上以紅點標示</p>` : ''}</div>`);
   }
   if (s.declining) {
     cards.push(`<div class="note alert"><h4>連續 3 個月比自己平常慢</h4>
-      <p>平常 ${fmt(s.med)} 瓶/工時，最近三個生產月分別是
+      <p>平常 ${fmt(s.med)} 單位/hr，最近三個生產月分別是
       ${s.months.slice(-3).map(m => `${monthLabel(m.m)} ${fmt(m.rate)}`).join('、')}。
       跟自己比，所以與瓶型無關 —— 這是真的變慢了。</p></div>`);
   }
   if (s.laggards.length) {
     cards.push(`<div class="note watch"><h4>落後最多的批次 — 從這幾天查起</h4>
-      <p>離這支產品的合理目標（${fmt(s.p75)} 瓶/工時）差距最大的 5 批，依日期新到舊排列。
+      <p>離這支產品的合理目標（${fmt(s.p75)} 單位/hr）差距最大的 5 批，依日期新到舊排列。
       查查看那幾天有沒有共同點：批量、班別、機台。</p>
       <ul>${s.laggards.map(l => {
         const also = isOutlier(l, s) ? '　<span style="color:var(--signal)">離群</span>' : '';
         return `<li><span>${l.d}${also}</span>
-          <span>${fmt(l.rate)} 瓶/工時　慢 ${Math.round(l.gap * 100)}%</span></li>`;
+          <span>${fmt(l.rate)} 單位/hr　慢 ${Math.round(l.gap * 100)}%</span></li>`;
       }).join('')}</ul></div>`);
   }
   if (s.cv > t.CV_WATCH) {
@@ -1423,13 +1438,13 @@ function calc() {
   $('calcOut').innerHTML = rows.map(([k, r, note], i) =>
     `<div class="${i === 1 ? 'pick' : ''}"><div class="k">${k}</div>
      <div class="v">${(qty / r).toFixed(1)}<span class="u" style="font-size:13px"> 小時</span></div>
-     <div class="s">${fmt(r)} 瓶/工時<br>${note}</div></div>`).join('');
+     <div class="s">${fmt(r)} 單位/hr<br>${note}</div></div>`).join('');
   const naive = qty / state.R.meta.rate, real = qty / s.med;
   const ratio = real / naive;
   const dir = ratio > 1 ? `<b>少估 ${ratio.toFixed(1)} 倍</b>（工時會不夠用）`
                         : `<b>多估 ${(1 / ratio).toFixed(1)} 倍</b>（會白留工時）`;
   $('calcNote').innerHTML =
-    `若改用全廠平均 ${fmt(state.R.meta.rate)} 瓶/工時 估，會算成 <b>${naive.toFixed(1)} 小時</b>
+    `若改用全廠平均 ${fmt(state.R.meta.rate)} 單位/hr 估，會算成 <b>${naive.toFixed(1)} 小時</b>
      —— 比這支產品的常態水準 ${f1(real)} 小時 ${dir}。
      這就是排程要用品項別實績、不能用全廠平均的原因。`;
 }
@@ -1499,59 +1514,13 @@ function showError(msg) {
   $('srcErr').hidden = false;
 }
 
-/* 起始年度：包裝日期欄沒有年份，10–12 月算起始年、1–9 月算次年 */
-let rawSheets = null;
-function buildYearOptions(selected) {
-  const now = new Date().getFullYear();
-  const years = [];
-  for (let y = now - 6; y <= now + 1; y++) years.push(y);
-  $('startYear').innerHTML = years.map(y =>
-    `<option value="${y}"${y === selected ? ' selected' : ''}>${y}/10 – ${y + 1}/09</option>`).join('');
-}
-
-$('pickFile').onclick = () => $('fileInput').click();
-$('fileInput').onchange = async ev => {
-  const file = ev.target.files[0];
-  if (!file) return;
-  $('pickFile').textContent = '讀取中…';
-  try {
-    if (!E.supported()) throw new Error(
-      '這個瀏覽器版本太舊，無法在本機解開 Excel 檔。請用 Chrome 103 以上的版本開啟。');
-    rawSheets = await E.readXlsx(await file.arrayBuffer());
-    state.year = +$('startYear').value;
-    const { batches, skipped } = E.toBatches(rawSheets, state.year);
-    load(batches, `你上傳的 ${file.name}`);
-    $('resetFile').hidden = false;
-    if (skipped.length) {
-      $('srcErr').innerHTML =
-        `<b>已載入，但有 ${skipped.length} 筆略過：</b>`
-        + skipped.slice(0, 5).map(x => `${x.sheet} 第 ${x.row} 列（${x.why}）`).join('、')
-        + (skipped.length > 5 ? ` …等 ${skipped.length} 筆` : '');
-      $('srcErr').hidden = false;
-    }
-  } catch (err) {
-    showError(err.message || String(err));
-  } finally {
-    $('pickFile').textContent = '載入我的 Excel 檔';
-    ev.target.value = '';
-  }
-};
+/* 切回內建快照。資料改由輸入系統維護後，來源只剩「資料庫」與「內建快照」兩種。 */
 $('resetFile').onclick = () => {
-  rawSheets = null;
-  $('startYear').closest('.src').querySelectorAll('#startYear, label[for=startYear]')
-    .forEach(el => el.hidden = false);
-  buildYearOptions(EMBEDDED.year);
-  state.year = EMBEDDED.year;
   load(EMBEDDED.batches, snapLabel());
   $('resetFile').hidden = true;
+  $('srcErr').hidden = true;
 };
-$('startYear').onchange = () => {
-  state.year = +$('startYear').value;
-  if (!rawSheets) return;
-  try {
-    load(E.toBatches(rawSheets, state.year).batches, state.source);
-  } catch (err) { showError(err.message); }
-};
+
 $('skuSearch').oninput = applySearch;
 $('selMain').onchange = () => goto($('selMain').value);
 $('selCmpA').onchange = $('selCmpB').onchange = () => renderSku($('selMain').value);
@@ -1605,8 +1574,8 @@ function buildReport(ym) {
   const list = [...byS.values()].map(g => {
     const s = skuOf.get(g.s) || {};
     const rate = g.h > 0 ? g.b / g.h : 0;
-    return { ...g, rate, usual: s.rate || 0,
-      vs: s.rate ? Math.round(100 * (rate / s.rate - 1)) : null,
+    return { ...g, rate, usual: s.med || 0,
+      vs: s.med ? Math.round(100 * (rate / s.med - 1)) : null,
       hShare: cur.H ? +(100 * g.h / cur.H).toFixed(1) : 0,
       bShare: cur.B ? +(100 * g.b / cur.B).toFixed(1) : 0 };
   }).sort((a, b) => b.b - a.b);
@@ -1615,8 +1584,11 @@ function buildReport(ym) {
     const s = skuOf.get(x.s);
     if (!s || s.n < 10) return null;
     const rate = x.b / x.h;
-    const kind = rate < s.rate * 0.7 ? 'lo' : rate > s.rate * 2.5 ? 'hi' : null;
-    return kind ? { ...x, rate, usual: s.rate, kind } : null;
+    const kind = rate < s.med * 0.7 ? 'lo' : rate > s.med * 2.5 ? 'hi' : null;
+    // 差距百分比一起算出來 —— 只說「低於平常」看不出嚴重程度，
+    // 慢 25% 和慢 70% 要採取的行動完全不同。
+    return kind ? { ...x, rate, usual: s.med, kind,
+                    gap: Math.round(Math.abs(100 * (rate / s.med - 1))) } : null;
   }).filter(Boolean).sort((a, b) => a.d < b.d ? -1 : 1);
 
   const heavy = list.filter(g => g.hShare >= 3 && g.hShare > g.bShare * 1.5)
@@ -1642,7 +1614,8 @@ function buildReport(ym) {
     <td>${x.d}</td><td><b>${x.s}</b></td><td class="num">${f1(x.h)}</td>
     <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
     <td class="num">${fmt(x.usual)}</td>
-    <td>${x.kind === 'lo' ? '低於平常' : '高於平常'}</td></tr>`).join('');
+    <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td>
+    </tr>`).join('');
 
   const t3 = heavy.map(g => `<tr>
     <td><b>${g.s}</b></td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
@@ -1662,20 +1635,23 @@ function buildReport(ym) {
   <h3><span class="n">02</span>當月產出品項（依包裝量排序）</h3>
   <table class="rtab"><thead><tr>
     <th>品號</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
-    <th class="num">當月產能</th><th class="num">平常水準</th><th class="num">差異</th>
+    <th class="num">當月產能<i>單位/hr</i></th>
+    <th class="num">平常水準<i>單位/hr</i></th><th class="num">差異</th>
   </tr></thead><tbody>${t1}</tbody></table>
   ${list.length > 12 ? `<p>另有 ${list.length - 12} 個品項未列出。</p>` : ''}
-  <div class="rep-note">「平常水準」是該品項全期的平均產能。差異超過 ±10% 才標色 ——
+  <div class="rep-note">「平常水準」是該品項全期每批產能的中位數 —— 一半的批次做得到。
+    差異超過 ±10% 才標色 ——
     每一支產品只跟自己比，不跨品項排名。</div>
 
   <h3><span class="n">03</span>需要說明的批次</h3>
   ${odd.length ? `<table class="rtab"><thead><tr>
     <th>日期</th><th>品號</th><th class="num">工時</th><th class="num">瓶數</th>
-    <th class="num">當批產能</th><th class="num">平常水準</th><th>情況</th>
+    <th class="num">當批產能<i>單位/hr</i></th>
+    <th class="num">平常水準<i>單位/hr</i></th><th>情況</th>
   </tr></thead><tbody>${t2}</tbody></table>
   ${odd.length > ODD_MAX ? `<p>本月共 ${odd.length} 批偏離平常水準，上表列出最早的
     ${ODD_MAX} 批；其餘請在儀表板上逐支品項查看。</p>` : ''}
-  <div class="rep-note">判定門檻：低於該品項平均的 0.7 倍或高於 2.5 倍，且該品項全期至少 10 批
+  <div class="rep-note">判定門檻：低於該品項平常水準的 0.7 倍或高於 2.5 倍，且該品項全期至少 10 批
     （樣本太少不判定）。請製造單位就這幾批說明當天狀況。</div>`
   : '<div class="rep-empty">本月沒有偏離平常水準的批次。</div>'}
 
@@ -1813,13 +1789,9 @@ async function loadLive(quiet) {
   try {
     const batches = await fetchBatches();
     if (!batches.length) throw new Error('資料庫目前沒有任何批次紀錄。');
-    rawSheets = null;
     const last = batches[batches.length - 1].d;
     load(batches, `資料庫最新資料（到 ${last}）`);
-    $('startYear').closest('.src').querySelectorAll('#startYear, label[for=startYear]')
-      .forEach(el => el.hidden = true);          // 資料庫的日期是完整的，不需要推年份
     $('resetFile').hidden = false;
-    $('resetFile').textContent = '回到內建資料';
     $('srcErr').hidden = true;
   } catch (err) {
     if (!quiet) {
@@ -1867,11 +1839,6 @@ $('lgForm').onsubmit = async e => {
 $('liveBtn').onclick = () => (readSess() && sess.refresh) ? loadLive() : openLogin();
 
 /* 啟動 */
-buildYearOptions(EMBEDDED.year);
-if (!E.supported()) {
-  showError('這個瀏覽器版本太舊，「載入我的 Excel 檔」功能無法使用（需要 Chrome 103 以上）。'
-    + '內建資料仍可正常瀏覽。');
-}
 load(EMBEDDED.batches, snapLabel());
 
 // 已經登入過就自動換成最新的；失敗就安靜留在快照，不打擾只是想看看的人

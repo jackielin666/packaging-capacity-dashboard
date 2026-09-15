@@ -112,6 +112,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   background:var(--sunk)}
 .grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
+.grid th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
+  color:var(--ink-4);font-weight:400;margin-top:1px;text-transform:none}
 .grid th:nth-child(7){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
 .grid td{padding:9px 8px;border-bottom:1px solid #F0F2ED;vertical-align:top}
 .grid td:first-child{padding-left:16px}
@@ -418,7 +420,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <div><div class="k">批次</div><div class="v" id="sumB">0</div></div>
         <div><div class="k">包裝量</div><div class="v" id="sumQ">0</div></div>
         <div><div class="k">工時</div><div class="v" id="sumH">0<small>h</small></div></div>
-        <div><div class="k">當日產能</div><div class="v" id="sumR">—<small>/工時</small></div></div>
+        <div><div class="k">當日產能</div><div class="v" id="sumR">—<small>單位/hr</small></div></div>
       </div>
     </div>
 
@@ -452,7 +454,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <thead>
           <tr>
             <th>品號</th><th>品名</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
-            <th class="num">人數</th><th class="num">工時</th><th class="num">產能</th><th></th>
+            <th class="num">人數</th><th class="num">工時<i>hr</i></th>
+            <th class="num">產能<i>單位/hr</i></th><th></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -552,7 +555,8 @@ var API  = 'https://vnncuksjvdsxwveomoww.supabase.co';
 var KEY  = 'sb_publishable_Bloy5WhUpWGd7G0Uh_Kmdw_UB4dUNEo';
 var MAIL = '@packing.local';     // 使用者只打帳號，網域由程式補上
 
-// 離群門檻沿用儀表板的定義，兩邊才不會各說各話
+// 離群門檻沿用儀表板的定義，兩邊才不會各說各話。
+// 基準是「平常水準」＝每批產能的中位數（見 rateFlag 的說明）。
 var OUT_LO = 0.7, OUT_HI = 2.5, MIN_BATCHES = 10;
 
 var SS = 'packing.session';
@@ -999,15 +1003,24 @@ function rowRate(r) {
 }
 
 /**
- * 這一批的產能是不是偏離該品項平常水準。
- * 門檻與儀表板同一組（平均 ×0.7 ／ ×2.5），批次數不足的品項不判定 ——
+ * 這一批的產能是不是偏離該品項的平常水準。
+ *
+ * 基準用中位數，不是總瓶數÷總工時。後者是加權平均：慢的批次佔用的工時多、
+ * 權重就大，會把基準往下拉。實測 48 支樣本足夠的品項，有 44 支的中位數高於
+ * 加權平均，平均高出 12.4% —— 這個偏差是系統性的。
+ *
+ * 門檻與儀表板同一組（平常水準 ×0.7 ／ ×2.5）。批次數不足的品項不判定 ——
  * 樣本太少，標了也沒有判斷力，只會變成雜訊。
  */
+function typical(code) {
+  var s = state.stats[code];
+  return (s && s.batches >= MIN_BATCHES) ? (s.median_rate || null) : null;
+}
 function rateFlag(r) {
-  var v = rowRate(r), s = state.stats[r.sku];
-  if (!v || !s || !s.mean_rate || s.batches < MIN_BATCHES) return null;
-  if (v.rate < s.mean_rate * OUT_LO) return 'low';
-  if (v.rate > s.mean_rate * OUT_HI) return 'high';
+  var v = rowRate(r), t = typical(r.sku);
+  if (!v || !t) return null;
+  if (v.rate < t * OUT_LO) return 'low';
+  if (v.rate > t * OUT_HI) return 'high';
   return null;
 }
 
@@ -1063,7 +1076,7 @@ function recalc() {
   $('sumB').textContent = num(tb2);
   $('sumQ').textContent = num(tq);
   $('sumH').innerHTML   = num(th, 1) + '<small>h</small>';
-  $('sumR').innerHTML   = (th > 0 ? num(Math.round(tq / th)) : '—') + '<small>/工時</small>';
+  $('sumR').innerHTML   = (th > 0 ? num(Math.round(tq / th)) : '—') + '<small>單位/hr</small>';
 
   var canWrite = state.role === 'operator' || state.role === 'manager';
   var pending  = pendingCount();
@@ -1146,11 +1159,15 @@ function buildChecks() {
   good.forEach(function (r) {
     var f = rateFlag(r);
     if (!f || r.ok) return;
-    var st = state.stats[r.sku], v = rowRate(r);
+    var v = rowRate(r), t = typical(r.sku);
+    // 差距百分比要寫出來 —— 只說「低於平常」看不出嚴重程度，
+    // 慢 25% 和慢 70% 要採取的行動完全不同。
+    var gap = Math.round(Math.abs(100 * (v.rate / t - 1)));
     warns.push({
       row: r, confirm: r,
-      title: r.sku + '　產能 ' + num(Math.round(v.rate)) + '／工時，'
-           + (f === 'low' ? '低於' : '高於') + '平常水準（平均 ' + num(st.mean_rate) + '）',
+      title: r.sku + '　產能 ' + num(Math.round(v.rate)) + ' 單位/hr，'
+           + (f === 'low' ? '低於平常 ' : '高於平常 ') + gap + '%'
+           + '（平常水準 ' + num(t) + '）',
       detail: '多半是瓶數或時間打錯。確認數字沒問題可以標記為正常，不影響儲存。'
     });
   });
@@ -1543,7 +1560,8 @@ $('chkGo').addEventListener('click', function () {
  * 開頭加 BOM，否則 Excel 開啟時中文會變亂碼 —— 這是現場最常回報的問題。
  */
 function toCsvText(rows) {
-  var cols = ['生產日期','品號','品名','起始','結束','工時','瓶數','人數','產能','已確認異常','備註'];
+  var cols = ['生產日期','品號','品名','起始','結束','工時(hr)','瓶數','人數',
+              '產能(單位/hr)','已確認異常','備註'];
   var out  = [cols.join(',')];
 
   rows.forEach(function (b) {
@@ -1629,22 +1647,28 @@ function openHistory(code, row) {
 function renderHistory(code, sku, rows, row) {
   var st = state.stats[code] || {};
   var mine = row ? rowRate(row) : null;
+  var typ = st.median_rate || null;          // 平常水準＝每批產能的中位數
 
   var rates = rows.map(function (b) { return b.bottles / Number(b.hours); })
                   .filter(function (x) { return isFinite(x) && x > 0; });
-  var lo = st.mean_rate ? st.mean_rate * OUT_LO : null;
-  var hi = st.mean_rate ? st.mean_rate * OUT_HI : null;
+  var lo = typ ? typ * OUT_LO : null;
+  var hi = typ ? typ * OUT_HI : null;
 
   $('histSub').textContent = (sku.container || '') + '　全期共 ' + num(st.batches || 0) + ' 批'
     + (st.last_date ? '　·　最近一次 ' + st.last_date : '');
 
   var h = '<div class="hstats">'
-    + '<div><div class="k">平均產能</div><div class="v">' + num(st.mean_rate) + '</div></div>'
-    + '<div><div class="k">中位數</div><div class="v">' + num(st.median_rate) + '</div></div>'
-    + '<div><div class="k">偏低門檻</div><div class="v">' + (lo ? num(Math.round(lo)) : '—') + '</div></div>'
+    + '<div><div class="k">平常水準</div><div class="v">' + num(typ) + '</div></div>'
+    + '<div><div class="k">偏低門檻</div><div class="v">'
+      + (lo ? num(Math.round(lo)) : '—') + '</div></div>'
+    + '<div><div class="k">整體產能</div><div class="v">' + num(st.mean_rate) + '</div></div>'
     + '<div><div class="k">這批</div><div class="v">'
       + (mine ? num(Math.round(mine.rate)) : '—') + '</div></div>'
-    + '</div>';
+    + '</div>'
+    + '<p class="hint" style="margin:8px 0 0">單位是<b>單位/hr</b> —— 「單位」依品項可能是瓶、包、桶或袋，'
+    + '「hr」是工時（掛鐘時間），不是人工時。<br>'
+    + '平常水準＝每批產能的中位數，一半的批次做得到；'
+    + '整體產能＝總瓶數÷總工時，慢批次佔的工時多所以會被拉低。判定用平常水準。</p>';
 
   // 分布帶：把最近這些批次的產能畫成一條線，這一批用大點標出來
   if (rates.length) {
@@ -1655,9 +1679,9 @@ function renderHistory(code, sku, rows, row) {
     var pos = function (v) { return ((v - mn) / (mx - mn) * 100).toFixed(2) + '%'; };
 
     h += '<div class="strip">';
-    if (st.mean_rate && st.mean_rate > mn && st.mean_rate < mx) {
-      h += '<s style="left:' + pos(st.mean_rate) + '"></s>'
-         + '<b style="left:' + pos(st.mean_rate) + '">平均 ' + num(st.mean_rate) + '</b>';
+    if (typ && typ > mn && typ < mx) {
+      h += '<s style="left:' + pos(typ) + '"></s>'
+         + '<b style="left:' + pos(typ) + '">平常 ' + num(typ) + '</b>';
     }
     if (lo && lo > mn && lo < mx) {
       h += '<s style="left:' + pos(lo) + '"></s>'
@@ -1669,7 +1693,7 @@ function renderHistory(code, sku, rows, row) {
     });
     if (mine) h += '<i class="me" style="left:' + pos(mine.rate) + '"></i>';
     h += '</div><div class="striplab">'
-      + '<span>每一點是一批，越右邊越快</span>'
+      + '<span>每一點是一批，越右邊越快（單位/hr）</span>'
       + (mine ? '<span style="color:var(--accent)">●&nbsp;這一批</span>' : '')
       + '<span style="color:var(--signal)">●&nbsp;偏低</span>'
       + '<span style="color:var(--cool)">●&nbsp;偏高</span></div>';
@@ -1677,11 +1701,12 @@ function renderHistory(code, sku, rows, row) {
 
   h += '<table class="htab"><thead><tr><th>日期</th><th>時間</th>'
      + '<th class="num">工時</th><th class="num">瓶數</th><th class="num">人數</th>'
-     + '<th class="num">產能</th><th></th></tr></thead><tbody>';
+     + '<th class="num">產能<i>單位/hr</i></th><th></th></tr></thead><tbody>';
 
   rows.forEach(function (b) {
     var hh = Number(b.hours), rate = hh > 0 ? b.bottles / hh : null;
     var mk = (rate && lo && rate < lo) ? 'low' : (rate && hi && rate > hi) ? 'high' : '';
+    var gap = (rate && typ) ? Math.round(Math.abs(100 * (rate / typ - 1))) : null;
     h += '<tr><td>' + b.prod_date + '</td>'
        + '<td>' + String(b.start_time).slice(0, 5) + '–' + String(b.end_time).slice(0, 5) + '</td>'
        + '<td class="num">' + hh.toFixed(2) + '</td>'
@@ -1689,7 +1714,8 @@ function renderHistory(code, sku, rows, row) {
        + '<td class="num">' + (b.headcount == null ? '—' : b.headcount) + '</td>'
        + '<td class="num">' + (rate ? num(Math.round(rate)) : '—') + '</td>'
        + '<td class="mk ' + mk + '">'
-         + (mk === 'low' ? '偏低' : mk === 'high' ? '偏高' : '')
+         + (mk === 'low' ? '低於平常 ' + gap + '%'
+            : mk === 'high' ? '高於平常 ' + gap + '%' : '')
          + (b.abnormal_ok ? '　已確認' : '') + '</td></tr>';
   });
   h += '</tbody></table>';

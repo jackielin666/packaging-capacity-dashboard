@@ -61,6 +61,10 @@ with sync_playwright() as p:
     check("沒有偷偷去打資料庫", calls["batches"] == 0, calls)
     kpi = pg.inner_text(".kpis")
     check("KPI 有數字", "214.0" in kpi or "2,755" in kpi, kpi[:80])
+    check("KPI 標出產能單位", "單位/hr" in kpi, kpi[:160])
+    check("全廠那格叫整體產能", "整體產能" in kpi, kpi[:160])
+    ov = pg.inner_text("#ovBody") if pg.locator("#ovBody").count() else pg.inner_text("table")
+    check("品項總覽欄名改為平常水準", "平常水準" in pg.inner_text("section"), "")
 
     print("\n── 按「讀取最新資料」會要求登入 ──")
     pg.click("#liveBtn")
@@ -80,15 +84,16 @@ with sync_playwright() as p:
     src = pg.inner_text("#srcNow")
     check("來源改為資料庫並標出最後日期", "資料庫最新資料" in src and "2026-09-15" in src, src)
     check("確實去讀了資料庫", calls["batches"] >= 1, calls)
-    check("起始年度選單隱藏（資料庫日期是完整的）",
-          pg.locator("#startYear[hidden]").count() == 1)
+    check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
+    check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
     kpi = pg.inner_text(".kpis")
     check("KPI 換成資料庫的數字", "5,880" in kpi or "60" in kpi, kpi[:120])
 
     print("\n── 可以切回內建快照 ──")
     pg.click("#resetFile"); pg.wait_for_timeout(800)
     check("來源切回快照", "內建快照" in pg.inner_text("#srcNow"), pg.inner_text("#srcNow"))
-    check("年度選單回來", pg.locator("#startYear[hidden]").count() == 0)
+    check("來源說明改為由輸入系統維護", "輸入系統" in pg.inner_text(".privacy"),
+          pg.inner_text(".privacy"))
     ctx.close()
 
     # ── 情境二：在輸入頁登入過的人，打開儀表板就是最新的 ──
@@ -135,6 +140,10 @@ with sync_playwright() as p:
     check("有與上月比較", "箭頭為與" in body and "2026 年 6 月" in body, body[:400])
     check("有品項表", "當月產出品項" in body)
     check("有需要說明的批次", "需要說明的批次" in body)
+    import re as _re
+    check("情況欄標出差距百分比",
+          _re.search(r"(低於|高於)平常 \d+%", body) is not None,
+          [l for l in body.split("\n") if "於平常" in l][:3])
     check("有吃工時的品項段落", "吃工時但產量不高" in body)
     check("標明責任歸屬", "不是包裝作業的問題" in body or "本月沒有工時佔比" in body)
     check("標明資料來源", "資料來源" in body, body[:200])
@@ -146,6 +155,9 @@ with sync_playwright() as p:
     check("批次數與資料一致", "151" in body, [l for l in body.split("\n") if "批次" in l][:2])
 
     check("列印按鈕存在", pg3.is_visible("#repPrint"))
+    heads = pg3.inner_text("#repBody .rtab")
+    check("月報表頭標出產能單位", "單位/hr" in heads, heads[:200])
+    check("月報平常水準說明是中位數", "中位數" in body, body[:900])
     check("有資料完整性段落", "資料完整性" in body, body[-300:])
     check("未登入時誠實說明無法檢核", "未登入" in pg3.inner_text("#repChk"),
           pg3.inner_text("#repChk"))

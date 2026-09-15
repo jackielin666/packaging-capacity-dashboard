@@ -158,10 +158,13 @@ with sync_playwright() as p:
     cells = pg.locator("#rows tr").first.locator("td")
     check("偏低時表格只多一個 low class", "low" in (cells.nth(7).get_attribute("class") or ""),
           cells.nth(7).get_attribute("class"))
-    check("表格裡沒有說明文字", "偏低" not in cells.nth(7).inner_text(), cells.nth(7).inner_text())
+    check("表格裡沒有說明文字", "低於" not in cells.nth(7).inner_text(), cells.nth(7).inner_text())
     checks_txt = pg.inner_text("#checksList")
-    check("檢查清單說明偏低的原因", "低於平常水準" in checks_txt, checks_txt[:120])
-    check("檢查清單帶出該品項的平均", "256" in checks_txt, checks_txt[:120])
+    # D0310 中位數 295，這批 80 → 低於平常 73%
+    check("檢查清單說明偏低的原因", "低於平常 73%" in checks_txt, checks_txt[:150])
+    # 假資料的 D0310：加權平均 256、中位數 295。判定基準要是中位數。
+    check("檢查清單帶出平常水準（中位數 295，不是平均 256）",
+          "295" in checks_txt and "256" not in checks_txt, checks_txt[:150])
 
     print("\n── 確認無誤 ──")
     warn = pg.locator("#checksList .ck.warn").first
@@ -332,13 +335,17 @@ with sync_playwright() as p:
             and "ERR_FAILED" not in l]
     print("\n── 品項歷史 ──")
     pg.locator("#rows tr").first.locator("button.hist").click()
-    pg.wait_for_selector("#hist:not([hidden])", timeout=5000)
+    # 視窗會先開、資料才載入完 —— 要等內容出現，不能只等視窗
+    pg.wait_for_selector("#histBody .hstats", timeout=5000)
     body = pg.inner_text("#histBody")
     check("視窗打開", pg.is_visible("#histBody"))
     check("標題含品號與品名", "D0310" in pg.inner_text("#histTitle")
           and "草莓蒟蒻餡" in pg.inner_text("#histTitle"), pg.inner_text("#histTitle"))
-    check("顯示平均與中位數", "平均產能" in body and "中位數" in body, body[:80])
+    check("平常水準排第一格", body.strip().startswith("平常水準"), body[:60])
+    check("同時附上整體產能供對照", "整體產能" in body, body[:120])
+    check("說明兩者差別", "中位數" in body and "總瓶數÷總工時" in body, body[:400])
     check("顯示偏低門檻", "偏低門檻" in body, body[:120])
+    check("門檻以中位數計算（295×0.7=207）", "207" in body, body[:200])
     check("分布帶有點", pg.locator("#histBody .strip i").count() >= 3,
           pg.locator("#histBody .strip i").count())
     check("這一批被標出來", pg.locator("#histBody .strip i.me").count() == 1)
@@ -363,12 +370,21 @@ with sync_playwright() as p:
     lines = txt.strip().split("\r\n")
     check("有標題列與一筆資料", len(lines) == 2, lines)
     check("標題含中文欄名", "生產日期" in lines[0] and "產能" in lines[0], lines[0])
+    check("CSV 欄名帶單位", "產能(單位/hr)" in lines[0] and "工時(hr)" in lines[0], lines[0])
     check("帶出品名", "草莓蒟蒻餡" in lines[1], lines[1])
     check("算出產能 300", ",300," in lines[1], lines[1])
     check("含逗號的備註有加引號", '"含,逗號與""引號"""' in lines[1] or '含,逗號' in lines[1],
           lines[1])
     pg.wait_for_timeout(200)
     check("顯示匯出筆數", "1 筆" in pg.inner_text("#expState"), pg.inner_text("#expState"))
+
+    print("\n── 產能單位標示 ──")
+    pg.set_viewport_size({"width": 1280, "height": 1000})
+    pg.wait_for_timeout(200)
+    th = pg.inner_text(".grid thead")
+    check("產能表頭標出單位/hr", "單位/hr" in th, th)
+    check("工時表頭標出 hr", "hr" in th, th)
+    check("當日產能標出單位", "單位/hr" in pg.inner_text("#sumR"), pg.inner_text("#sumR"))
 
     print("\n── 標題與間距 ──")
     pg.set_viewport_size({"width": 1280, "height": 1000})   # 前面截圖縮成手機寬了，量桌機版
