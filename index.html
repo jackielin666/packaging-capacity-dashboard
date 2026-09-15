@@ -271,9 +271,12 @@ select:focus,input:focus,.btn:focus-visible{outline:2px solid var(--accent);outl
   font-family:"IBM Plex Mono",monospace;display:flex;justify-content:space-between;gap:12px}
 .note li:last-child{border-bottom:0}
 @media(max-width:860px){.notes{grid-template-columns:1fr}
-  .skukpi{grid-template-columns:repeat(3,1fr)}
-  .skukpi div:nth-child(3n+1){border-left:0}
-  .skukpi div:nth-child(n+4){border-top:1px solid var(--rule)}
+  /* 三欄在 390px 會撐破版面（每格最少也要 136px），改成兩欄 */
+  .skukpi{grid-template-columns:1fr 1fr}
+  .skukpi div{padding:11px 12px 13px;min-width:0}
+  .skukpi div:nth-child(2n+1){border-left:0}
+  .skukpi div:nth-child(n+3){border-top:1px solid var(--rule)}
+  .skukpi .v{font-size:17px}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .kpi{border-top:1px solid var(--rule)}.kpi:nth-child(odd){border-left:0}}
 

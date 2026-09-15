@@ -80,6 +80,14 @@ with sync_playwright() as p:
     bar = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     check("頂欄底色與輸入頁相同（rgb(10,106,93)）", bar == "rgb(10, 106, 93)", bar)
 
+    for w in (390, 768, 1440):
+        pg.set_viewport_size({"width": w, "height": 900})
+        pg.wait_for_timeout(250)
+        sw = pg.evaluate("document.documentElement.scrollWidth")
+        check("%dpx 沒有橫向捲動" % w, sw <= w, sw)
+    pg.set_viewport_size({"width": 1280, "height": 1000})
+    pg.wait_for_timeout(200)
+
     print("\n── 按「讀取最新資料」會要求登入 ──")
     pg.click("#liveBtn")
     pg.wait_for_timeout(400)
