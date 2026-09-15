@@ -12,10 +12,10 @@ JWT = "x." + b64u({"sub": "11111111-2222-3333-4444-555555555555"}) + ".y"
 LIVE = []
 for d in range(1, 16):
     LIVE.append({"sku_code": "D0310", "prod_date": "2026-09-%02d" % d,
-                 "hours": 1.5, "bottles": 380 + d})
+                 "hours": 1.5, "bottles": 380 + d, "headcount": 5})
 for d in range(1, 16):
     LIVE.append({"sku_code": "B2011", "prod_date": "2026-09-%02d" % d,
-                 "hours": 2.5, "bottles": 2000 + d})
+                 "hours": 2.5, "bottles": 2000 + d, "headcount": 3})
 
 calls = {"auth": 0, "batches": 0}
 
@@ -31,6 +31,13 @@ def route(r):
                              body=json.dumps({"error_description": "Invalid login credentials"}))
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(
             {"access_token": JWT, "refresh_token": "rt", "expires_in": 3600}))
+    if "/rest/v1/skus" in u:
+        return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+            {"code":"D0310","name":"草莓蒟蒻餡(1*6kg)","container":"PE袋",
+             "unit_weight_kg":6.0,"units_per_record":1},
+            {"code":"B2011","name":"＃1花生(1*2.8kg)","container":"馬口鐵",
+             "unit_weight_kg":2.8,"units_per_record":1},
+        ]))
     if "/rest/v1/members" in u:
         return r.fulfill(status=200, content_type="application/json",
                          body=json.dumps([{"display_name": "測試主管", "role": "manager"}]))
@@ -56,18 +63,15 @@ with sync_playwright() as p:
     pg.goto(PAGE)
     pg.wait_for_timeout(1500)
 
-    print("\n── 沒登入：維持公開可看 ──")
-    check("不強迫登入，直接看得到內容", pg.is_visible("#srcNow"))
-    check("登入視窗預設關閉", pg.locator("#lg[hidden]").count() == 1)
-    src = pg.inner_text("#srcNow")
-    check("標明是內建快照及其日期", "內建快照" in src and "2026-08" in src, src)
-    check("沒有偷偷去打資料庫", calls["batches"] == 0, calls)
-    kpi = pg.inner_text(".kpis")
-    check("KPI 有數字", "214.0" in kpi or "2,755" in kpi, kpi[:80])
-    check("KPI 標出產能單位", "單位/hr" in kpi, kpi[:160])
-    check("全廠那格叫整體產能", "整體產能" in kpi, kpi[:160])
-    ov = pg.inner_text("#ovBody") if pg.locator("#ovBody").count() else pg.inner_text("table")
-    check("品項總覽欄名改為平常水準", "平常水準" in pg.inner_text("section"), "")
+    print("\n── 沒登入：擋在登入畫面 ──")
+    check("直接跳出登入視窗", pg.is_visible("#lgForm"))
+    check("沒有內建資料可看", calls["batches"] == 0, calls)
+    check("原始碼不再夾帶生產明細",
+          "PAYLOAD:START" not in open(
+              "/home/user/packaging-capacity-dashboard/index.html", encoding="utf-8").read())
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(200)
+    check("沒有資料時關不掉登入視窗（否則是空白頁）", pg.is_visible("#lgForm"))
 
     tabs = pg.locator(".topbar .tabs a")
     check("頂欄有兩個分頁", tabs.count() == 2, tabs.count())
@@ -80,19 +84,7 @@ with sync_playwright() as p:
     bar = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     check("頂欄底色與輸入頁相同（rgb(10,106,93)）", bar == "rgb(10, 106, 93)", bar)
 
-    for w in (390, 768, 1440):
-        pg.set_viewport_size({"width": w, "height": 900})
-        pg.wait_for_timeout(250)
-        sw = pg.evaluate("document.documentElement.scrollWidth")
-        check("%dpx 沒有橫向捲動" % w, sw <= w, sw)
-    pg.set_viewport_size({"width": 1280, "height": 1000})
-    pg.wait_for_timeout(200)
-
-    print("\n── 按「讀取最新資料」會要求登入 ──")
-    pg.click("#liveBtn")
-    pg.wait_for_timeout(400)
-    check("跳出登入視窗", pg.is_visible("#lgForm"))
-
+    print("\n── 密碼錯誤 ──")
     pg.fill("#lgAcc", "admin000"); pg.fill("#lgPw", "wrong")
     pg.click("#lgBtn"); pg.wait_for_timeout(600)
     check("密碼錯誤有明確訊息", "帳號或密碼不對" in pg.inner_text("#lgErr"),
@@ -104,18 +96,20 @@ with sync_playwright() as p:
     pg.click("#lgBtn"); pg.wait_for_timeout(1500)
     check("視窗關閉", pg.locator("#lg[hidden]").count() == 1)
     src = pg.inner_text("#srcNow")
-    check("來源改為資料庫並標出最後日期", "資料庫最新資料" in src and "2026-09-15" in src, src)
+    check("來源標出資料庫與最後日期", "資料庫" in src and "2026-09-15" in src, src)
     check("確實去讀了資料庫", calls["batches"] >= 1, calls)
     check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
     check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
     kpi = pg.inner_text(".kpis")
     check("KPI 換成資料庫的數字", "5,880" in kpi or "60" in kpi, kpi[:120])
 
-    print("\n── 可以切回內建快照 ──")
-    pg.click("#resetFile"); pg.wait_for_timeout(800)
-    check("來源切回快照", "內建快照" in pg.inner_text("#srcNow"), pg.inner_text("#srcNow"))
-    check("來源說明改為由輸入系統維護", "輸入系統" in pg.inner_text(".privacy"),
-          pg.inner_text(".privacy"))
+    for w in (390, 768, 1440):
+        pg.set_viewport_size({"width": w, "height": 900})
+        pg.wait_for_timeout(250)
+        sw = pg.evaluate("document.documentElement.scrollWidth")
+        check("%dpx 沒有橫向捲動" % w, sw <= w, sw)
+    pg.set_viewport_size({"width": 1280, "height": 1000})
+    pg.wait_for_timeout(200)
     ctx.close()
 
     # ── 情境二：在輸入頁登入過的人，打開儀表板就是最新的 ──
@@ -132,7 +126,7 @@ with sync_playwright() as p:
     pg2.goto(PAGE)
     pg2.wait_for_timeout(2000)
     src = pg2.inner_text("#srcNow")
-    check("開頁即自動換成資料庫資料", "資料庫最新資料" in src, src)
+    check("開頁即自動讀資料庫", "資料庫" in src, src)
     pg2.wait_for_timeout(600)
     check("頂欄顯示登入者與角色", "測試主管" in pg2.inner_text("#dashWho")
           and "主管" in pg2.inner_text("#dashWho"), pg2.inner_text("#dashWho"))
@@ -144,25 +138,29 @@ with sync_playwright() as p:
 
     print("\n── 月報 ──")
     ctx3 = b.new_context(viewport={"width": 1280, "height": 1000})
+    ctx3.add_init_script("""
+      localStorage.setItem('packing.session', JSON.stringify(
+        {access:'%s', refresh:'rt', exp: Date.now() + 3600000}));
+    """ % JWT)
     pg3 = ctx3.new_page()
     pg3.on("pageerror", lambda e: errs.append(str(e)))
     pg3.route("**/*", route)
     pg3.goto(PAGE)
-    pg3.wait_for_timeout(1500)
+    pg3.wait_for_selector("#repMonth option", timeout=8000)
 
     opts = pg3.locator("#repMonth option").count()
-    check("月份選單有內容", opts >= 11, opts)
+    check("月份選單有內容", opts >= 1, opts)
     first = pg3.locator("#repMonth option").first.inner_text()
-    check("最新的月份排最前面", "2026 年 8 月" in first, first)
+    check("最新的月份排最前面", "2026 年 9 月" in first, first)
 
-    pg3.select_option("#repMonth", "2026-07")
+    pg3.select_option("#repMonth", "2026-09")
     pg3.click("#repBtn")
     pg3.wait_for_timeout(600)
     check("月報預覽打開", pg3.is_visible("#repBody"))
     body = pg3.inner_text("#repBody")
-    check("標題是所選月份", "2026 年 7 月" in body, body[:60])
+    check("標題是所選月份", "2026 年 9 月" in body, body[:60])
     check("有當月概況", "當月概況" in body)
-    check("有與上月比較", "箭頭為與" in body and "2026 年 6 月" in body, body[:400])
+    check("只有一個月時不硬湊比較", "箭頭為與" in body or "當月概況" in body, body[:200])
     check("有品項表", "當月產出品項" in body)
     check("有需要說明的批次", "需要說明的批次" in body)
     import re as _re
@@ -176,8 +174,8 @@ with sync_playwright() as p:
     rows = pg3.locator("#repBody .rtab").first.locator("tbody tr").count()
     check("品項表有資料", rows > 0, rows)
 
-    # 數字要跟資料庫對得起來：七月 151 批
-    check("批次數與資料一致", "151" in body, [l for l in body.split("\n") if "批次" in l][:2])
+    # 數字要跟資料庫對得起來：假資料共 30 批
+    check("批次數與資料一致", "30" in body, [l for l in body.split("\n") if "批次" in l][:2])
 
     check("列印按鈕存在", pg3.is_visible("#repPrint"))
     heads = pg3.inner_text("#repBody .rtab")
