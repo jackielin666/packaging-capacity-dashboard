@@ -258,6 +258,18 @@ with sync_playwright() as p:
           r0.locator('input[data-f="start"]').input_value())
     check("貼上提示出現", "已貼上" in pg.inner_text("#banner"), pg.inner_text("#banner"))
 
+    print("\n── 介面調整 ──")
+    check("Excel 貼上按鈕已移除", pg.locator("#pasteBtn").count() == 0)
+    check("Excel 字樣不再出現在提示列", "Excel" not in pg.inner_text(".panel .keys"),
+          pg.inner_text(".panel .keys"))
+    bar = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
+    check("頂欄不是黑色", bar == "rgb(10, 106, 93)", bar)
+    bd = pg.evaluate("""() => {
+      const el = document.querySelector('#rows input[data-f=\"sku\"]');
+      return getComputedStyle(el).borderTopColor;
+    }""")
+    check("輸入格平常就有邊框", bd == "rgb(205, 210, 200)", bd)
+
     pg.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/entry_desktop.png", full_page=True)
     pg.set_viewport_size({"width":390,"height":900})
     pg.wait_for_timeout(300)

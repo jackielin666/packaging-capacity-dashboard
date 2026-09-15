@@ -126,7 +126,11 @@ Supabase Auth 底層一定要用信箱格式，所以前端會自動把 `admin00
 | 帳號 | 角色 | 用途 |
 |---|---|---|
 | `admin000` | manager 主管 | Jackie 哥，不限月份可改 |
+| `pack01` | operator 輸入專員 | 廠務助理，新增不限日期、修改只限當月 |
 | `backup` | viewer 唯讀 | 每月備份程式專用，只能讀 |
+
+新增帳號用 `packing.create_login('帳號', '密碼', '顯示名稱', '角色')`，
+不要再手寫 insert —— 漏掉 auth.users 的那八個欄位會讓登入回 500。
 
 ---
 
