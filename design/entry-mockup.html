@@ -48,7 +48,7 @@ body{background:var(--paper);color:var(--ink);
   font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
-.wrap{max-width:1020px;margin:0 auto;padding:26px 26px 60px}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 26px 60px}
 [hidden]{display:none!important}
 
 /* ── 按鈕 ── */
@@ -78,21 +78,33 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .login .btn{width:100%;padding:12px}
 .note{font-size:12.5px;color:var(--ink-3);margin-top:18px;line-height:1.6}
 
-/* ── 頂欄 ── */
+/* ── 系統頂欄（兩個頁面共用同一套）── */
 .topbar{background:var(--bar);color:#F2F3F0;height:62px;display:flex;align-items:center}
-.topbar .in{max-width:1020px;margin:0 auto;padding:0 26px;width:100%;display:flex;
-  align-items:center;gap:16px}
+.topbar .in{max-width:1180px;margin:0 auto;padding:0 26px;width:100%;display:flex;
+  align-items:center;gap:18px}
 .topbar .t{font-family:"Noto Sans TC",sans-serif;font-size:21px;font-weight:700;
-  letter-spacing:.02em;line-height:1.2}
-.topbar .rule{width:1px;height:22px;background:rgba(242,243,240,.28)}
-.topbar .code{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;
-  color:rgba(242,243,240,.55);flex:1}
-.topbar .who{font-size:12.5px;color:rgba(242,243,240,.7)}
+  letter-spacing:.02em;line-height:1.2;white-space:nowrap}
+.topbar .rule{width:1px;height:24px;background:rgba(242,243,240,.28);flex:none}
+.tabs{display:flex;border:1px solid rgba(242,243,240,.45);border-radius:5px;overflow:hidden}
+.tabs a{font:500 13px/1 "Noto Sans TC",sans-serif;padding:9px 18px;color:#F2F3F0;
+  text-decoration:none;white-space:nowrap;border-right:1px solid rgba(242,243,240,.28)}
+.tabs a:last-child{border-right:0}
+.tabs a:hover{background:rgba(255,255,255,.14)}
+.tabs a.on{background:var(--paper);color:var(--bar);font-weight:700}
+.topbar .sp{flex:1}
+.topbar .who{font-size:12.5px;color:rgba(242,243,240,.72);white-space:nowrap}
 .topbar .btn{background:transparent;border-color:rgba(255,255,255,.45);color:#F2F3F0;
-  padding:6px 13px;font-size:12px}
+  padding:7px 14px;font-size:12.5px}
 .topbar .btn:hover{background:rgba(255,255,255,.12);opacity:1}
-.topbar .btn.nav{text-decoration:none;display:inline-flex;align-items:center;
-  border-color:rgba(255,255,255,.7)}
+@media(max-width:760px){
+  .topbar{height:auto;padding:10px 0}
+  .topbar .in{gap:10px;flex-wrap:wrap;padding:0 14px}
+  .topbar .t{font-size:16px}
+  .topbar .rule{display:none}
+  .tabs{order:3;width:100%}
+  .tabs a{flex:1;text-align:center;padding:11px 8px}
+  .topbar .who{font-size:11.5px;overflow:hidden;text-overflow:ellipsis}
+}
 
 /* ── 日期列 ── */
 .daybar{background:var(--surface);border:1px solid var(--rule-3);border-radius:5px;overflow:hidden}
@@ -338,9 +350,6 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   /* 頂欄在 390px 會把標題擠成兩行，把裝飾性的字拿掉、姓名縮小 */
   .topbar{height:auto;padding:10px 0}
   .topbar .in{gap:10px}
-  .topbar{height:auto}
-  .topbar .t{font-size:17px;white-space:nowrap}
-  .topbar .code,.topbar .rule{display:none}
   .topbar .who{font-size:11.5px;flex:1;text-align:right;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap}
   /* 檢查項目的按鈕擠在文字旁邊會把說明壓成一條細柱，改成整排放到下面 */
@@ -413,11 +422,14 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 <div id="appView">
   <div class="topbar">
     <div class="in">
-      <div class="t">產品包裝資料輸入</div>
+      <div class="t">包裝產能系統</div>
       <div class="rule"></div>
-      <div class="code">PACKING / ENTRY</div>
+    <nav class="tabs">
+      <a href="entry.html" class="on">資料輸入</a>
+      <a href="index.html">儀表板</a>
+    </nav>
+      <div class="sp"></div>
       <div class="who" id="who">陳小姐（輸入專員）</div>
-      <a class="btn nav" href="index.html">儀表板 →</a>
       <button class="btn" id="logoutBtn">登出</button>
     </div>
   </div>

@@ -379,11 +379,14 @@ with sync_playwright() as p:
     check("顯示匯出筆數", "1 筆" in pg.inner_text("#expState"), pg.inner_text("#expState"))
 
     print("\n── 兩個頁面互相連得到 ──")
-    nav = pg.locator(".topbar a.nav")
-    check("輸入頁有儀表板入口", nav.count() == 1)
-    check("連到 index.html", nav.get_attribute("href") == "index.html",
-          nav.get_attribute("href"))
-    check("按鈕文字清楚", "儀表板" in nav.inner_text(), nav.inner_text())
+    tabs = pg.locator(".topbar .tabs a")
+    check("頂欄有兩個分頁", tabs.count() == 2, tabs.count())
+    check("目前在資料輸入且標示為選中",
+          "on" in (tabs.nth(0).get_attribute("class") or ""), tabs.nth(0).get_attribute("class"))
+    check("另一個連到儀表板", tabs.nth(1).get_attribute("href") == "index.html",
+          tabs.nth(1).get_attribute("href"))
+    check("系統名稱一致", pg.inner_text(".topbar .t") == "包裝產能系統",
+          pg.inner_text(".topbar .t"))
 
     print("\n── 產能單位標示 ──")
     pg.set_viewport_size({"width": 1280, "height": 1000})
@@ -401,7 +404,7 @@ with sync_playwright() as p:
       const cs = getComputedStyle(el);
       return {text: el.textContent, size: parseFloat(cs.fontSize), weight: cs.fontWeight};
     }""")
-    check("標題文字正確", t["text"] == "產品包裝資料輸入", t["text"])
+    check("標題文字正確", t["text"] == "包裝產能系統", t["text"])
     check("標題放大到 21px", t["size"] >= 20, t["size"])
     check("標題是粗體", int(t["weight"]) >= 700, t["weight"])
     gap = pg.evaluate("""() => {

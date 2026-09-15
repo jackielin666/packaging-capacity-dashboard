@@ -11,6 +11,7 @@
   --ink:#12171A; --ink-2:#414A46; --ink-3:#6E7772; --ink-4:#8B948F;
   --rule:#E6E9E2; --rule-2:#CDD2C8; --rule-3:#DCE0D9;
   --accent:#0A7F70; --signal:#B4541A; --cool:#3F6FA8;
+  --bar:#0A6A5D;   /* 頂欄。比主色深一階，白字對比 5.83:1（主色本身只有 4.40） */
   --accent-wash:rgba(10,127,112,.08); --signal-wash:rgba(180,84,26,.07);
   --cool-wash:rgba(63,111,168,.08);
 }
@@ -18,12 +19,40 @@
 body{background:var(--paper);color:var(--ink);
   font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   font-size:15px;line-height:1.72;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1120px;margin:0 auto;padding:0 28px 90px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 26px 90px}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
+/* ── 系統頂欄（兩個頁面共用同一套）── */
+.topbar{background:var(--bar);color:#F2F3F0;height:62px;display:flex;align-items:center}
+.topbar .in{max-width:1180px;margin:0 auto;padding:0 26px;width:100%;display:flex;
+  align-items:center;gap:18px}
+.topbar .t{font-family:"Noto Sans TC",sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.02em;line-height:1.2;white-space:nowrap}
+.topbar .rule{width:1px;height:24px;background:rgba(242,243,240,.28);flex:none}
+.tabs{display:flex;border:1px solid rgba(242,243,240,.45);border-radius:5px;overflow:hidden}
+.tabs a{font:500 13px/1 "Noto Sans TC",sans-serif;padding:9px 18px;color:#F2F3F0;
+  text-decoration:none;white-space:nowrap;border-right:1px solid rgba(242,243,240,.28)}
+.tabs a:last-child{border-right:0}
+.tabs a:hover{background:rgba(255,255,255,.14)}
+.tabs a.on{background:var(--paper);color:var(--bar);font-weight:700}
+.topbar .sp{flex:1}
+.topbar .who{font-size:12.5px;color:rgba(242,243,240,.72);white-space:nowrap}
+.topbar .btn{background:transparent;border-color:rgba(255,255,255,.45);color:#F2F3F0;
+  padding:7px 14px;font-size:12.5px}
+.topbar .btn:hover{background:rgba(255,255,255,.12);opacity:1}
+@media(max-width:760px){
+  .topbar{height:auto;padding:10px 0}
+  .topbar .in{gap:10px;flex-wrap:wrap;padding:0 14px}
+  .topbar .t{font-size:16px}
+  .topbar .rule{display:none}
+  .tabs{order:3;width:100%}
+  .tabs a{flex:1;text-align:center;padding:11px 8px}
+  .topbar .who{font-size:11.5px;overflow:hidden;text-overflow:ellipsis}
+}
+
 /* ── masthead ── */
-.mast{border-bottom:2px solid var(--ink);padding:40px 0 18px}
+.mast{border-bottom:2px solid var(--ink);padding:28px 0 16px}
 .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--ink-3)}
 .mast h1{font-size:clamp(26px,4vw,38px);font-weight:700;line-height:1.2;margin:11px 0 9px;
@@ -360,6 +389,20 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 
+<div class="topbar">
+  <div class="in">
+    <div class="t">包裝產能系統</div>
+    <div class="rule"></div>
+    <nav class="tabs">
+      <a href="entry.html">資料輸入</a>
+      <a href="index.html" class="on">儀表板</a>
+    </nav>
+    <div class="sp"></div>
+    <div class="who" id="dashWho"></div>
+    <button class="btn" id="dashOut" hidden>登出</button>
+  </div>
+</div>
+
 <div class="wrap">
 
 <header class="mast">
@@ -407,7 +450,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <span class="now" id="srcNow"></span>
     <button class="btn" id="liveBtn">讀取最新資料</button>
     <button class="btn ghost" id="resetFile" hidden>回到內建快照</button>
-    <a class="btn ghost nav" href="entry.html">← 資料輸入</a>
     <div class="privacy">
       資料由包裝資料輸入系統維護，已不再使用 Excel 交換。
       登入後會自動顯示資料庫的最新內容；未登入時顯示內建快照。
@@ -1785,6 +1827,33 @@ async function fetchBatches() {
   }));
 }
 
+/** 從權杖取出使用者 id。base64url 少了補位字元，atob 會吐錯，所以要補回來。 */
+function jwtSub(tok) {
+  try {
+    let b = String(tok).split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    return JSON.parse(decodeURIComponent(escape(atob(b)))).sub;
+  } catch (e) { return null; }
+}
+
+/** 登入後在頂欄顯示是誰，跟輸入頁一致 —— 兩邊看起來才像同一套系統 */
+async function showWho() {
+  try {
+    const sub = jwtSub(sess.access);
+    if (!sub) return;
+    const me = (await dbGet(`members?select=display_name,role&user_id=eq.${sub}`))[0];
+    if (!me) return;
+    const ROLE = { operator: '輸入專員', manager: '主管', viewer: '檢視者' };
+    $('dashWho').textContent = `${me.display_name}（${ROLE[me.role] || me.role}）`;
+    $('dashOut').hidden = false;
+  } catch (e) { /* 顯示名稱失敗不影響看報表 */ }
+}
+
+$('dashOut').onclick = () => {
+  try { localStorage.removeItem(SS); } catch (e) {}
+  location.reload();
+};
+
 async function loadLive(quiet) {
   $('liveBtn').disabled = true;
   $('liveBtn').textContent = '讀取中…';
@@ -1794,6 +1863,7 @@ async function loadLive(quiet) {
     const last = batches[batches.length - 1].d;
     load(batches, `資料庫最新資料（到 ${last}）`);
     $('resetFile').hidden = false;
+    showWho();
     $('srcErr').hidden = true;
   } catch (err) {
     if (!quiet) {

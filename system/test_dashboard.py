@@ -31,6 +31,9 @@ def route(r):
                              body=json.dumps({"error_description": "Invalid login credentials"}))
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(
             {"access_token": JWT, "refresh_token": "rt", "expires_in": 3600}))
+    if "/rest/v1/members" in u:
+        return r.fulfill(status=200, content_type="application/json",
+                         body=json.dumps([{"display_name": "測試主管", "role": "manager"}]))
     if "/rest/v1/batches" in u:
         calls["batches"] += 1
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(LIVE))
@@ -66,10 +69,16 @@ with sync_playwright() as p:
     ov = pg.inner_text("#ovBody") if pg.locator("#ovBody").count() else pg.inner_text("table")
     check("品項總覽欄名改為平常水準", "平常水準" in pg.inner_text("section"), "")
 
-    nav = pg.locator(".src a.nav")
-    check("儀表板有回輸入頁的入口", nav.count() == 1)
-    check("連到 entry.html", nav.get_attribute("href") == "entry.html",
-          nav.get_attribute("href"))
+    tabs = pg.locator(".topbar .tabs a")
+    check("頂欄有兩個分頁", tabs.count() == 2, tabs.count())
+    check("目前在儀表板且標示為選中",
+          "on" in (tabs.nth(1).get_attribute("class") or ""), tabs.nth(1).get_attribute("class"))
+    check("另一個連到資料輸入", tabs.nth(0).get_attribute("href") == "entry.html",
+          tabs.nth(0).get_attribute("href"))
+    check("系統名稱與輸入頁一致", pg.inner_text(".topbar .t") == "包裝產能系統",
+          pg.inner_text(".topbar .t"))
+    bar = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
+    check("頂欄底色與輸入頁相同（rgb(10,106,93)）", bar == "rgb(10, 106, 93)", bar)
 
     print("\n── 按「讀取最新資料」會要求登入 ──")
     pg.click("#liveBtn")
@@ -105,10 +114,10 @@ with sync_playwright() as p:
     print("\n── 已登入過：自動帶出最新資料 ──")
     calls["batches"] = 0
     ctx2 = b.new_context(viewport={"width": 1280, "height": 1000})
-    ctx2.add_init_script("""
+    ctx2.add_init_script(("""
       localStorage.setItem('packing.session', JSON.stringify(
-        {access:'x', refresh:'rt', exp: Date.now() + 3600000}));
-    """)
+        {access:'%s', refresh:'rt', exp: Date.now() + 3600000}));
+    """ % JWT))
     pg2 = ctx2.new_page()
     pg2.on("pageerror", lambda e: errs.append(str(e)))
     pg2.route("**/*", route)
@@ -116,6 +125,9 @@ with sync_playwright() as p:
     pg2.wait_for_timeout(2000)
     src = pg2.inner_text("#srcNow")
     check("開頁即自動換成資料庫資料", "資料庫最新資料" in src, src)
+    pg2.wait_for_timeout(600)
+    check("頂欄顯示登入者與角色", "測試主管" in pg2.inner_text("#dashWho")
+          and "主管" in pg2.inner_text("#dashWho"), pg2.inner_text("#dashWho"))
     check("不需要再按任何按鈕", calls["batches"] >= 1, calls)
     pg2.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
                         "fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/dash_live.png",
