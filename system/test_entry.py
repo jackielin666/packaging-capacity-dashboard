@@ -438,6 +438,24 @@ with sync_playwright() as p:
     check("點月份可跳到該月", "2026 年 7 月" in pg.inner_text("#calTitle"),
           pg.inner_text("#calTitle"))
 
+    print("\n── 連不到資料庫時的訊息 ──")
+    # 工廠內網擋外部網域是常見狀況；Failed to fetch 會被當成帳密打錯一直重試
+    # 直接把資料庫網域丟掉，跟防火牆擋掉的行為一樣
+    pg.route("**supabase.co/**", lambda r: r.abort())
+    pg.click("#logoutBtn")
+    pg.wait_for_timeout(800)
+    pg.fill("#acc", "pack01"); pg.fill("#pw", "x")
+    pg.click("#loginBtn"); pg.wait_for_timeout(900)
+    msg = pg.inner_text("#loginErr")
+    check("連不上時不顯示 Failed to fetch", "Failed to fetch" not in msg, msg[:120])
+    check("訊息說明不是帳密問題", "不是帳號密碼的問題" in msg, msg[:160])
+    check("訊息點出要開通的網址", "supabase.co" in msg, msg[:160])
+    pg.unroute("**supabase.co/**")
+    pg.fill("#acc", "pack01"); pg.fill("#pw", "x")
+    pg.click("#loginBtn"); pg.wait_for_timeout(1600)
+    check("網路恢復後照常登入得進去", pg.is_visible("#rows"),
+          pg.inner_text("#loginErr")[:80])
+
     print("\n── 操作說明 ──")
     # 現場是站著看的：打開要快，關掉更要快，關掉後游標要回到剛才那一格
     pg.wait_for_selector("#rows input", timeout=4000)

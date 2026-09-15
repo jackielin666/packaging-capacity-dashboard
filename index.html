@@ -2502,7 +2502,7 @@ const writeSess = j => {
 
 async function refreshToken() {
   if (!sess || !sess.refresh) throw new Error('未登入');
-  const r = await fetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
+  const r = await netFetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
     method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: sess.refresh })
   });
@@ -2510,9 +2510,21 @@ async function refreshToken() {
   writeSess(await r.json());
 }
 
+/* 連不到資料庫時 fetch 會丟出 TypeError: Failed to fetch —— 那串字對現場沒有意義，
+   而且會被當成帳密問題一直重試。工廠內網擋外部網域是很常見的事，
+   所以直接翻成一句人看得懂的話，並寫出要請 IT 開通哪個網址。 */
+const DB_HOST = API.replace(/^https?:\/\//, '');
+const netMsg = () => `連不到資料庫（${DB_HOST}）。`
+  + `這不是帳號密碼的問題 —— 是這台電腦連不出去。`
+  + `請先確認網路正常；若其他網站開得起來，請 IT 把這個網址加入白名單。`;
+async function netFetch(url, opts) {
+  try { return await fetch(url, opts); }
+  catch (e) { throw new Error(netMsg()); }      // 伺服器回的錯誤不會走到這裡
+}
+
 async function dbGet(path) {
   if (!sess || sess.exp - Date.now() < 60000) await refreshToken();
-  const r = await fetch(`${API}/rest/v1/${path}`, {
+  const r = await netFetch(`${API}/rest/v1/${path}`, {
     headers: { apikey: KEY, Authorization: `Bearer ${sess.access}`, 'Accept-Profile': 'packing' }
   });
   if (!r.ok) throw new Error(`讀取失敗（${r.status}）`);
@@ -2611,7 +2623,7 @@ $('lgForm').onsubmit = async e => {
   $('lgBtn').disabled = true; $('lgBtn').textContent = '登入中…';
   $('lgErr').hidden = true;
   try {
-    const r = await fetch(`${API}/auth/v1/token?grant_type=password`, {
+    const r = await netFetch(`${API}/auth/v1/token?grant_type=password`, {
       method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: acc.toLowerCase() + '@packing.local', password: pw })
     });

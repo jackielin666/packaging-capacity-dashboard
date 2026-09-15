@@ -738,8 +738,22 @@ function jwtSub(tok) {
   } catch (e) { return null; }
 }
 
+/* 連不到資料庫時，fetch 會丟出 TypeError: Failed to fetch —— 那串字對現場沒有意義，
+   而且會被當成「帳密打錯」一直重試。工廠內網擋外部網域是很常見的事，
+   所以這裡把它翻成一句人看得懂的話，並直接寫出要請 IT 開通哪個網址。 */
+var DB_HOST = API.replace(/^https?:\/\//, '');
+function netMsg() {
+  return '連不到資料庫（' + DB_HOST + '）。\n'
+    + '這不是帳號密碼的問題 —— 是這台電腦連不出去。\n'
+    + '請先確認網路正常；若其他網站開得起來，請 IT 把這個網址加入白名單。';
+}
+/** 包一層：只有「根本連不上」才換訊息，伺服器回的錯誤照原樣顯示 */
+function netFetch(url, opts) {
+  return fetch(url, opts).catch(function () { throw new Error(netMsg()); });
+}
+
 function signIn(account, password) {
-  return fetch(API + '/auth/v1/token?grant_type=password', {
+  return netFetch(API + '/auth/v1/token?grant_type=password', {
     method: 'POST',
     headers: { apikey: KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: account.toLowerCase() + MAIL, password: password })
@@ -755,7 +769,7 @@ function signIn(account, password) {
 
 function refresh() {
   if (!sess || !sess.refresh) return Promise.reject(new Error('no session'));
-  return fetch(API + '/auth/v1/token?grant_type=refresh_token', {
+  return netFetch(API + '/auth/v1/token?grant_type=refresh_token', {
     method: 'POST',
     headers: { apikey: KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: sess.refresh })
@@ -788,7 +802,7 @@ function api(path, opts, retried) {
     if (opts.body) h['Content-Type'] = 'application/json';
     if (opts.prefer) h.Prefer = opts.prefer;
 
-    return fetch(API + '/rest/v1/' + path, {
+    return netFetch(API + '/rest/v1/' + path, {
       method: opts.method || 'GET', headers: h, body: opts.body
     });
   }).then(function (r) {
@@ -863,6 +877,7 @@ $('loginForm').addEventListener('submit', function (e) {
     .catch(function (err) {
       $('loginErr').textContent = /Invalid login/i.test(err.message)
         ? '帳號或密碼不對，請再試一次。' : err.message;
+      $('loginErr').style.whiteSpace = 'pre-line';
       $('loginErr').hidden = false;
     })
     .then(function () {
