@@ -143,6 +143,42 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rtab td.nm{color:var(--ink-2);font-size:11.5px}
 /* 報表同樣帶品名。注意這是 td 底下的 span，與上一行的整格 td.nm 是兩回事 */
 .rtab td .nm{display:block;font-size:10px;font-weight:400;color:var(--ink-3);line-height:1.45}
+.rep-fig{margin:10px 0 4px}
+.rep-fig svg{width:100%;height:auto;display:block}
+.rep-figleg{display:flex;gap:16px;flex-wrap:wrap;font-size:10.5px;color:var(--ink-2);
+  margin:0 0 10px;align-items:baseline}
+.rep-figleg .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.rep-figleg .dot.ok{background:var(--accent)} .rep-figleg .dot.bad{background:var(--signal)}
+/* 人力分配橫條 */
+.lbt td{vertical-align:middle}
+.lbt td.lbs{width:23%} .lbt td.lbb{width:66%} .lbt th:last-child,.lbt td:last-child{width:11%}
+.lb{position:relative;height:13px;margin:1.5px 0;background:var(--sunk);border-radius:2px}
+.lb i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;min-width:1px}
+.lb i.ph{background:var(--signal);opacity:.82}
+.lb i.kg{background:var(--cool);opacity:.82}
+.lb em{position:absolute;left:7px;top:0;line-height:13px;font-style:normal;font-size:9px;
+  font-family:"IBM Plex Mono",monospace;color:var(--ink);mix-blend-mode:normal}
+/* 月份 × 品項熱圖。色階用單一色相的深淺，紅綠色盲下靠明度仍分得出方向 */
+.heatwrap{overflow-x:auto;margin:8px 0 4px}
+.heat{border-collapse:separate;border-spacing:2px;font-size:10px;
+  font-family:"IBM Plex Mono",monospace}
+.heat thead th{background:none;border:0;padding:2px 4px;font-size:9px;color:var(--ink-3);
+  text-align:center;font-weight:400;letter-spacing:0;text-transform:none}
+.heat th.hsku{background:none;border:0;text-align:left;padding:2px 8px 2px 0;
+  white-space:nowrap;font-weight:400;letter-spacing:0;text-transform:none}
+.heat th.hsku b{font-weight:600;font-size:11px}
+.heat th.hsku .nm{display:block;font-family:"Noto Sans TC",sans-serif;font-size:9px;
+  color:var(--ink-3)}
+.heat td{width:34px;height:22px;text-align:center;border:0;padding:0;border-radius:2px;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.h1{background:#C2571A;color:#fff} .h2{background:#E7A87C}
+.h3{background:#EDEFE9;color:var(--ink-3)} .h4{background:#8FC3B7} .h5{background:#0A7F70;color:#fff}
+.h0{background:repeating-linear-gradient(45deg,var(--sunk),var(--sunk) 3px,
+  var(--surface) 3px,var(--surface) 6px)}
+.heatleg i{width:14px;height:11px;border-radius:2px;display:inline-block;margin-right:5px;
+  vertical-align:-1px}
+.heatleg i.h1{background:#C2571A} .heatleg i.h2{background:#E7A87C}
+.heatleg i.h3{background:#EDEFE9} .heatleg i.h4{background:#8FC3B7} .heatleg i.h5{background:#0A7F70}
 .rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
 .hilite{border:1.5px solid var(--ink);border-radius:5px;margin:18px 0 6px;overflow:hidden}
 .hilite .hd{background:var(--ink);color:var(--paper);font-family:"Noto Serif TC",serif;
@@ -239,6 +275,9 @@ td.dv b{display:block;font-size:11.5px;font-weight:500;margin-top:3px}
 .dvb i{position:absolute;top:0;bottom:0;border-radius:2px;min-width:2px}
 .dvb i.dn{background:var(--signal)} .dvb i.up{background:var(--accent)}
 .dvb i.flat{background:var(--ink-4)}
+td.sp{text-align:center;vertical-align:middle}
+.spark{width:92px;height:22px;display:inline-block;vertical-align:middle}
+.sparkna{color:var(--ink-4);font-family:"IBM Plex Mono",monospace;font-size:11px}
 td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
 /* 品號底下帶一行品名。只給品號的表，要先去查對照表才看得懂在講哪支產品 ——
    那一步就是現場不看報表的原因。品名用內文字體、放小一級，不跟品號搶。 */
@@ -375,6 +414,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     font-family:"IBM Plex Mono",monospace;letter-spacing:.05em;text-align:left;flex:none}
   #overviewTable td.sku{font-size:16px;padding-bottom:8px}
   #overviewTable td.sku::before{content:none}
+  #overviewTable td.sp{justify-content:flex-end}
   #overviewTable td.dv{display:grid;grid-template-columns:1fr 64px;align-items:center;gap:10px}
   #overviewTable td.dv .dvb{width:100%}
   #overviewTable td.dv b{margin:0;text-align:right}
@@ -473,14 +513,16 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <div class="tw">
       <table id="overviewTable">
         <colgroup>
-          <col style="width:20%"><col style="width:8%"><col style="width:10%">
-          <col class="opt" style="width:7%"><col style="width:10%">
-          <col class="opt" style="width:9%"><col style="width:13%"><col style="width:23%">
+          <col style="width:18%"><col style="width:7%"><col style="width:9%">
+          <col class="opt" style="width:6%"><col style="width:9%">
+          <col class="opt" style="width:8%"><col style="width:12%">
+          <col style="width:12%"><col style="width:19%">
         </colgroup>
         <thead><tr>
           <th>品號 / 品名</th><th class="n">生產<i>天數</i></th><th class="n">包裝量</th>
           <th class="n opt">批次</th><th class="n">平常水準<i>單位/hr</i></th>
           <th class="n opt">每千瓶<i>工時 hr</i></th>
+          <th class="c">逐月走勢<i>vs 平常</i></th>
           <th class="c">近 3 個生產月<i>vs 平常</i></th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
@@ -514,7 +556,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
     <div class="fig">
       <div class="fig-t" id="scatterTitle"></div>
-      <div class="fig-s">同樣是每批一個點，但橫軸換成工時、縱軸是瓶數。斜線是合理目標 —— 點落在線上方代表這批做得比目標好。</div>
+      <div class="fig-s">同樣是每批一個點，但橫軸換成工時、縱軸是瓶數。橫軸是工時、縱軸是瓶數，
+        所以「固定產能」在圖上就是一條從原點出發的斜線 —— 愈陡代表愈快。</div>
       <div class="legend" id="scatterLegend"></div>
       <div class="chart"><div id="cScatter"></div><div class="tip" id="tScatter"></div></div>
     </div>
@@ -1204,11 +1247,35 @@ function scatter(skus) {
   s += `<text x="${L - 10}" y="${T - 8}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">瓶數</text>`;
   s += `<text x="${W - R}" y="${T + ph + 40}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">工時（小時）</text>`;
 
+  /* 這張圖的橫軸是工時、縱軸是瓶數，所以「固定產能」在圖上是一條從原點出發的斜線 ——
+     上下限就變成兩條斜線，正常範圍是它們之間的楔形。跟批次落點圖同一套判定，
+     只是換個角度看：落在楔形下方的點，就是那邊的紅點。 */
+  const lo = E.thresholds.OUT_LO, hi2 = E.thresholds.OUT_HI;
+  const single = skus.length === 1;
+  const ray = r => {                       // 產能 r 的斜線在圖框內的終點
+    const x = Math.min(maxH, maxB / r);
+    return [X(x), Y(r * x)];
+  };
   skus.forEach((sk, si) => {
     const col = cssv(SERIES[si]);
+    const sig = cssv('--signal');
+    const [xl, yl] = ray(sk.med * lo), [xh, yh] = ray(sk.med * hi2);
+    if (single) {
+      // 楔形：原點 → 上限終點 →（沿圖框）→ 下限終點 → 原點
+      s += `<path d="M${X(0)},${Y(0)} L${xh},${yh} L${X(maxH)},${yh} L${X(maxH)},${yl} L${xl},${yl} Z"
+             fill="${cssv('--accent')}" opacity=".055"/>`;
+    }
+    s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${xl}" y2="${yl}" stroke="${sig}"
+           stroke-width="1.2" stroke-dasharray="3 4" opacity=".8"/>`;
+    s += label(xl - 4, yl + 13, `下限 ${fmt(sk.med * lo)}　低於就要查`, sig, 'end');
+    const [xm, ym] = ray(sk.med);
+    s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${xm}" y2="${ym}" stroke="${col}"
+           stroke-width="1.5" stroke-dasharray="7 5" opacity=".9"/>`;
+    s += label(xm - 4, ym + 13, `平常 ${fmt(sk.med)}　一半批次做得到`, col, 'end');
     const xEnd = Math.min(maxH, maxB / sk.p75), yEnd = sk.p75 * xEnd;
-    s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(xEnd)}" y2="${Y(yEnd)}" stroke="${col}" stroke-width="1.5" stroke-dasharray="7 5" opacity=".85"/>`;
-    s += label(X(xEnd) - 4, Y(yEnd) - 8, `${sk.sku} 合理目標 ${fmt(sk.p75)}`, col, 'end');
+    s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(xEnd)}" y2="${Y(yEnd)}" stroke="${col}" stroke-width="1.2" stroke-dasharray="2 4" opacity=".55"/>`;
+    s += label(X(xEnd) - 4, Y(yEnd) - 8,
+      `合理目標 ${fmt(sk.p75)}　已有 1/4 批次做到`, cssv('--ink-3'), 'end');
   });
   pts.forEach((p, i) => {
     const col = cssv(SERIES[p.si]);
@@ -1226,7 +1293,15 @@ function scatter(skus) {
   });
   $('scatterLegend').innerHTML = skus.map((sk, i) =>
     `<span><i style="background:${cssv(SERIES[i])}"></i>${sk.sku}</span>`).join('')
-    + `<span><i style="background:var(--signal)"></i>離群批次</span>`;
+    + `<span><i style="background:var(--signal)"></i>離群批次</span>`
+    + (single ? `<span style="color:var(--ink-3)">淺綠楔形＝正常範圍`
+      + `（${fmt(skus[0].med * lo)} ～ ${fmt(skus[0].med * hi2)} 單位/hr），與上一張圖同一套門檻</span>`
+      + `<span style="flex-basis:100%;color:var(--ink-3);margin-top:2px">`
+      + `<b>三條斜線不是同一種東西：</b>`
+      + `<b style="color:var(--signal)">下限 ${fmt(skus[0].med * lo)}</b> 是「低於就要去查」的門檻；`
+      + `<b>平常 ${fmt(skus[0].med)}</b> 是這支產品的中位數，一半的批次本來就做得到；`
+      + `<b>合理目標 ${fmt(skus[0].p75)}</b> 是已經有 1/4 批次達到的水準，`
+      + `「可省工時」與排程試算用的就是它 —— 它是目標，不是判定門檻。</span>` : '');
 }
 
 /* ─────────── 05 全廠相對表現 ─────────── */
@@ -1355,6 +1430,35 @@ const TOP_N = 10;   // 總覽預設顯示的列數
 
 const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太少' };
 
+/* 逐月走勢的迷你折線。燈號說「正常」或「異常」，這條線是它的佐證 ——
+   不必點進去就看得出這支是一路往下、還是只有某個月掉下去。
+   縱軸以該品項自己的平常水準為 1.0，固定 0.6～1.4，各列之間才比得起來。 */
+const SPARK_LO = 0.6, SPARK_HI = 1.4;
+function sparkSvg(s) {
+  const ms = s.months || [];
+  if (ms.length < 2 || !s.med) return '<span class="sparkna">—</span>';
+  const W = 92, H = 22, P = 2;
+  const X = i => P + (i / (ms.length - 1)) * (W - 2 * P);
+  const Y = v => {
+    const t = (Math.min(Math.max(v, SPARK_LO), SPARK_HI) - SPARK_LO) / (SPARK_HI - SPARK_LO);
+    return H - P - t * (H - 2 * P);
+  };
+  const rel = ms.map(m => m.rate / s.med);
+  const d = rel.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('');
+  const last = rel[rel.length - 1];
+  const col = last < E.thresholds.DECLINE ? 'var(--signal)'
+            : last > 2 - E.thresholds.DECLINE ? 'var(--accent)' : 'var(--ink-3)';
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="逐月走勢，最後一個月為平常水準的 ${Math.round(last * 100)}%">
+    <line x1="${P}" y1="${Y(1)}" x2="${W - P}" y2="${Y(1)}"
+      stroke="var(--rule-2)" stroke-dasharray="2 3"/>
+    <path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="1.4"
+      stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>
+    <circle cx="${X(rel.length - 1)}" cy="${Y(last)}" r="2.6" fill="${col}"/>
+    <title>${ms.map(m => `${monthLabel(m.m)} ${fmt(m.rate)}`).join('　')}</title>
+  </svg>`;
+}
+
 function renderOverview() {
   const skus = [...state.R.skus].sort((a, b) =>
     tab === 'freq' ? b.d - a.d || b.b - a.b : b.b - a.b);
@@ -1382,6 +1486,7 @@ function renderOverview() {
       <td class="n opt" data-l="批次">${s.n}</td>
       <td class="n" data-l="平常水準">${fmt(s.med)}</td>
       <td class="n opt" data-l="每千瓶工時">${s.hPer1k.toFixed(2)}</td>
+      <td class="sp" data-l="逐月走勢">${sparkSvg(s)}</td>
       <td class="dv delta ${cls}" data-l="近 3 個生產月 vs 平常">${bar}<b>${
         pct == null ? '—' : (pct > 0 ? '+' : '') + pct + '%'}</b></td>
       <td class="st"><div class="lamp ${s.status}"><b>${LAMP[s.status]}</b>
@@ -1736,6 +1841,87 @@ function quadrants(rows) {
   return out;
 }
 
+/* ── 人力分配橫條圖 ──
+   每支品項兩條：上面是它吃掉多少人時，下面是它產出多少重量。
+   兩條差很多的那幾支，就是人力花下去但重量出不來 —— 那是接單與排程的成本，
+   不是包裝做得慢。用 HTML 的方塊而不是 SVG：列印時不會被縮放糊掉，
+   欄位也跟上下的表格對得齊。 */
+function labourBarHtml(labS) {
+  const list = [...labS.values()].filter(x => x.usable && x.personHours > 0)
+    .sort((a, b) => b.personHours - a.personHours).slice(0, 12);
+  if (list.length < 3) return '';
+  const totPH = list.reduce((a, x) => a + x.personHours, 0);
+  const totKG = list.reduce((a, x) => a + x.kg, 0);
+  if (!totPH || !totKG) return '';
+  const rows = list.map(x => ({
+    sku: x.sku,
+    ph: 100 * x.personHours / totPH,
+    kg: 100 * x.kg / totKG,
+  }));
+  const max = Math.max(...rows.map(r => Math.max(r.ph, r.kg))) || 1;
+  const body = rows.map(r => {
+    const ratio = r.kg > 0 ? r.ph / r.kg : null;
+    // 1.5 倍以上＝吃掉的人力明顯多於產出的重量，值得業務與生管知道
+    const heavy = ratio !== null && ratio >= 1.5;
+    return `<tr>
+      <td class="lbs"><b>${r.sku}</b>${skuName(r.sku)}</td>
+      <td class="lbb">
+        <div class="lb"><i class="ph" style="width:${(100 * r.ph / max).toFixed(1)}%"></i>
+          <em>人時 ${r.ph.toFixed(1)}%</em></div>
+        <div class="lb"><i class="kg" style="width:${(100 * r.kg / max).toFixed(1)}%"></i>
+          <em>公斤 ${r.kg.toFixed(1)}%</em></div>
+      </td>
+      <td class="num ${heavy ? 'lo' : ''}">${ratio === null ? '—' : ratio.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="rtab lbt"><thead><tr>
+      <th>品號 / 品名</th><th>人時佔比（上）　對　產出公斤佔比（下）</th>
+      <th class="num">倍數</th>
+    </tr></thead><tbody>${body}</tbody></table>
+    <div class="rep-note">上下兩條差距愈大，代表這支吃掉的人力愈不成比例。
+      「倍數」＝人時佔比 ÷ 公斤佔比，<b>1.5 以上標色</b>。<br>
+      <b>這不是包裝做得慢</b> —— 瓶型小、批量碎的品項本來就吃人力。
+      這張圖是給<b>業務與生管</b>看的：接單與排班時，這幾支的人力成本要先估進去。</div>`;
+}
+
+/* ── 月份 × 品項熱圖 ──
+   趨勢類的問題，表格永遠看不出來 —— 要翻十一欄數字才知道哪一支從哪個月開始變慢。
+   一格一個月，顏色是「該月產能 ÷ 該品項自己的平常水準」，所以不同瓶型可以放在同一張圖。
+   橘色＝比自己平常慢，綠色＝比自己平常快，空白＝那個月沒做。
+   色階刻意只分五級：現場要的是「有沒有連續變橘」，不是精確到個位數。 */
+const HEAT_STEPS = [
+  [0.80, 'h1', '慢 20% 以上'], [0.90, 'h2', '慢 10–20%'],
+  [1.10, 'h3', '跟平常差不多'], [1.20, 'h4', '快 10–20%'], [Infinity, 'h5', '快 20% 以上'],
+];
+const heatClass = v => (HEAT_STEPS.find(x => v < x[0]) || HEAT_STEPS[4])[1];
+
+function heatmapHtml(skus, months, topN = 18) {
+  const list = skus.filter(s => s.status !== 'thin' && s.med)
+    .sort((a, b) => b.d - a.d).slice(0, topN);
+  if (list.length < 3 || months.length < 3) return '';
+  const head = months.map(m => `<th>${monthLabel(m)}</th>`).join('');
+  const body = list.map(s => {
+    const byM = new Map(s.months.map(x => [x.m, x.rate]));
+    const cells = months.map(m => {
+      const r = byM.get(m);
+      if (!r) return '<td class="h0" title="該月沒有生產"></td>';
+      const v = r / s.med;
+      return `<td class="${heatClass(v)}" title="${monthLabel(m)}　${fmt(r)} 單位/hr`
+           + `　平常 ${fmt(s.med)}　${Math.round(v * 100)}%">${Math.round(v * 100)}</td>`;
+    }).join('');
+    return `<tr><th class="hsku"><b>${s.sku}</b>${skuName(s.sku)}</th>${cells}</tr>`;
+  }).join('');
+  const legend = HEAT_STEPS.map(x => `<span><i class="${x[1]}"></i>${x[2]}</span>`).join('')
+    + '<span><i class="h0"></i>該月沒有生產</span>';
+  return `<div class="heatwrap"><table class="heat"><thead><tr><th></th>${head}</tr></thead>
+      <tbody>${body}</tbody></table></div>
+    <div class="rep-figleg heatleg">${legend}</div>
+    <div class="rep-note">格子裡的數字是<b>該月產能佔自己平常水準的百分比</b>，
+      100 就是跟平常一樣。每支產品只跟自己比，所以不同瓶型可以放在同一張圖上。<br>
+      要看的是<b>橫著讀</b>：一路變橘的那幾支才是真的在變慢；
+      單獨一格橘色多半是那個月剛好排到難做的批。依生產天數取前 ${topN} 支。</div>`;
+}
+
 const QUAD = {
   both:  { t: '線體與人均都偏低', why: '那一批真的不順 —— 卡料、機器或新手', who: '製造' },
   short: { t: '線體偏低但人均正常', why: '人做得跟平常一樣，是人派得比較少', who: '生管排班' },
@@ -1751,6 +1937,73 @@ const QUAD = {
    一個月的樣本不足以定義什麼叫正常，而且門檻要跟畫面上看到的一致。 */
 
 const ymLabel = m => `${m.slice(0, 4)} 年 ${+m.slice(5)} 月`;
+
+/* ── 本月批次落點圖 ──
+   一張圖代替一頁表格。每一批一個點，Y 軸是「這批 ÷ 這支產品自己的平常水準」，
+   所以不同瓶型可以畫在同一張圖上 —— 1.0 就是跟平常一樣，0.7 是離群門檻。
+   看的人不必逐列讀數字，直接看哪幾天的點掉到線下、以及有沒有集中在同一支產品。 */
+const MIN_REPORT_BATCHES = 10;   // 全期不到這麼多批就不判定離群，樣本撐不起門檻
+const REL_TOP = 1.8;        // Y 軸上限；再高的點釘在頂端並標成空心，避免壓扁主要區間
+
+function monthDotSvg(rows, skuOf, ym) {
+  const pts = rows.map(x => {
+    const s = skuOf.get(x.s);
+    if (!s || !s.med || s.n < MIN_REPORT_BATCHES) return null;
+    return { ...x, rel: (x.b / x.h) / s.med, usual: s.med };
+  }).filter(Boolean);
+  if (pts.length < 3) return '';
+
+  const W = 880, H = 300, L = 42, R = 92, T = 16, B = 34;
+  const pw = W - L - R, ph = H - T - B;
+  const days = new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate();
+  const Xd = day => L + ((day - 0.5) / days) * pw;
+  const X = d => Xd(+d.slice(8));
+  const Y = v => v > REL_TOP ? T + 5 : T + ph - (v / REL_TOP) * ph;
+  const lo = E.thresholds.OUT_LO, hi = E.thresholds.OUT_HI;
+
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="${ymLabel(ym)}每一批相對自己平常水準的表現">`;
+  // 正常範圍：下限到上限。上限 2.5 倍通常在圖外，帶狀就填到頂。
+  g += `<rect x="${L}" y="${Y(hi)}" width="${pw}" height="${Y(lo) - Y(hi)}"
+         fill="var(--accent)" opacity=".06"/>`;
+  [[1, '平常水準 1.0', 'var(--ink-2)', '7 5'],
+   [lo, `離群下限 ${lo}`, 'var(--signal)', '3 4']].forEach(([v, t, c, d]) => {
+    g += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}"
+           stroke="${c}" stroke-width="1.2" stroke-dasharray="${d}"/>`;
+    g += `<text x="${W - R + 7}" y="${Y(v) + 4}" fill="${c}" font-size="10"
+           font-family="'IBM Plex Mono',monospace">${t}</text>`;
+  });
+  for (let v = 0; v <= REL_TOP; v += 0.5) {
+    g += `<text x="${L - 8}" y="${Y(v) + 3.5}" fill="var(--ink-3)" font-size="9.5"
+           text-anchor="end" font-family="'IBM Plex Mono',monospace">${v.toFixed(1)}</text>`;
+  }
+  // 日期刻度：每 5 天一格，太密在 A4 上會糊掉
+  for (let d = 1; d <= days; d += 5) {
+    const x = Xd(d);
+    g += `<line x1="${x}" y1="${T}" x2="${x}" y2="${T + ph}" stroke="var(--rule)"
+           stroke-dasharray="2 4"/>`;
+    g += `<text x="${x}" y="${T + ph + 16}" fill="var(--ink-3)" font-size="9.5"
+           text-anchor="middle" font-family="'IBM Plex Mono',monospace">${d}日</text>`;
+  }
+  pts.forEach(p => {
+    const out = p.rel < lo || p.rel > hi;
+    const over = p.rel > REL_TOP;
+    g += `<circle cx="${X(p.d)}" cy="${Y(p.rel)}" r="${out ? 5 : 3.2}"
+      fill="${over ? 'none' : out ? 'var(--signal)' : 'var(--accent)'}"
+      stroke="${over ? 'var(--signal)' : 'var(--surface)'}" stroke-width="1.3" opacity="${out ? 1 : .68}">
+      <title>${p.d}　${p.s}　${fmt(Math.round(p.b / p.h))} 單位/hr（平常 ${fmt(p.usual)}） ${
+        Math.round(p.rel * 100)}%</title></circle>`;
+  });
+  const outN = pts.filter(p => p.rel < lo || p.rel > hi).length;
+  return `<div class="rep-fig">${g}</svg></div>
+    <div class="rep-figleg">
+      <span><i class="dot ok"></i>正常 ${pts.length - outN} 批</span>
+      <span><i class="dot bad"></i>離群 ${outN} 批</span>
+      <span style="color:var(--ink-3)">Y 軸＝這批 ÷ 該品項自己的平常水準，
+        所以不同瓶型可以畫在同一張圖上。1.0 就是跟平常一樣。
+        空心圈代表超出 ${REL_TOP} 倍、釘在頂端。</span>
+    </div>`;
+}
 
 function monthAgg(ym) {
   const rows = state.R.batches.filter(x => x.m === ym);
@@ -1794,7 +2047,7 @@ function buildReport(ym) {
 
   const odd = cur.rows.map(x => {
     const s = skuOf.get(x.s);
-    if (!s || s.n < 10) return null;
+    if (!s || s.n < MIN_REPORT_BATCHES) return null;
     const rate = x.b / x.h;
     const kind = rate < s.med * 0.7 ? 'lo' : rate > s.med * 2.5 ? 'hi' : null;
     // 差距百分比一起算出來 —— 只說「低於平常」看不出嚴重程度，
@@ -1938,6 +2191,7 @@ function buildReport(ym) {
     每一支產品只跟自己比，不跨品項排名。</div>
 
   <h3><span class="n">03</span>需要說明的批次</h3>
+  ${monthDotSvg(cur.rows, skuOf, ym)}
   ${odd.length ? `<table class="rtab"><thead><tr>
     <th>日期</th><th>品號 / 品名</th><th class="num">工時</th><th class="num">瓶數</th>
     <th class="num">當批產能<i>單位/hr</i></th>
@@ -1972,6 +2226,7 @@ function buildReport(ym) {
     <div><div class="k">人數覆蓋率</div><div class="v">${lab.pct}%</div>
       <div class="d">${lab.withHead} / ${lab.n} 批</div></div>
   </div>
+  ${labourBarHtml(labS)}
   <table class="rtab"><thead><tr>
     <th>品號 / 品名</th><th class="num">人時</th><th class="num">人時佔比</th>
     <th class="num">公斤佔比</th><th class="num">單位／人·hr</th>
@@ -1994,7 +2249,10 @@ function buildReport(ym) {
     未達 ${HEAD_MIN_PCT}%，不足以計算人均產能。<br>
     只用「有填人數的那幾批」代表整月會有選擇偏誤，寧可不出數字。</div>`}
 
-  <h3><span class="n">06</span>資料完整性</h3>
+  <h3><span class="n">06</span>逐月走勢（月份 × 品項）</h3>
+  ${heatmapHtml(R.skus, months.slice(-12), 18)}
+
+  <h3><span class="n">07</span>資料完整性</h3>
   <div id="repChk"><div class="rep-empty">讀取中…</div></div>
 
   <div class="rep-foot">工時一律由起訖時間推算，不接受人工填寫。本報表由包裝產能系統自動產生。</div>`;

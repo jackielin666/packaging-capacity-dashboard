@@ -24,6 +24,23 @@ LIVE.append({"sku_code": "D0310", "prod_date": "2026-09-17",
 LIVE.append({"sku_code": "B2011", "prod_date": "2026-09-18",
              "hours": 2.5, "bottles": 1300, "headcount": 2})   # 線體低、人均正常
 
+# 逐月走勢線、月份×品項熱圖、燈號的「近 3 個生產月」都需要跨月資料；
+# 人力分配橫條圖至少要三支品項才畫。以上都不影響 9 月的數字（月報只取當月）。
+HIST = []
+for ym, mul in (("2026-07", 1.00), ("2026-08", 0.88)):
+    for d in range(1, 13):
+        HIST.append({"sku_code": "D0310", "prod_date": "%s-%02d" % (ym, d),
+                     "hours": 1.5, "bottles": round((380 + d) * mul), "headcount": 5})
+        HIST.append({"sku_code": "B2011", "prod_date": "%s-%02d" % (ym, d),
+                     "hours": 2.5, "bottles": round((2000 + d) * mul), "headcount": 3})
+# 第三支品項：三個月都有做，讓熱圖與人力橫條至少有三列
+for ym in ("2026-07", "2026-08", "2026-09"):
+    for d in range(1, 13):
+        HIST.append({"sku_code": "C1010", "prod_date": "%s-%02d" % (ym, d),
+                     "hours": 2.0, "bottles": 900 + d * 3, "headcount": 4})
+LIVE = HIST + LIVE
+LIVE.sort(key=lambda x: x["prod_date"])
+
 calls = {"auth": 0, "batches": 0}
 
 def route(r):
@@ -50,6 +67,8 @@ def route(r):
              "unit_weight_kg":6.0,"units_per_record":1},
             {"code":"B2011","name":"＃1花生(1*2.8kg)","container":"馬口鐵",
              "unit_weight_kg":2.8,"units_per_record":1},
+            {"code":"C1010","name":"藍莓餡(1*9kg)","container":"PE袋",
+             "unit_weight_kg":9.0,"units_per_record":1},
         ]))
     if "/rest/v1/members" in u:
         return r.fulfill(status=200, content_type="application/json",
@@ -114,8 +133,8 @@ with sync_playwright() as p:
     check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
     check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
     kpi = pg.inner_text(".kpis")
-    # 假資料總工時 66 hr（D0310 26 + B2011 40）
-    check("KPI 換成資料庫的數字", "66" in kpi, kpi[:160])
+    # 假資料總工時 234 hr（三支品項 × 三個月）
+    check("KPI 換成資料庫的數字", "234" in kpi, kpi[:160])
 
     # ── 品名：只給品號的表，看的人要先去翻對照表才知道在講哪支產品 ──
     print("\n── 品號旁邊帶出品名 ──")
@@ -152,6 +171,16 @@ with sync_playwright() as p:
     check("圖上畫出正常範圍帶狀", "<rect" in svg and "opacity=\".055\"" in svg)
     dl = pg.inner_text("#dotLegend")
     check("圖例寫出正常範圍的兩個端點", "～" in dl and "正常範圍" in dl, dl[:200])
+    # 工時／產出散佈圖：固定產能是一條從原點出發的斜線，上下限就變成楔形
+    sc = pg.inner_html("#cScatter")
+    check("散佈圖畫出上下限楔形", "<path" in sc and "opacity=\".055\"" in sc)
+    check("散佈圖標出下限與平常", "下限" in sc and "平常" in sc, sc[:150])
+    sl = pg.inner_text("#scatterLegend")
+    check("說明三條斜線不是同一種東西", "不是同一種東西" in sl and "合理目標" in sl, sl[:200])
+    # 迷你趨勢線
+    check("品項總覽有逐月走勢", pg.locator("#tbOverview svg.spark").count() > 0)
+    check("走勢線有基準線與末點", "circle" in pg.inner_html("#tbOverview td.sp"),
+          pg.inner_html("#tbOverview td.sp")[:120])
 
     for w in (390, 768, 1440):
         pg.set_viewport_size({"width": w, "height": 900})
@@ -224,8 +253,8 @@ with sync_playwright() as p:
     rows = pg3.locator("#repBody .rtab").first.locator("tbody tr").count()
     check("品項表有資料", rows > 0, rows)
 
-    # 數字要跟資料庫對得起來：假資料共 30 批
-    check("批次數與資料一致", "30" in body, [l for l in body.split("\n") if "批次" in l][:2])
+    # 數字要跟資料庫對得起來：9 月共 45 批（月報只取當月，不受歷史月份影響）
+    check("批次數與資料一致", "45" in body, [l for l in body.split("\n") if "批次" in l][:2])
 
     check("列印按鈕存在", pg3.is_visible("#repPrint"))
     heads = pg3.inner_text("#repBody .rtab")
@@ -239,6 +268,21 @@ with sync_playwright() as p:
     check("月報表格也帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
     check("本月重點的品項是條列", pg3.locator("#repBody .hilite .hlist li").count() > 0,
           pg3.locator("#repBody .hilite .hlist li").count())
+
+    print("\n── 月報的圖表 ──")
+    check("有本月批次落點圖", pg3.locator("#repBody .rep-fig svg").count() > 0)
+    figleg = pg3.inner_text("#repBody .rep-figleg")
+    check("落點圖說明 Y 軸是相對自己的倍率", "平常水準" in figleg, figleg[:160])
+    check("有人力分配橫條圖", pg3.locator("#repBody .lbt .lb i.ph").count() > 0,
+          pg3.locator("#repBody .lbt").count())
+    check("橫條圖同時畫人時與公斤", pg3.locator("#repBody .lbt .lb i.kg").count() > 0)
+    check("橫條圖標明收件者是業務與生管", "業務與生管" in pg3.inner_text("#repBody"),
+          "")
+    check("有月份 × 品項熱圖", pg3.locator("#repBody .heat tbody tr").count() > 0,
+          pg3.locator("#repBody .heat").count())
+    check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#repBody .heatleg"),
+          pg3.inner_text("#repBody .heatleg")[:120])
+    check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#repBody"))
     check("月報表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html("#repBody"))
 
     print("\n── 月報的本月重點 ──")
