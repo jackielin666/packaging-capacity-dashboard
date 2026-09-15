@@ -169,6 +169,30 @@ with sync_playwright() as p:
     check("圖上標出平常水準", "平常" in svg, svg[:120])
     check("圖上標出下限", "下限" in svg)
     check("圖上畫出正常範圍帶狀", "<rect" in svg and "opacity=\".055\"" in svg)
+    # 「連續變慢」看的是月平均，不是單批 —— 圖上要畫得出來，否則看起來像誤判
+    check("圖上有月平均折線", pg.locator("#cDots rect").count() >= 2,
+          pg.locator("#cDots rect").count())
+    check("圖例說明月平均與散點是兩回事", "月平均那條線是另一回事" in pg.inner_text("#dotLegend"),
+          pg.inner_text("#dotLegend")[:200])
+    # 一次只看一支
+    check("已移除品項比較 A/B", pg.locator("#selCmpA").count() == 0
+          and pg.locator("#selCmpB").count() == 0)
+    # 名詞定義只有一份，儀表板與月報共用
+    pg.eval_on_selector(".defs", "e => e.open = true")
+    pg.wait_for_timeout(250)
+    dfs = pg.inner_text("#defsBox")
+    for term in ("平常水準", "合理目標", "離群下限", "全廠水準", "公斤／人·hr"):
+        check("定義表有「%s」" % term, term in dfs, dfs[:120])
+    check("說明為何用中位數不用平均數", "12.4%" in dfs and "加權平均" in dfs, dfs[-300:])
+    # 版面：欄位標題要看得見，內容要垂直置中
+    th = pg.eval_on_selector("#overviewTable thead th",
+        "e => { const c = getComputedStyle(e); return c.textTransform + '|' + c.fontSize + '|' + c.fontWeight; }")
+    check("欄位標題沒有被轉成全大寫", "uppercase" not in th, th)
+    check("欄位標題字級夠大且夠粗",
+          float(th.split("|")[1].replace("px", "")) >= 11 and int(th.split("|")[2]) >= 600, th)
+    va = pg.eval_on_selector("#tbOverview td", "e => getComputedStyle(e).verticalAlign")
+    check("表格內容垂直置中", va == "middle", va)
+
     dl = pg.inner_text("#dotLegend")
     check("圖例寫出正常範圍的兩個端點", "～" in dl and "正常範圍" in dl, dl[:200])
     # 工時／產出散佈圖：固定產能是一條從原點出發的斜線，上下限就變成楔形
@@ -268,6 +292,8 @@ with sync_playwright() as p:
     check("月報表格也帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
     check("本月重點的品項是條列", pg3.locator("#repBody .hilite .hlist li").count() > 0,
           pg3.locator("#repBody .hilite .hlist li").count())
+
+    check("月報也帶同一份名詞定義", "數字怎麼算的" in body and "合理目標" in body, body[-400:])
 
     print("\n── 月報的圖表 ──")
     check("有本月批次落點圖", pg3.locator("#repBody .rep-fig svg").count() > 0)

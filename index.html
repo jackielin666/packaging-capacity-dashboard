@@ -19,13 +19,13 @@
 body{background:var(--paper);color:var(--ink);
   font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   font-size:15px;line-height:1.72;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1180px;margin:0 auto;padding:0 26px 90px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 26px 90px}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
 /* ── 系統頂欄（兩個頁面共用同一套）── */
 .topbar{background:var(--bar);color:#F2F3F0;height:62px;display:flex;align-items:center}
-.topbar .in{max-width:1180px;margin:0 auto;padding:0 26px;width:100%;display:flex;
+.topbar .in{max-width:1320px;margin:0 auto;padding:0 26px;width:100%;display:flex;
   align-items:center;gap:18px}
 .topbar .t{font-family:"Noto Sans TC",sans-serif;font-size:21px;font-weight:700;
   letter-spacing:.02em;line-height:1.2;white-space:nowrap}
@@ -131,13 +131,14 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rep-kpi .d{font-size:10.5px;margin-top:1px}
 .rep-kpi .d.up{color:var(--accent)} .rep-kpi .d.dn{color:var(--signal)}
 .rtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
-.rtab th{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
+.rtab th{font-family:"Noto Sans TC",sans-serif;font-size:11px;letter-spacing:.01em;
   /* 標籤是中英混排，轉大寫會把 hr 變成 HR，看起來像另一個單位。
      這裡必須寫 none —— 只是不宣告的話，會落回通用的 th{} 規則。 */
-  text-transform:none;color:var(--ink-3);text-align:left;font-weight:400;
-  padding:6px 7px;border-bottom:1px solid var(--rule-2);background:var(--sunk)}
+  text-transform:none;color:var(--ink-2);text-align:left;font-weight:600;
+  padding:7px;border-bottom:1.5px solid var(--rule-2);background:var(--sunk)}
+.rtab th i{display:block;font-style:normal;font-size:9px;font-weight:400;color:var(--ink-3)}
 .rtab th.num{text-align:right}
-.rtab td{padding:6px 7px;border-bottom:1px solid var(--rule);
+.rtab td{padding:7px;border-bottom:1px solid var(--rule);vertical-align:middle;
   font-variant-numeric:tabular-nums}
 .rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
 .rtab td.nm{color:var(--ink-2);font-size:11.5px}
@@ -256,9 +257,15 @@ section{padding:50px 0 6px;border-top:1px solid var(--rule)}
 .tw{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);border-radius:3px}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.07em;
-  text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 13px;
-  border-bottom:1px solid var(--rule-2);white-space:nowrap;background:var(--sunk)}
-td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+  /* 欄位標題原本是 10px 淺灰全大寫 —— 掃過去等於沒有標題，欄位對不上意思。
+     改成 12px、深一階的灰、不轉大寫，並用較粗的底線把標題列和資料分開。 */
+  text-transform:none;color:var(--ink-2);font-weight:600;text-align:left;padding:9px 13px 8px;
+  border-bottom:2px solid var(--rule-2);white-space:nowrap;background:var(--sunk);
+  font-size:12px;letter-spacing:.01em}
+th i{display:block;font-style:normal;font-size:10px;font-weight:400;letter-spacing:0;
+  color:var(--ink-3);margin-top:1px}
+/* 一列裡有品名（兩行）、數字（一行）、迷你圖（22px），靠上對齊會參差不齊 */
+td{padding:10px 13px;border-bottom:1px solid var(--rule);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;
   font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -277,6 +284,16 @@ td.dv b{display:block;font-size:11.5px;font-weight:500;margin-top:3px}
 .dvb i.flat{background:var(--ink-4)}
 td.sp{text-align:center;vertical-align:middle}
 .spark{width:92px;height:22px;display:inline-block;vertical-align:middle}
+/* 名詞定義。摺疊起來不佔版面，但隨時打得開 —— 看不懂一個數字就無法相信它 */
+.defs{margin-top:20px;border:1px solid var(--rule-2);border-radius:4px;background:var(--surface)}
+.defs summary{cursor:pointer;padding:11px 16px;font-size:13px;font-weight:500;
+  color:var(--ink-2);list-style-position:inside}
+.defs summary:hover{background:var(--sunk)}
+.defs[open] summary{border-bottom:1px solid var(--rule)}
+.defs>div{padding:4px 16px 16px}
+.deft td.dn{font-weight:600;white-space:nowrap}
+.deft td.df{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-2)}
+.deft td.du{color:var(--ink-3);font-size:11px}
 .sparkna{color:var(--ink-4);font-family:"IBM Plex Mono",monospace;font-size:11px}
 td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
 /* 品號底下帶一行品名。只給品號的表，要先去查對照表才看得懂在講哪支產品 ——
@@ -304,8 +321,9 @@ tbody tr.clickable:hover{background:var(--accent-wash)}
 
 /* ── chart ── */
 .fig{margin:22px 0 30px}
-.fig-t{font-size:14px;font-weight:700;font-family:"Noto Serif TC",serif;margin-bottom:2px}
-.fig-s{font-size:12.5px;color:var(--ink-3);margin-bottom:12px;max-width:74ch}
+.fig-t{font-size:15px;font-weight:700;font-family:"Noto Serif TC",serif;margin-bottom:3px;
+  padding-left:10px;border-left:3px solid var(--accent)}
+.fig-s{font-size:12.5px;color:var(--ink-2);margin:0 0 12px 13px;max-width:74ch}
 .fig-n{font-size:12px;color:var(--ink-3);margin-top:9px;max-width:76ch}
 .chart{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
   padding:16px 14px 8px;position:relative}
@@ -529,6 +547,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       </table>
     </div>
     <div class="fig-n" id="lampLegend"></div>
+    <details class="defs"><summary>數字怎麼算的 —— 平常水準、合理目標、離群門檻的定義</summary>
+      <div id="defsBox"></div></details>
   </div>
 </section>
 
@@ -540,8 +560,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       <label for="skuSearch">搜尋</label>
       <input type="search" id="skuSearch" placeholder="品號或品名，例如 D03、花生" autocomplete="off">
       <label for="selMain">品項</label><select id="selMain"></select>
-      <label>比較 A</label><select id="selCmpA"></select>
-      <label>比較 B</label><select id="selCmpB"></select>
     </div>
     <div class="fig-n" id="searchNote" style="margin:-8px 0 16px"></div>
     <div class="skuname" id="skuName"></div>
@@ -857,7 +875,17 @@ const OUT_RATE_WATCH = 25;   // ≥ 此值 → 注意
 const OUT_MIN_ALERT  = 3;    // 且至少要有這麼多批，避免 2/5 就亮紅
 const OUT_MIN_WATCH  = 2;
 const RECENT_MIN_N   = 5;    // 近三個生產月不到這麼多批，不用比率判定
-const DECLINE = 0.9;         // 連續低於自身中位數 10% 以上
+/* 「連續變慢」的門檻。兩個問題要一起解決 ——
+   (1) 舊寫法是「三個生產月每個月都低於平常水準的 90%」，那是一道刀鋒：
+       實測 A2060 有兩個月分別只差 0.19% 與 0.38%，再多 11 瓶/hr 整支就從異常翻成正常。
+       改成「三個月都低於平常，而且三個月合計慢 10% 以上」，看的是幅度不是剛好跨線。
+   (2) 更要緊的是基準本身。「平常水準」是全期中位數，但全廠自 2025-12 起就整體下移：
+       各品項相對自己平常水準的月中位數，10/11 月是 105～106%，到 2026 年只剩 90～94%。
+       用全期中位數當基準，近期幾乎每一支都會「比平常慢」—— 那不是品項的問題。
+       所以判定時先扣掉全廠同期的漂移：只標出「比同期大盤更差」的品項。
+       實測 10 支 → 3 支，其餘 7 支只是跟著大盤走。
+       全廠的下移沒有被藏起來，它被提到「全廠水準」自己講。 */
+const DECLINE = 0.9;
 const DECLINE_MONTHS = 3;
 const MIN_BATCHES = 10;      // 低於此批次數不做判定，只標「批次太少」
 const INTENSITY_HIGH = 1.5;  // 相對工時強度
@@ -927,36 +955,17 @@ function analyse(batches) {
     // 用月曆月份會失真 —— 接單式生產下很多品項不是每月都做，
     // 例如 A1040 八月沒生產，用月曆月只涵蓋兩個月，會算出 -8% 的假警訊。
     const last3 = months.slice(-DECLINE_MONTHS);
-    const declining = months.length >= DECLINE_MONTHS
-      && last3.every(x => x.rate < med * DECLINE);
     const belowCount = last3.filter(x => x.rate < med * DECLINE).length;
     const ownRecent = new Set(last3.map(x => x.m));
     const recentRates = list.filter(x => ownRecent.has(x.m)).map(x => x.b / x.h);
     const vsUsual = recentRates.length ? mean(recentRates) / med - 1 : null;
 
     const cv = Math.round(100 * stdev(rates) / mean(rates));
-    const enough = list.length >= MIN_BATCHES;
     // 「近期」與 declining 同一個基準：該品項自己最後 3 個有生產的月份
     const recentAll = list.filter(x => ownRecent.has(x.m));
     const recentOutliers = outliers.filter(x => ownRecent.has(x.m));
     const outRate = recentAll.length
       ? Math.round(100 * recentOutliers.length / recentAll.length) : null;
-    const rated = recentAll.length >= RECENT_MIN_N;   // 批數太少時比率沒有意義
-    const outText = `近三月 ${recentOutliers.length}/${recentAll.length} 批離群（${outRate}%）`;
-
-    // 燈號要能自己解釋為什麼 —— 否則「近三月 +1% 卻標異常」會讓人不信任
-    let status = 'ok', statusWhy = '批次穩定';
-    if (!enough) { status = 'thin'; statusWhy = `全年僅 ${list.length} 批，樣本不足`; }
-    else if (declining) { status = 'alert'; statusWhy = '連續 3 個生產月變慢'; }
-    else if (rated && outRate >= OUT_RATE_ALERT && recentOutliers.length >= OUT_MIN_ALERT) {
-      status = 'alert'; statusWhy = outText;
-    } else if (rated && outRate >= OUT_RATE_WATCH && recentOutliers.length >= OUT_MIN_WATCH) {
-      status = 'watch'; statusWhy = outText;
-    } else if (cv > CV_WATCH) { status = 'watch'; statusWhy = `批次落差 ${cv}%`; }
-    // 只有在近期整體確實偏低時才這樣寫 —— 否則會出現「+2.5% 卻說偏低」的反向矛盾
-    else if (belowCount && vsUsual !== null && vsUsual < 0) {
-      statusWhy = `近期偏低，但未連續（${belowCount}/${last3.length} 個月）`;
-    }
 
     skus.push({
       sku, b: Math.round(B), h: +H.toFixed(1), d: days, n: list.length,
@@ -967,11 +976,63 @@ function analyse(batches) {
       intensity: +(overallRate / rate).toFixed(2),
       hShare: +(100 * H / totalH).toFixed(2), bShare: +(100 * B / totalB).toFixed(2),
       shortN: short.length, shortH: +short.reduce((a, x) => a + x.h, 0).toFixed(1),
-      status, statusWhy, declining, belowCount, vsUsual, months, outliers, laggards,
+      belowCount, vsUsual, months, outliers, laggards, last3,
       recentOutlierN: recentOutliers.length, recentN: recentAll.length, outRate,
     });
   }
   skus.sort((a, b) => b.b - a.b);
+
+  /* ── 全廠每月基準 ──
+     每個月，把所有樣本足夠的品項「該月產能 ÷ 自己的平常水準」取中位數。
+     這條線代表「這個月全廠整體比自己的常態快還是慢」。
+     判定單一品項時要先扣掉它 —— 否則全廠一起慢的時候，每一支都會被標成異常，
+     然後十個課長被叫去說明同一件事。 */
+  const rated = skus.filter(s => s.n >= MIN_BATCHES);
+  const plant = {};
+  allMonths.forEach(m => {
+    const v = rated.map(s => {
+      const x = s.months.find(y => y.m === m);
+      return x && s.med ? x.rate / s.med : null;
+    }).filter(v => v !== null);
+    plant[m] = v.length >= 5 ? median(v) : 1;      // 樣本太少就不調整
+  });
+
+  // ── 燈號（要等全廠基準算完才判得出來）──
+  for (const s of skus) {
+    const enough = s.n >= MIN_BATCHES;
+    const l3 = s.last3;
+    // 扣掉全廠同期漂移後，這支還剩多少
+    const adj = l3.map(m => (m.rate / s.med) / (plant[m.m] || 1));
+    const adjAvg = adj.length ? adj.reduce((a, b) => a + b, 0) / adj.length : 1;
+    // 「連續變慢」＝三個生產月都比同期大盤差，而且合計差 10% 以上。
+    // 看的是幅度，不是剛好跨線 —— 舊寫法差 0.2% 就翻一個結論。
+    s.declining = s.months.length >= DECLINE_MONTHS
+      && adj.every(v => v < 1) && adjAvg <= DECLINE;
+    s.adjAvg = Math.round(adjAvg * 100);
+    s.selfAvg = l3.length
+      ? Math.round(100 * l3.reduce((a, m) => a + m.rate, 0) / l3.length / s.med) : null;
+
+    const useRate = s.recentN >= RECENT_MIN_N;     // 批數太少時比率沒有意義
+    const outText = `近三月 ${s.recentOutlierN}/${s.recentN} 批離群（${s.outRate}%）`;
+    // 燈號要能自己解釋為什麼 —— 否則「近三月 +1% 卻標異常」會讓人不信任
+    s.status = 'ok'; s.statusWhy = '批次穩定';
+    if (!enough) { s.status = 'thin'; s.statusWhy = `全年僅 ${s.n} 批，樣本不足`; }
+    else if (s.declining) {
+      s.status = 'alert';
+      s.statusWhy = `連續 3 個生產月變慢（扣掉全廠漂移仍差 ${100 - s.adjAvg}%）`;
+    } else if (useRate && s.outRate >= OUT_RATE_ALERT
+               && s.recentOutlierN >= OUT_MIN_ALERT) {
+      s.status = 'alert'; s.statusWhy = outText;
+    } else if (useRate && s.outRate >= OUT_RATE_WATCH
+               && s.recentOutlierN >= OUT_MIN_WATCH) {
+      s.status = 'watch'; s.statusWhy = outText;
+    } else if (s.cv > CV_WATCH) { s.status = 'watch'; s.statusWhy = `批次落差 ${s.cv}%`; }
+    // 只有在近期整體確實偏低時才這樣寫 —— 否則會出現「+2.5% 卻說偏低」的反向矛盾
+    else if (s.belowCount && s.vsUsual !== null && s.vsUsual < 0) {
+      s.statusWhy = `近期偏低，但未連續（${s.belowCount}/${l3.length} 個月）`;
+    }
+    delete s.last3;
+  }
 
   // 每日負載
   const dayH = new Map(), daySku = new Map();
@@ -1010,6 +1071,8 @@ function analyse(batches) {
     over8Days: dailyHours.filter(h => h > 8).length,
     solo8, months: allMonths,
     mixedN: batches.filter(x => x.mixed).length,
+    // 全廠每月相對水準。判定單一品項時要扣掉它，同時它自己也是一條要看的線。
+    plant: allMonths.map(m => ({ m, rel: +(plant[m] || 1).toFixed(3) })),
   };
 
   return { meta, skus, batches, relative, relByMonth, alerts: buildAlerts(skus, meta) };
@@ -1203,6 +1266,29 @@ function dotChart(skus) {
       fill="${out ? cssv('--signal') : col}" stroke="${cssv('--surface')}" stroke-width="1.5"
       style="cursor:crosshair"/>`;
   });
+
+  /* 月平均折線。
+     「連續變慢」看的是月平均，不是單批 —— 水準整體下移 10% 時，
+     沒有任何一批會掉出 ±30% 的範圍，所以只看散點會覺得「明明都正常」。
+     把月平均畫上去，燈號在看什麼就一目了然。
+     橘色方點＝該月比這支產品的平常水準慢 10% 以上。 */
+  if (single) {
+    const sk = skus[0], ms = sk.months.filter(m => m.rate);
+    if (ms.length >= 2) {
+      const mid = m => X(m.m + '-15');
+      const d = ms.map((m, i) => `${i ? 'L' : 'M'}${mid(m).toFixed(1)},${Y(m.rate).toFixed(1)}`).join('');
+      s += `<path d="${d}" fill="none" stroke="${cssv('--ink-2')}" stroke-width="2"
+             stroke-linejoin="round" opacity=".75"/>`;
+      ms.forEach(m => {
+        const low = m.rate < sk.med * E.thresholds.DECLINE;
+        s += `<rect x="${mid(m) - 4}" y="${Y(m.rate) - 4}" width="8" height="8" rx="1.5"
+               fill="${low ? cssv('--signal') : cssv('--ink-2')}"
+               stroke="${cssv('--surface')}" stroke-width="1.5"><title>${
+               monthLabel(m.m)} 月平均 ${fmt(m.rate)} 單位/hr（平常 ${fmt(sk.med)} 的 ${
+               Math.round(100 * m.rate / sk.med)}%）</title></rect>`;
+      });
+    }
+  }
   el.innerHTML = s + '</svg>';
   tipOn(el, tip, [...el.querySelectorAll('.hit')], h => {
     const p = pts[+h.dataset.i], sk = skus[p.si];
@@ -1216,7 +1302,12 @@ function dotChart(skus) {
     + `<span><i style="background:var(--signal)"></i>離群批次 ——`
     + ` 掉出 <b>${fmt(skus[0].med * lo)} ～ ${fmt(skus[0].med * hi)}</b> 這個範圍`
     + `（平常水準 ${fmt(skus[0].med)} 的 ${Math.round(lo * 100)}% ～ ${hi} 倍）</span>`
-    + (single ? `<span style="color:var(--ink-3)">淺綠色區塊就是正常範圍，點落在裡面就不必追</span>` : '');
+    + (single ? `<span><i style="background:var(--ink-2);border-radius:1px"></i>月平均`
+      + `（<b style="color:var(--signal)">橘色方點</b>＝該月比平常慢 10% 以上）</span>`
+      + `<span style="flex-basis:100%;color:var(--ink-3);margin-top:2px">`
+      + `淺綠色區塊是<b>單批</b>的正常範圍，點落在裡面那一批就不必追；`
+      + `<b>月平均那條線是另一回事</b> —— 水準整體下移 10% 時，沒有任何一批會掉出範圍，`
+      + `但月平均會一路走低。燈號的「連續變慢」看的就是這條線，不是散點。</span>` : '');
 }
 
 /* ─────────── 02b 工時與產出散佈圖 ─────────── */
@@ -1430,6 +1521,56 @@ const TOP_N = 10;   // 總覽預設顯示的列數
 
 const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太少' };
 
+/* ── 數字怎麼算的 ──
+   同一份定義同時給儀表板和月報用。分散在各處的小字說明會慢慢走鐘 ——
+   改了一邊忘了另一邊，最後沒有人知道哪個才算數。 */
+function defsHtml() {
+  const t = E.thresholds;
+  const rows = [
+    ['平常水準', '該品項每批產能的<b>中位數</b>',
+     '一半的批次做得到。<b>不是平均數</b>', '所有「vs 平常」、燈號、離群門檻'],
+    ['合理目標', '該品項每批產能的 <b>P75</b>（第 75 百分位）',
+     '已經有 1/4 的批次做到，所以是做得到的目標', '可省工時、排程試算'],
+    ['整體產能', '總包裝量 ÷ 總工時（<b>加權平均</b>）',
+     '全廠或當月的總平均。混了不同瓶型，只能看趨勢', 'KPI 帶、月報概況'],
+    ['離群下限', `平常水準 × <b>${t.OUT_LO}</b>`,
+     '低於就請製造單位說明那一批', '批次落點圖、需要說明的批次'],
+    ['離群上限', `平常水準 × <b>${t.OUT_HI}</b>`,
+     '高於通常是資料登錄有誤', '同上'],
+    ['離群率', '近 3 個生產月的離群批數 ÷ 該期間總批數',
+     `≥ <b>${t.OUT_RATE_ALERT}%</b> 標異常、≥ ${t.OUT_RATE_WATCH}% 標注意。`
+     + '全廠水準約 19%，所以「有一兩批離群」不算異常', '燈號'],
+    ['連續變慢', '3 個生產月的<b>月平均</b>都低於平常水準，'
+     + `且扣掉全廠同期漂移後仍差 <b>${Math.round((1 - t.DECLINE) * 100)}%</b> 以上`,
+     '整體水準下移。這時單批可能都還在正常範圍內 —— 要看月平均那條線', '燈號「異常」'],
+    ['全廠水準', '每個月，各品項「該月產能 ÷ 自己平常水準」的<b>中位數</b>',
+     '這個月全廠整體比常態快還是慢。判定單一品項時要先扣掉它，'
+     + '否則全廠一起慢的時候每支都被標異常', '燈號的基準調整'],
+    ['批次落差 CV', '該品項各批產能的標準差 ÷ 平均',
+     `&gt; <b>${t.CV_WATCH}%</b> 標注意。同一支產品批次之間差太多`, '燈號'],
+    ['每千瓶工時', '1000 ÷ 該品項產能',
+     '包這支一千瓶要幾小時。接單估工時用', '品項總覽、吃工時的品項'],
+    ['可省工時', '總工時 −（包裝量 ÷ 合理目標）',
+     '<b>理論上限，不是承諾</b>。實務拿到 3～5 成即算成功', 'KPI 帶'],
+    ['單位／人·hr', '包裝量 ÷（工時 × 人數）',
+     '每人每小時處理幾件＝作業強度。<b>只能跟自己比</b>，'
+     + '拿去跨品項排名等於在罵做小包裝的人', '人均產能'],
+    ['公斤／人·hr', '產出重量 ÷ 人時',
+     '<b>唯一可以跨品項比</b>的人均指標', '人均產能'],
+  ];
+  return `<table class="rtab deft"><thead><tr>
+      <th>名詞</th><th>算法</th><th>代表什麼</th><th>用在哪</th>
+    </tr></thead><tbody>${rows.map(r => `<tr>
+      <td class="dn">${r[0]}</td><td class="df">${r[1]}</td>
+      <td>${r[2]}</td><td class="du">${r[3]}</td></tr>`).join('')}</tbody></table>
+    <div class="rep-note"><b>為什麼「平常水準」用中位數不用平均數？</b>
+      加權平均是總瓶數÷總工時 —— 慢的批次佔用的工時多、權重就大，會把基準往下拉。
+      實測 48 支樣本足夠的品項裡有 <b>44 支</b>的中位數高於加權平均，平均高出 <b>12.4%</b>，
+      代表這是系統性偏差，不是個案。中位數才是「一般一批做得到的速度」。<br>
+      <b>每一支產品只跟自己比。</b>瓶型不同，跨品項比產能沒有意義 ——
+      所以這套系統不做任何跨品項的效率排名。</div>`;
+}
+
 /* 逐月走勢的迷你折線。燈號說「正常」或「異常」，這條線是它的佐證 ——
    不必點進去就看得出這支是一路往下、還是只有某個月掉下去。
    縱軸以該品項自己的平常水準為 1.0，固定 0.6～1.4，各列之間才比得起來。 */
@@ -1532,12 +1673,10 @@ function optionFor(sku) {
 function fillSelects() {
   const skus = state.R.skus;
   const byFreq = [...skus].sort((a, b) => b.d - a.d).slice(0, 15).map(s => s.sku);
-  const groups = withNone =>
-    (withNone ? '<option value="">— 不比較 —</option>' : '')
-    + `<optgroup label="經常生產">${byFreq.map(optionFor).join('')}</optgroup>`
+  const groups = () =>
+    `<optgroup label="經常生產">${byFreq.map(optionFor).join('')}</optgroup>`
     + `<optgroup label="其他品項">${skus.filter(s => !byFreq.includes(s.sku)).map(s => optionFor(s.sku)).join('')}</optgroup>`;
-  ['selMain', 'selCalc'].forEach(id => $(id).innerHTML = groups(false));
-  ['selCmpA', 'selCmpB'].forEach(id => $(id).innerHTML = groups(true));
+  ['selMain', 'selCalc'].forEach(id => $(id).innerHTML = groups());
 }
 
 /** 搜尋框：輸入品號或品名即時縮小「品項」下拉的範圍；只剩一支就直接切過去 */
@@ -1581,12 +1720,10 @@ function renderSku(sku) {
   $('dotTitle').textContent = `${sku}${nm ? '　' + nm : ''}　每一批的產能，依時間排列`;
   $('scatterTitle').textContent = `${sku}${nm ? '　' + nm : ''}　批次工時與產出`;
 
-  const cmp = [$('selCmpA').value, $('selCmpB').value]
-    .filter(v => v && v !== sku)
-    .map(v => state.R.skus.find(x => x.sku === v));
-  const series = [s, ...cmp];
-  dotChart(series);
-  scatter(series);
+  // 一次只看一支。三支疊在同一張圖上，點的顏色會互相干擾，
+  // 而且每支的平常水準不同 —— 三組上下限畫在一起就分不出哪條線是誰的。
+  dotChart([s]);
+  scatter([s]);
   renderSkuNotes(s);
 }
 
@@ -1702,6 +1839,7 @@ function render() {
   $('footMeta').textContent =
     `${state.source} · ${m.records} 筆 / ${m.skuCount} 品項 · ${m.period[0]} – ${m.period[1]}`;
   renderKpis(); syncTabs(); fillSelects(); renderAlerts(); relChart();
+  $('defsBox').innerHTML = defsHtml();
   $('skuSearch').value = ''; $('searchNote').textContent = '';
 
   const wanted = new URLSearchParams(location.search).get('sku');
@@ -1717,7 +1855,6 @@ function render() {
 function goto(sku) {
   if (!state.R.skus.some(s => s.sku === sku)) return;
   $('selMain').value = sku; $('selCalc').value = sku;
-  $('selCmpA').value = ''; $('selCmpB').value = '';
   setSliderRange(state.R.skus.find(x => x.sku === sku));
   renderSku(sku); calc();
   history.replaceState(null, '', '?sku=' + encodeURIComponent(sku));
@@ -1739,7 +1876,6 @@ function showError(msg) {
 
 $('skuSearch').oninput = applySearch;
 $('selMain').onchange = () => goto($('selMain').value);
-$('selCmpA').onchange = $('selCmpB').onchange = () => renderSku($('selMain').value);
 $('selCalc').onchange = () => {
   setSliderRange(state.R.skus.find(x => x.sku === $('selCalc').value));
   calc();
@@ -2254,6 +2390,9 @@ function buildReport(ym) {
 
   <h3><span class="n">07</span>資料完整性</h3>
   <div id="repChk"><div class="rep-empty">讀取中…</div></div>
+
+  <h3><span class="n">08</span>數字怎麼算的</h3>
+  ${defsHtml()}
 
   <div class="rep-foot">工時一律由起訖時間推算，不接受人工填寫。本報表由包裝產能系統自動產生。</div>`;
 }
