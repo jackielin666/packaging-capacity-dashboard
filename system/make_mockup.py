@@ -47,6 +47,17 @@ def route(r):
                          body=json.dumps([{"display_name":"陳小姐","role":"operator"}]))
     if "/rest/v1/sku_stats" in u:
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(SKUS))
+    if "/rest/v1/month_status" in u:
+        return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+            {"ym":"2026-09","is_imported":False,"workdays":11,"logged_days":6,
+             "no_op_days":1,"missing_days":4,"batches":26,"with_headcount":26,"head_pct":100},
+            {"ym":"2026-08","is_imported":True,"workdays":21,"logged_days":21,
+             "no_op_days":0,"missing_days":0,"batches":154,"with_headcount":154,"head_pct":100},
+            {"ym":"2026-07","is_imported":True,"workdays":23,"logged_days":22,
+             "no_op_days":0,"missing_days":0,"batches":151,"with_headcount":68,"head_pct":45},
+            {"ym":"2026-06","is_imported":True,"workdays":22,"logged_days":19,
+             "no_op_days":0,"missing_days":0,"batches":120,"with_headcount":0,"head_pct":0},
+        ]))
     if "/rest/v1/day_summary" in u:
         return r.fulfill(status=200, content_type="application/json", body=json.dumps(DAYS))
     if "/rest/v1/daily_status" in u:

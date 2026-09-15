@@ -250,6 +250,27 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .htab .mk.low{color:var(--signal)}
 .htab .mk.high{color:var(--cool)}
 
+/* ── 月度檢核 ── */
+.chk-hd{display:flex;align-items:center;gap:12px;padding:16px 20px;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule)}
+.chk-hd.warn{background:var(--signal-wash)}
+.chk-hd.ok{background:var(--accent-wash)}
+.chk-hd .ic{font-family:"IBM Plex Mono",monospace;font-size:13px;width:20px;height:20px;
+  display:grid;place-items:center;border-radius:50%;flex:none}
+.chk-hd.warn .ic{background:var(--signal);color:#fff}
+.chk-hd.ok .ic{color:var(--accent);font-size:15px}
+.chk-hd .txt{flex:1;min-width:180px;font-size:13.5px}
+.chk-hd .txt b{font-family:"Noto Serif TC",serif}
+.mtab tr[data-m]{cursor:pointer}
+.mtab tr[data-m]:hover td{background:var(--sunk)}
+.mtab td.miss{color:var(--signal);font-weight:500}
+.mtab .src{font-size:11px;color:var(--ink-3);font-family:"Noto Sans TC",sans-serif}
+.bar{display:flex;align-items:center;gap:7px;justify-content:flex-end}
+.bar .t{width:52px;height:6px;border-radius:3px;background:var(--raised);overflow:hidden;
+  flex:none}
+.bar .t i{display:block;height:100%;background:var(--accent)}
+.bar .p{font-size:11.5px;color:var(--ink-3);min-width:32px;text-align:right}
+
 /* ── 匯出 ── */
 .exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:14px 20px 16px;
   border-top:1px solid var(--rule);background:var(--sunk);border-radius:0 0 5px 5px}
@@ -506,6 +527,22 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <button class="btn ghost sm" id="expBtn">下載 CSV</button>
         <span class="hint" id="expState"></span>
       </div>
+    </div>
+
+    <!-- 月度完整性檢核 -->
+    <div class="panel">
+      <div class="head">
+        <div>
+          <h2>補登與檢核</h2>
+          <div class="sub">每個月該登記幾天、登了幾天、人數補到哪裡。點月份可以跳過去。</div>
+        </div>
+      </div>
+      <div class="chk-hd warn" id="chkHd">
+        <div class="ic" id="chkIc">!</div>
+        <div class="txt" id="chkTxt"><b>還有 4 個工作日沒有登記</b>　登記了就不會再出現在這裡。</div>
+        <button class="btn ghost sm" id="chkGo">前往最早的一天</button>
+      </div>
+      <div id="chkBody"><table class="htab mtab"><thead><tr><th>月份</th><th class="num">工作日</th><th class="num">已登記</th><th class="num">無作業</th><th class="num">待補</th><th class="num">批次</th><th class="num">人數補登</th></tr></thead><tbody><tr data-m="2026-09"><td>2026-09</td><td class="num">11</td><td class="num">6</td><td class="num">1</td><td class="num miss">4</td><td class="num">26</td><td><div class="bar"><span class="t"><i style="width:100%"></i></span><span class="p">100%</span></div></td></tr><tr data-m="2026-08"><td>2026-08 <span class="src">匯入</span></td><td class="num">21</td><td class="num">21</td><td class="num">—</td><td class="num">—</td><td class="num">154</td><td><div class="bar"><span class="t"><i style="width:100%"></i></span><span class="p">100%</span></div></td></tr><tr data-m="2026-07"><td>2026-07 <span class="src">匯入</span></td><td class="num">23</td><td class="num">22</td><td class="num">—</td><td class="num">—</td><td class="num">151</td><td><div class="bar"><span class="t"><i style="width:45%"></i></span><span class="p">45%</span></div></td></tr><tr data-m="2026-06"><td>2026-06 <span class="src">匯入</span></td><td class="num">22</td><td class="num">19</td><td class="num">—</td><td class="num">—</td><td class="num">120</td><td><div class="bar"><span class="t"><i style="width:0%"></i></span><span class="p">0%</span></div></td></tr></tbody></table><div class="exp" style="border-radius:0 0 5px 5px"><span class="hint">人數補登合計　248 / 451 批（55%）</span><span class="t" style="flex:1;max-width:220px;height:6px;border-radius:3px;background:var(--raised);overflow:hidden"><i style="display:block;height:100%;width:55%;background:var(--accent)"></i></span></div></div>
     </div>
 
   </div>

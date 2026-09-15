@@ -68,6 +68,15 @@ def make_router(existing_batches):
             if m in ("POST", "DELETE"):
                 return r.fulfill(status=201, content_type="application/json", body="[]")
             return r.fulfill(status=200, content_type="application/json", body="[]")
+        if "/rest/v1/month_status" in u:
+            return r.fulfill(status=200, content_type="application/json", body=json.dumps([
+                {"ym":"2026-09","is_imported":False,"workdays":11,"logged_days":0,
+                 "no_op_days":0,"missing_days":11,"batches":0,"with_headcount":0,"head_pct":None},
+                {"ym":"2026-08","is_imported":True,"workdays":21,"logged_days":21,
+                 "no_op_days":0,"missing_days":0,"batches":154,"with_headcount":154,"head_pct":100},
+                {"ym":"2026-07","is_imported":True,"workdays":23,"logged_days":22,
+                 "no_op_days":0,"missing_days":0,"batches":151,"with_headcount":0,"head_pct":0},
+            ]))
         if "/rest/v1/day_summary" in u:
             return r.fulfill(status=200, content_type="application/json", body=json.dumps([
                 {"prod_date":"2026-09-01","batches":4,"bottles":5000,"hours":6.0,"no_operation":False},
@@ -361,6 +370,26 @@ with sync_playwright() as p:
     check("匯出列與上方分開（有分隔線與間距）", gap >= 0, gap)
     check("匯出列有分隔線",
           pg.evaluate("getComputedStyle(document.querySelector('.exp')).borderTopWidth") == "1px")
+
+    print("\n── 月度完整性檢核 ──")
+    check("檢核面板有出現", pg.is_visible("#chkBody"))
+    hd = pg.inner_text("#chkTxt")
+    check("標示待補天數", "11 個工作日" in hd, hd)
+    check("待補時是警示樣式", "warn" in (pg.locator("#chkHd").get_attribute("class") or ""),
+          pg.locator("#chkHd").get_attribute("class"))
+    check("提供前往最早一天的按鈕", pg.is_visible("#chkGo"))
+    rows = pg.locator("#chkBody .mtab tbody tr")
+    check("列出三個月", rows.count() == 3, rows.count())
+    check("匯入的月份有標示", "匯入" in rows.nth(1).inner_text(), rows.nth(1).inner_text())
+    check("匯入月份不列待補", rows.nth(1).locator("td").nth(4).inner_text().strip() == "—",
+          rows.nth(1).locator("td").nth(4).inner_text())
+    check("人數覆蓋率顯示 100%", "100%" in rows.nth(1).inner_text(), rows.nth(1).inner_text())
+    check("合計進度出現", "人數補登合計" in pg.inner_text("#chkBody"),
+          pg.inner_text("#chkBody")[-120:])
+    rows.nth(2).click()
+    pg.wait_for_timeout(500)
+    check("點月份可跳到該月", "2026 年 7 月" in pg.inner_text("#calTitle"),
+          pg.inner_text("#calTitle"))
 
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)

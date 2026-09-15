@@ -223,6 +223,27 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .htab .mk.low{color:var(--signal)}
 .htab .mk.high{color:var(--cool)}
 
+/* ── 月度檢核 ── */
+.chk-hd{display:flex;align-items:center;gap:12px;padding:16px 20px;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule)}
+.chk-hd.warn{background:var(--signal-wash)}
+.chk-hd.ok{background:var(--accent-wash)}
+.chk-hd .ic{font-family:"IBM Plex Mono",monospace;font-size:13px;width:20px;height:20px;
+  display:grid;place-items:center;border-radius:50%;flex:none}
+.chk-hd.warn .ic{background:var(--signal);color:#fff}
+.chk-hd.ok .ic{color:var(--accent);font-size:15px}
+.chk-hd .txt{flex:1;min-width:180px;font-size:13.5px}
+.chk-hd .txt b{font-family:"Noto Serif TC",serif}
+.mtab tr[data-m]{cursor:pointer}
+.mtab tr[data-m]:hover td{background:var(--sunk)}
+.mtab td.miss{color:var(--signal);font-weight:500}
+.mtab .src{font-size:11px;color:var(--ink-3);font-family:"Noto Sans TC",sans-serif}
+.bar{display:flex;align-items:center;gap:7px;justify-content:flex-end}
+.bar .t{width:52px;height:6px;border-radius:3px;background:var(--raised);overflow:hidden;
+  flex:none}
+.bar .t i{display:block;height:100%;background:var(--accent)}
+.bar .p{font-size:11.5px;color:var(--ink-3);min-width:32px;text-align:right}
+
 /* ── 匯出 ── */
 .exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:14px 20px 16px;
   border-top:1px solid var(--rule);background:var(--sunk);border-radius:0 0 5px 5px}
@@ -482,6 +503,22 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <button class="btn ghost sm" id="expBtn">下載 CSV</button>
         <span class="hint" id="expState"></span>
       </div>
+    </div>
+
+    <!-- 月度完整性檢核 -->
+    <div class="panel">
+      <div class="head">
+        <div>
+          <h2>補登與檢核</h2>
+          <div class="sub">每個月該登記幾天、登了幾天、人數補到哪裡。點月份可以跳過去。</div>
+        </div>
+      </div>
+      <div class="chk-hd" id="chkHd" hidden>
+        <div class="ic" id="chkIc"></div>
+        <div class="txt" id="chkTxt"></div>
+        <button class="btn ghost sm" id="chkGo" hidden>前往最早的一天</button>
+      </div>
+      <div id="chkBody"></div>
     </div>
 
   </div>
@@ -767,7 +804,7 @@ function boot() {
     if (state.role === 'viewer') {
       banner('info', '<b>你是檢視者</b>　可以查看所有資料，但不能新增或修改。');
     }
-    return loadDay(today());
+    return loadDay(today()).then(loadCheck);
   });
 }
 
@@ -1225,7 +1262,7 @@ $('saveBtn').addEventListener('click', function () {
     if (ins.length) bits.push('新增 ' + ins.length + ' 批');
     if (upd.length) bits.push('修改 ' + upd.length + ' 批');
     if (del.length) bits.push('刪除 ' + del.length + ' 批');
-    return refreshStats().then(function () {
+    return refreshStats().then(loadCheck).then(function () {
       return loadDay(d).then(function () {
         var nxt = nextWorkday(d);
         banner('ok', '<b>已儲存</b>　' + bits.join('、') + '。'
@@ -1267,6 +1304,7 @@ $('noOpBtn').addEventListener('click', function () {
 
   $('noOpBtn').disabled = true;
   req.then(function () { return loadDay(d); })
+     .then(loadCheck)
      .then(function () {
        banner('ok', marked ? '已取消標記。' : '<b>已標記本日無包裝作業</b>　月底檢核不會再把這天算成漏登。');
      })
@@ -1396,6 +1434,89 @@ $('rows').addEventListener('paste', function (e) {
   renderDay();
   banner('info', '<b>已貼上 ' + lines.length + ' 列</b>　'
     + '請確認品項與時間都對，再按儲存。欄位順序：品項／起始／結束／瓶數／人數。');
+});
+
+// ══ 月度完整性檢核 ════════════════════════════════════════
+/**
+ * 每個月「該登記幾個工作日、實際登了幾天、人數補到哪」。
+ *
+ * 匯入的歷史月份不列入待補：Excel 裡沒有「那天沒生產」這種紀錄，
+ * 空白的日子無從判斷究竟是沒做還是漏記。整個歷史區間有 23 個這種日子，
+ * 當成待辦丟出去就是 23 件查不出答案的假工作 —— 清單一旦混進查不到答案的
+ * 項目，整份就會被放棄，連真的漏登也一起被忽略。
+ */
+function loadCheck() {
+  return api('month_status?select=ym,is_imported,workdays,logged_days,no_op_days,'
+             + 'missing_days,batches,with_headcount,head_pct&order=ym.desc')
+    .then(renderCheck)
+    .catch(function (e) {
+      $('chkBody').innerHTML = '<div class="msg bad" style="margin:16px 20px">讀取失敗：'
+        + esc(e.message) + '</div>';
+    });
+}
+
+function renderCheck(rows) {
+  var miss = 0, batches = 0, heads = 0;
+  rows.forEach(function (r) {
+    miss    += r.missing_days;
+    batches += r.batches;
+    heads   += r.with_headcount;
+  });
+
+  var hd = $('chkHd');
+  hd.hidden = false;
+  hd.className = 'chk-hd ' + (miss ? 'warn' : 'ok');
+  $('chkIc').textContent = miss ? '!' : '✓';
+  $('chkTxt').innerHTML = miss
+    ? '<b>還有 ' + miss + ' 個工作日沒有登記</b>　登記了就不會再出現在這裡。'
+    : '<b>所有工作日都處理過了</b>　沒有漏登的日子。';
+  $('chkGo').hidden = !miss;
+
+  var pct = batches ? Math.round(100 * heads / batches) : 0;
+  var h = '<table class="htab mtab"><thead><tr>'
+    + '<th>月份</th><th class="num">工作日</th><th class="num">已登記</th>'
+    + '<th class="num">無作業</th><th class="num">待補</th><th class="num">批次</th>'
+    + '<th class="num">人數補登</th></tr></thead><tbody>';
+
+  rows.forEach(function (r) {
+    h += '<tr data-m="' + r.ym + '">'
+      + '<td>' + r.ym + (r.is_imported ? ' <span class="src">匯入</span>' : '') + '</td>'
+      + '<td class="num">' + r.workdays + '</td>'
+      + '<td class="num">' + r.logged_days + '</td>'
+      + '<td class="num">' + (r.no_op_days || '—') + '</td>'
+      + '<td class="num' + (r.missing_days ? ' miss' : '') + '">'
+        + (r.missing_days || '—') + '</td>'
+      + '<td class="num">' + num(r.batches) + '</td>'
+      + '<td>' + (r.batches
+          ? '<div class="bar"><span class="t"><i style="width:' + (r.head_pct || 0)
+            + '%"></i></span><span class="p">' + (r.head_pct || 0) + '%</span></div>'
+          : '<div class="bar"><span class="p">—</span></div>')
+      + '</td></tr>';
+  });
+
+  h += '</tbody></table>'
+    + '<div class="exp" style="border-radius:0 0 5px 5px">'
+    + '<span class="hint">人數補登合計　' + num(heads) + ' / ' + num(batches)
+    + ' 批（' + pct + '%）</span>'
+    + '<span class="t" style="flex:1;max-width:220px;height:6px;border-radius:3px;'
+    + 'background:var(--raised);overflow:hidden">'
+    + '<i style="display:block;height:100%;width:' + pct + '%;background:var(--accent)"></i>'
+    + '</span></div>';
+
+  $('chkBody').innerHTML = h;
+
+  $('chkBody').querySelectorAll('tr[data-m]').forEach(function (tr) {
+    tr.addEventListener('click', function () { loadMonth(tr.dataset.m); });
+  });
+}
+
+$('chkGo').addEventListener('click', function () {
+  $('chkGo').disabled = true;
+  findGap().then(function (d) {
+    if (d) guardUnsaved(function () { loadDay(d); });
+    else banner('ok', '<b>近四個月的工作日都處理過了</b>');
+  }).catch(function (e) { banner('bad', e.message); })
+    .then(function () { $('chkGo').disabled = false; });
 });
 
 // ══ 匯出 ══════════════════════════════════════════════════
