@@ -45,6 +45,83 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .privacy{font-size:12px;color:var(--ink-3);width:100%;margin-top:2px}
 .err{background:var(--signal-wash);border-left:3px solid var(--signal);padding:12px 16px;
   margin-top:12px;border-radius:0 3px 3px 0;font-size:13.5px}
+
+/* ── 登入視窗 ── */
+.modal{position:fixed;inset:0;background:rgba(18,23,26,.45);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:60}
+.modal .box{background:var(--surface);border-radius:6px;width:100%;max-width:420px;
+  box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.modal .top{display:flex;align-items:flex-start;gap:14px;padding:20px 22px 16px;
+  border-bottom:1px solid var(--rule)}
+.modal .top h2{font-size:17px}
+.modal .top .sub{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.modal .x2{background:0;border:0;font-size:22px;color:var(--ink-3);cursor:pointer;
+  line-height:1;padding:2px 6px;border-radius:3px;margin-left:auto}
+.modal .x2:hover{background:var(--raised);color:var(--ink)}
+.modal .scroll{padding:20px 22px 22px}
+.modal .field{margin-bottom:15px}
+.modal .field label{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
+.modal .field input{width:100%;padding:11px 13px;border:1px solid var(--rule-2);
+  border-radius:3px;background:var(--paper);font:15px "IBM Plex Mono",monospace;color:var(--ink)}
+.modal .field input:focus{outline:2px solid var(--accent);outline-offset:-1px;
+  border-color:transparent}
+[hidden]{display:none!important}
+
+/* ── 月報 ── */
+.rep-wrap{position:fixed;inset:0;background:var(--raised);z-index:70;overflow:auto}
+.rep-bar{position:sticky;top:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--ink);color:var(--paper);padding:11px 20px;z-index:2}
+.rep-bar .lbl{color:rgba(242,243,240,.6)}
+.rep-bar .now{flex:1;color:var(--paper);font-size:13.5px}
+.rep-bar .btn{border-color:rgba(255,255,255,.45);background:transparent;color:var(--paper)}
+.rep-bar .btn:first-of-type{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.rep-page{background:#fff;max-width:196mm;margin:22px auto;padding:16mm 15mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.12);color:var(--ink)}
+.rep-page h1{font-size:23px;margin:0}
+.rep-page .meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.09em;
+  color:var(--ink-3);text-transform:uppercase}
+.rep-page .stamp{display:flex;justify-content:space-between;align-items:flex-end;
+  border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;gap:14px;
+  flex-wrap:wrap}
+.rep-page h3{font-size:14.5px;margin:22px 0 8px;padding-bottom:5px;
+  border-bottom:1px solid var(--rule-2)}
+.rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
+  margin-right:8px}
+.rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
+.rep-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.rep-kpi div{background:var(--sunk);padding:10px 12px}
+.rep-kpi .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3)}
+.rep-kpi .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
+.rep-kpi .d{font-size:10.5px;margin-top:1px}
+.rep-kpi .d.up{color:var(--accent)} .rep-kpi .d.dn{color:var(--signal)}
+.rtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.rtab th{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  padding:6px 7px;border-bottom:1px solid var(--rule-2);background:var(--sunk)}
+.rtab th.num{text-align:right}
+.rtab td{padding:6px 7px;border-bottom:1px solid var(--rule);
+  font-variant-numeric:tabular-nums}
+.rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
+.rtab td.nm{color:var(--ink-2);font-size:11.5px}
+.rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
+.rep-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
+  font-size:11.5px;color:var(--ink-2);margin-top:8px}
+.rep-foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--rule);
+  font-size:10.5px;color:var(--ink-3)}
+.rep-empty{font-size:12.5px;color:var(--ink-3);padding:8px 0}
+
+@media print {
+  body > *:not(.rep-wrap){display:none!important}
+  .rep-wrap{position:static;background:#fff;overflow:visible}
+  .rep-bar{display:none!important}
+  .rep-page{box-shadow:none;margin:0;max-width:none;padding:0}
+  .rep-page h3{break-after:avoid}
+  .rtab{break-inside:auto}
+  .rtab tr{break-inside:avoid}
+  @page{size:A4;margin:14mm}
+}
 .err b{font-family:"Noto Serif TC",serif}
 
 /* ── kpi ── */
@@ -201,6 +278,62 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px;cursor:point
 footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-size:12px;
   color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 [hidden]{display:none!important}
+
+/* ── 月報 ── */
+.rep-wrap{position:fixed;inset:0;background:var(--raised);z-index:70;overflow:auto}
+.rep-bar{position:sticky;top:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--ink);color:var(--paper);padding:11px 20px;z-index:2}
+.rep-bar .lbl{color:rgba(242,243,240,.6)}
+.rep-bar .now{flex:1;color:var(--paper);font-size:13.5px}
+.rep-bar .btn{border-color:rgba(255,255,255,.45);background:transparent;color:var(--paper)}
+.rep-bar .btn:first-of-type{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.rep-page{background:#fff;max-width:196mm;margin:22px auto;padding:16mm 15mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.12);color:var(--ink)}
+.rep-page h1{font-size:23px;margin:0}
+.rep-page .meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.09em;
+  color:var(--ink-3);text-transform:uppercase}
+.rep-page .stamp{display:flex;justify-content:space-between;align-items:flex-end;
+  border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px;gap:14px;
+  flex-wrap:wrap}
+.rep-page h3{font-size:14.5px;margin:22px 0 8px;padding-bottom:5px;
+  border-bottom:1px solid var(--rule-2)}
+.rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
+  margin-right:8px}
+.rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
+.rep-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.rep-kpi div{background:var(--sunk);padding:10px 12px}
+.rep-kpi .k{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3)}
+.rep-kpi .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;margin-top:2px}
+.rep-kpi .d{font-size:10.5px;margin-top:1px}
+.rep-kpi .d.up{color:var(--accent)} .rep-kpi .d.dn{color:var(--signal)}
+.rtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.rtab th{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+  padding:6px 7px;border-bottom:1px solid var(--rule-2);background:var(--sunk)}
+.rtab th.num{text-align:right}
+.rtab td{padding:6px 7px;border-bottom:1px solid var(--rule);
+  font-variant-numeric:tabular-nums}
+.rtab td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
+.rtab td.nm{color:var(--ink-2);font-size:11.5px}
+.rtab td.lo{color:var(--signal)} .rtab td.hi{color:var(--cool)}
+.rep-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
+  font-size:11.5px;color:var(--ink-2);margin-top:8px}
+.rep-foot{margin-top:26px;padding-top:10px;border-top:1px solid var(--rule);
+  font-size:10.5px;color:var(--ink-3)}
+.rep-empty{font-size:12.5px;color:var(--ink-3);padding:8px 0}
+
+@media print {
+  body > *:not(.rep-wrap){display:none!important}
+  .rep-wrap{position:static;background:#fff;overflow:visible}
+  .rep-bar{display:none!important}
+  .rep-page{box-shadow:none;margin:0;max-width:none;padding:0}
+  .rep-page h3{break-after:avoid}
+  .rtab{break-inside:auto}
+  .rtab tr{break-inside:avoid}
+  @page{size:A4;margin:14mm}
+}
 /* 手機上表格橫向捲動會把「狀態」擠出畫面 —— 改成一列一張卡片 */
 @media(max-width:760px){
   #overviewTable thead{display:none}
@@ -229,12 +362,48 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   <h1>包裝產能與效率儀表板</h1>
   <p>先看常做與量大的品項有沒有異常，再點進去看是哪幾批出問題。每一支產品都只跟自己比 —— 瓶型不同，跨品項比產能沒有意義。</p>
 
-  <div class="src">
+  <div class="rep-wrap" id="rep" hidden>
+  <div class="rep-bar">
+    <span class="lbl">月報預覽</span>
+    <span class="now" id="repTitle"></span>
+    <button class="btn" id="repPrint">列印／存成 PDF</button>
+    <button class="btn ghost" id="repClose">關閉</button>
+  </div>
+  <div class="rep-page" id="repBody"></div>
+</div>
+
+<div class="modal" id="lg" hidden>
+  <div class="box">
+    <div class="top">
+      <div>
+        <h2>登入看最新資料</h2>
+        <div class="sub">用包裝資料輸入系統的同一組帳號。沒有帳號也可以繼續看內建資料。</div>
+      </div>
+      <button class="x2" id="lgClose" title="關閉">×</button>
+    </div>
+    <form class="scroll" id="lgForm" autocomplete="on">
+      <div class="field">
+        <label for="lgAcc">帳號</label>
+        <input id="lgAcc" name="username" autocomplete="username" autocapitalize="off"
+               spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label for="lgPw">密碼</label>
+        <input id="lgPw" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" type="submit" id="lgBtn" style="width:100%;padding:12px">登入</button>
+      <div class="err" id="lgErr" hidden></div>
+    </form>
+  </div>
+</div>
+
+<div class="src">
     <span class="lbl">資料來源</span>
     <span class="now" id="srcNow"></span>
     <label class="lbl" for="startYear">起始年度</label>
     <select id="startYear" title="包裝日期欄沒有年份，這裡設定資料是從哪一年的 10 月開始"></select>
-    <button class="btn" id="pickFile">載入我的 Excel 檔</button>
+    <button class="btn" id="liveBtn">讀取最新資料</button>
+    <button class="btn ghost" id="pickFile">載入我的 Excel 檔</button>
     <button class="btn ghost" id="resetFile" hidden>回到內建資料</button>
     <input type="file" id="fileInput" accept=".xlsx" hidden>
     <div class="privacy">
@@ -343,6 +512,18 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       <div class="chart"><div id="cRel"></div><div class="tip" id="tRel"></div></div>
       <div class="fig-n" id="relNote"></div>
     </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">06</div><h2>月報</h2></div>
+  <p class="lede">選一個月份產生報表，再用瀏覽器的「列印 → 另存為 PDF」存檔或寄出。
+    內容是該月的實際數字，不含互動元件。</p>
+  <div class="src" style="margin-top:14px">
+    <span class="lbl">月份</span>
+    <select id="repMonth"></select>
+    <button class="btn" id="repBtn">產生月報</button>
+    <span class="now" id="repHint"></span>
   </div>
 </section>
 
@@ -782,6 +963,12 @@ const SERIES = ['--accent', '--cool', '--signal'];
 const E = window.PackingEngine;
 
 const state = { R: null, source: '', year: EMBEDDED.year };
+
+/** 內建資料是某一天的快照，標出截止日才不會讓人以為看到的是最新的 */
+const snapLabel = () => {
+  const n = EMBEDDED.batches.length;
+  return n ? `內建快照（到 ${EMBEDDED.batches[n - 1].d}）` : '內建資料';
+};
 
 /* ─────────── 共用繪圖工具 ─────────── */
 
@@ -1304,6 +1491,7 @@ function load(batches, source) {
   state.source = source;
   $('srcErr').hidden = true;
   render();
+  buildMonthOptions();
 }
 
 function showError(msg) {
@@ -1350,9 +1538,11 @@ $('fileInput').onchange = async ev => {
 };
 $('resetFile').onclick = () => {
   rawSheets = null;
+  $('startYear').closest('.src').querySelectorAll('#startYear, label[for=startYear]')
+    .forEach(el => el.hidden = false);
   buildYearOptions(EMBEDDED.year);
   state.year = EMBEDDED.year;
-  load(EMBEDDED.batches, '內建資料');
+  load(EMBEDDED.batches, snapLabel());
   $('resetFile').hidden = true;
 };
 $('startYear').onchange = () => {
@@ -1371,11 +1561,319 @@ $('selCalc').onchange = () => {
 };
 $('qtySlider').oninput = calc;
 
+/* ─────────── 06 月報 ───────────
+   給主管、業務與生管看的一頁式報表。用瀏覽器內建的列印功能存成 PDF，
+   不引用任何外部套件 —— 工廠內網擋 CDN，多一個依賴就多一個開不起來的理由。
+
+   月份範圍的數字（產量、工時、產能）都只算該月；
+   但「這批算不算離群」的門檻沿用該品項的全期平均 ——
+   一個月的樣本不足以定義什麼叫正常，而且門檻要跟畫面上看到的一致。 */
+
+const ymLabel = m => `${m.slice(0, 4)} 年 ${+m.slice(5)} 月`;
+
+function monthAgg(ym) {
+  const rows = state.R.batches.filter(x => x.m === ym);
+  const H = rows.reduce((a, x) => a + x.h, 0);
+  const B = rows.reduce((a, x) => a + x.b, 0);
+  return { ym, rows, n: rows.length, H, B,
+    rate: H > 0 ? B / H : 0,
+    days: new Set(rows.map(x => x.d)).size,
+    skus: new Set(rows.map(x => x.s)).size };
+}
+
+const delta = (now, prev) => {
+  if (!prev) return '';
+  const d = Math.round(100 * (now / prev - 1));
+  if (!isFinite(d) || d === 0) return '<div class="d">持平</div>';
+  return `<div class="d ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}%</div>`;
+};
+
+function buildReport(ym) {
+  const R = state.R;
+  const cur = monthAgg(ym);
+  const months = R.meta.months;
+  const prevYm = months[months.indexOf(ym) - 1];
+  const prev = prevYm ? monthAgg(prevYm) : null;
+  const skuOf = new Map(R.skus.map(s => [s.sku, s]));
+
+  const byS = new Map();
+  cur.rows.forEach(x => {
+    const g = byS.get(x.s) || { s: x.s, n: 0, b: 0, h: 0 };
+    g.n++; g.b += x.b; g.h += x.h;
+    byS.set(x.s, g);
+  });
+  const list = [...byS.values()].map(g => {
+    const s = skuOf.get(g.s) || {};
+    const rate = g.h > 0 ? g.b / g.h : 0;
+    return { ...g, rate, usual: s.rate || 0,
+      vs: s.rate ? Math.round(100 * (rate / s.rate - 1)) : null,
+      hShare: cur.H ? +(100 * g.h / cur.H).toFixed(1) : 0,
+      bShare: cur.B ? +(100 * g.b / cur.B).toFixed(1) : 0 };
+  }).sort((a, b) => b.b - a.b);
+
+  const odd = cur.rows.map(x => {
+    const s = skuOf.get(x.s);
+    if (!s || s.n < 10) return null;
+    const rate = x.b / x.h;
+    const kind = rate < s.rate * 0.7 ? 'lo' : rate > s.rate * 2.5 ? 'hi' : null;
+    return kind ? { ...x, rate, usual: s.rate, kind } : null;
+  }).filter(Boolean).sort((a, b) => a.d < b.d ? -1 : 1);
+
+  const heavy = list.filter(g => g.hShare >= 3 && g.hShare > g.bShare * 1.5)
+                    .sort((a, b) => b.hShare - a.hShare).slice(0, 8);
+
+  const kpi = `<div class="rep-kpi">
+    <div><div class="k">包裝量</div><div class="v">${fmt(cur.B)}</div>${delta(cur.B, prev && prev.B)}</div>
+    <div><div class="k">工時</div><div class="v">${f1(cur.H)}</div>${delta(cur.H, prev && prev.H)}</div>
+    <div><div class="k">整體產能</div><div class="v">${fmt(cur.rate)}</div>${delta(cur.rate, prev && prev.rate)}</div>
+    <div><div class="k">批次</div><div class="v">${fmt(cur.n)}</div><div class="d">${cur.skus} 個品項</div></div>
+    <div><div class="k">作業日</div><div class="v">${cur.days}</div><div class="d">平均每日 ${f1(cur.H / (cur.days || 1))} 工時</div></div>
+  </div>`;
+
+  const t1 = list.slice(0, 12).map(g => `<tr>
+    <td><b>${g.s}</b></td><td class="num">${g.n}</td><td class="num">${fmt(g.b)}</td>
+    <td class="num">${f1(g.h)}</td><td class="num">${fmt(g.rate)}</td>
+    <td class="num">${g.usual ? fmt(g.usual) : '—'}</td>
+    <td class="num ${g.vs === null ? '' : g.vs <= -10 ? 'lo' : g.vs >= 10 ? 'hi' : ''}">${
+      g.vs === null ? '—' : (g.vs > 0 ? '+' : '') + g.vs + '%'}</td></tr>`).join('');
+
+  const ODD_MAX = 25;                       // 報表要能印出來，太長就失去「一頁看完」的意義
+  const t2 = odd.slice(0, ODD_MAX).map(x => `<tr>
+    <td>${x.d}</td><td><b>${x.s}</b></td><td class="num">${f1(x.h)}</td>
+    <td class="num">${fmt(x.b)}</td><td class="num ${x.kind}">${fmt(x.rate)}</td>
+    <td class="num">${fmt(x.usual)}</td>
+    <td>${x.kind === 'lo' ? '低於平常' : '高於平常'}</td></tr>`).join('');
+
+  const t3 = heavy.map(g => `<tr>
+    <td><b>${g.s}</b></td><td class="num">${g.bShare}%</td><td class="num">${g.hShare}%</td>
+    <td class="num">${f1(1000 / (g.rate || 1))}</td><td class="num">${fmt(g.b)}</td></tr>`).join('');
+
+  return `
+  <div class="stamp">
+    <div><div class="meta">包裝產能月報</div><h1>${ymLabel(ym)}</h1></div>
+    <div class="meta">產出日期 ${new Date().toISOString().slice(0, 10)}<br>資料來源 ${state.source}</div>
+  </div>
+
+  <h3><span class="n">01</span>當月概況</h3>
+  ${kpi}
+  <p>箭頭為與${prevYm ? ymLabel(prevYm) : '上月'}的比較。整體產能＝當月總包裝量 ÷ 總工時；
+     不同瓶型混在一起只能看趨勢，跨品項比較沒有意義。</p>
+
+  <h3><span class="n">02</span>當月產出品項（依包裝量排序）</h3>
+  <table class="rtab"><thead><tr>
+    <th>品號</th><th class="num">批次</th><th class="num">包裝量</th><th class="num">工時</th>
+    <th class="num">當月產能</th><th class="num">平常水準</th><th class="num">差異</th>
+  </tr></thead><tbody>${t1}</tbody></table>
+  ${list.length > 12 ? `<p>另有 ${list.length - 12} 個品項未列出。</p>` : ''}
+  <div class="rep-note">「平常水準」是該品項全期的平均產能。差異超過 ±10% 才標色 ——
+    每一支產品只跟自己比，不跨品項排名。</div>
+
+  <h3><span class="n">03</span>需要說明的批次</h3>
+  ${odd.length ? `<table class="rtab"><thead><tr>
+    <th>日期</th><th>品號</th><th class="num">工時</th><th class="num">瓶數</th>
+    <th class="num">當批產能</th><th class="num">平常水準</th><th>情況</th>
+  </tr></thead><tbody>${t2}</tbody></table>
+  ${odd.length > ODD_MAX ? `<p>本月共 ${odd.length} 批偏離平常水準，上表列出最早的
+    ${ODD_MAX} 批；其餘請在儀表板上逐支品項查看。</p>` : ''}
+  <div class="rep-note">判定門檻：低於該品項平均的 0.7 倍或高於 2.5 倍，且該品項全期至少 10 批
+    （樣本太少不判定）。請製造單位就這幾批說明當天狀況。</div>`
+  : '<div class="rep-empty">本月沒有偏離平常水準的批次。</div>'}
+
+  <h3><span class="n">04</span>吃工時但產量不高的品項</h3>
+  ${heavy.length ? `<table class="rtab"><thead><tr>
+    <th>品號</th><th class="num">產量佔比</th><th class="num">工時佔比</th>
+    <th class="num">每千瓶工時</th><th class="num">當月包裝量</th>
+  </tr></thead><tbody>${t3}</tbody></table>
+  <div class="rep-note"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
+    提供給業務與生管參考：接單與排程時，這類品項的工時成本要先估進去。</div>`
+  : '<div class="rep-empty">本月沒有工時佔比明顯高於產量佔比的品項。</div>'}
+
+  <h3><span class="n">05</span>資料完整性</h3>
+  <div id="repChk"><div class="rep-empty">未登入，無法檢核當月的登記完整性。</div></div>
+
+  <div class="rep-foot">工時一律由起訖時間推算，不接受人工填寫。本報表由包裝產能系統自動產生。</div>`;
+}
+
+/**
+ * 報表最後補上「這個月的資料齊不齊」。
+ * 讀者要先知道資料完不完整，才知道前面的數字能信到什麼程度 ——
+ * 一份沒說清楚涵蓋範圍的報表，比沒有報表更容易誤導。
+ */
+async function fillReportCheck(ym) {
+  if (!sess || !sess.refresh) return;
+  try {
+    const r = (await dbGet(`month_status?select=*&ym=eq.${ym}`))[0];
+    if (!r) return;
+    const logged = r.logged_days + r.no_op_days;
+    const okDays = r.missing_days === 0;
+    $('repChk').innerHTML = `<table class="rtab"><thead><tr>
+      <th class="num">應登記工作日</th><th class="num">已登記</th><th class="num">無作業</th>
+      <th class="num">待補</th><th class="num">人數已填</th></tr></thead><tbody><tr>
+      <td class="num">${r.workdays}</td>
+      <td class="num">${r.logged_days}</td>
+      <td class="num">${r.no_op_days || '—'}</td>
+      <td class="num ${okDays ? '' : 'lo'}">${r.missing_days || '—'}</td>
+      <td class="num">${r.with_headcount} / ${r.batches}
+        （${r.head_pct === null ? '—' : r.head_pct + '%'}）</td>
+      </tr></tbody></table>
+      <div class="rep-note">${
+        r.is_imported
+          ? '本月資料由既有表單匯入，沒有「當天沒生產」的紀錄可比對，未列待補天數。'
+          : okDays
+            ? '本月工作日皆已處理，數字涵蓋完整。'
+            : `本月尚有 <b>${r.missing_days}</b> 個工作日未登記，`
+              + '以上數字尚未涵蓋那幾天。'
+      }${r.head_pct !== null && r.head_pct < 100
+          ? ' 人數尚未補齊，人均效率分析暫不適用本月。' : ''}</div>`;
+  } catch (e) { /* 讀不到就維持原本的說明，不要讓報表開不出來 */ }
+}
+
+function openReport(ym) {
+  $('repTitle').textContent = ymLabel(ym) + '　·　' + state.source;
+  $('repBody').innerHTML = buildReport(ym);
+  $('rep').hidden = false;
+  document.body.style.overflow = 'hidden';
+  fillReportCheck(ym);
+}
+const closeReport = () => { $('rep').hidden = true; document.body.style.overflow = ''; };
+
+$('repBtn').onclick = () => openReport($('repMonth').value);
+$('repClose').onclick = closeReport;
+$('repPrint').onclick = () => window.print();
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReport(); });
+
+/** 月份選單跟著資料重建，最新的月份排在最前面 */
+function buildMonthOptions() {
+  const ms = state.R.meta.months;
+  $('repMonth').innerHTML = ms.slice().reverse()
+    .map(m => `<option value="${m}">${ymLabel(m)}</option>`).join('');
+  $('repHint').textContent = ms.length ? `可選 ${ms.length} 個月份` : '';
+}
+
+/* ─────────── 從資料庫讀最新資料 ───────────
+   輸入頁與儀表板在同一個網域，所以登入狀態是共用的：
+   廠助或主管在輸入頁登入過，打開儀表板就直接是最新的。
+   沒登入的人看到的是內建快照 —— 這個頁面維持公開，不強迫登入。
+   （這段與 entry.html 的連線邏輯相同，只是這裡唯讀。） */
+
+const API = 'https://vnncuksjvdsxwveomoww.supabase.co';
+const KEY = 'sb_publishable_Bloy5WhUpWGd7G0Uh_Kmdw_UB4dUNEo';
+const SS  = 'packing.session';
+
+let sess = null;
+const readSess = () => {
+  try { sess = JSON.parse(localStorage.getItem(SS) || 'null'); } catch (e) { sess = null; }
+  return sess;
+};
+const writeSess = j => {
+  sess = { access: j.access_token, refresh: j.refresh_token,
+           exp: Date.now() + (j.expires_in || 3600) * 1000 };
+  try { localStorage.setItem(SS, JSON.stringify(sess)); } catch (e) {}
+};
+
+async function refreshToken() {
+  if (!sess || !sess.refresh) throw new Error('未登入');
+  const r = await fetch(`${API}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: sess.refresh })
+  });
+  if (!r.ok) throw new Error('登入已過期，請重新登入。');
+  writeSess(await r.json());
+}
+
+async function dbGet(path) {
+  if (!sess || sess.exp - Date.now() < 60000) await refreshToken();
+  const r = await fetch(`${API}/rest/v1/${path}`, {
+    headers: { apikey: KEY, Authorization: `Bearer ${sess.access}`, 'Accept-Profile': 'packing' }
+  });
+  if (!r.ok) throw new Error(`讀取失敗（${r.status}）`);
+  return r.json();
+}
+
+/** 分頁把批次全部讀完，轉成儀表板既有的資料格式 */
+async function fetchBatches() {
+  const PAGE = 1000;
+  let out = [], from = 0;
+  for (;;) {
+    const rows = await dbGet('batches?select=sku_code,prod_date,hours,bottles'
+      + `&order=prod_date.asc,id.asc&offset=${from}&limit=${PAGE}`);
+    out = out.concat(rows);
+    if (rows.length < PAGE) break;
+    from += PAGE;
+  }
+  return out.map(b => ({
+    s: b.sku_code, d: b.prod_date, m: b.prod_date.slice(0, 7),
+    h: +b.hours, b: b.bottles
+  }));
+}
+
+async function loadLive(quiet) {
+  $('liveBtn').disabled = true;
+  $('liveBtn').textContent = '讀取中…';
+  try {
+    const batches = await fetchBatches();
+    if (!batches.length) throw new Error('資料庫目前沒有任何批次紀錄。');
+    rawSheets = null;
+    const last = batches[batches.length - 1].d;
+    load(batches, `資料庫最新資料（到 ${last}）`);
+    $('startYear').closest('.src').querySelectorAll('#startYear, label[for=startYear]')
+      .forEach(el => el.hidden = true);          // 資料庫的日期是完整的，不需要推年份
+    $('resetFile').hidden = false;
+    $('resetFile').textContent = '回到內建資料';
+    $('srcErr').hidden = true;
+  } catch (err) {
+    if (!quiet) {
+      $('srcErr').innerHTML = `<b>讀不到最新資料：</b>${err.message}`;
+      $('srcErr').hidden = false;
+      if (/未登入|過期/.test(err.message)) openLogin();
+    }
+  } finally {
+    $('liveBtn').disabled = false;
+    $('liveBtn').textContent = '讀取最新資料';
+  }
+}
+
+/* ── 登入 ── */
+const openLogin  = () => { $('lg').hidden = false; $('lgErr').hidden = true; $('lgAcc').focus(); };
+const closeLogin = () => { $('lg').hidden = true; };
+$('lgClose').onclick = closeLogin;
+$('lg').onclick = e => { if (e.target === $('lg')) closeLogin(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogin(); });
+
+$('lgForm').onsubmit = async e => {
+  e.preventDefault();
+  const acc = $('lgAcc').value.trim(), pw = $('lgPw').value;
+  $('lgBtn').disabled = true; $('lgBtn').textContent = '登入中…';
+  $('lgErr').hidden = true;
+  try {
+    const r = await fetch(`${API}/auth/v1/token?grant_type=password`, {
+      method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: acc.toLowerCase() + '@packing.local', password: pw })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(/Invalid login/i.test(j.error_description || j.msg || '')
+      ? '帳號或密碼不對。' : (j.error_description || j.msg || `登入失敗（${r.status}）`));
+    writeSess(j);
+    closeLogin();
+    await loadLive();
+  } catch (err) {
+    $('lgErr').textContent = err.message;
+    $('lgErr').hidden = false;
+  } finally {
+    $('lgBtn').disabled = false; $('lgBtn').textContent = '登入';
+  }
+};
+
+$('liveBtn').onclick = () => (readSess() && sess.refresh) ? loadLive() : openLogin();
+
 /* 啟動 */
 buildYearOptions(EMBEDDED.year);
 if (!E.supported()) {
   showError('這個瀏覽器版本太舊，「載入我的 Excel 檔」功能無法使用（需要 Chrome 103 以上）。'
     + '內建資料仍可正常瀏覽。');
 }
-load(EMBEDDED.batches, '內建資料');
+load(EMBEDDED.batches, snapLabel());
+
+// 已經登入過就自動換成最新的；失敗就安靜留在快照，不打擾只是想看看的人
+if (readSess() && sess.refresh) loadLive(true);
 </script>
