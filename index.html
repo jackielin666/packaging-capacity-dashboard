@@ -42,6 +42,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   cursor:pointer;white-space:nowrap}
 .btn:hover{opacity:.88}
 .btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--rule-2)}
+.btn.nav{text-decoration:none;display:inline-flex;align-items:center}
 .privacy{font-size:12px;color:var(--ink-3);width:100%;margin-top:2px}
 .u-note{background:var(--sunk);border-left:3px solid var(--rule-2);padding:9px 12px;
   font-size:12px}
@@ -406,6 +407,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <span class="now" id="srcNow"></span>
     <button class="btn" id="liveBtn">讀取最新資料</button>
     <button class="btn ghost" id="resetFile" hidden>回到內建快照</button>
+    <a class="btn ghost nav" href="entry.html">← 資料輸入</a>
     <div class="privacy">
       資料由包裝資料輸入系統維護，已不再使用 Excel 交換。
       登入後會自動顯示資料庫的最新內容；未登入時顯示內建快照。

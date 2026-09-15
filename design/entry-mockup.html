@@ -91,6 +91,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .topbar .btn{background:transparent;border-color:rgba(255,255,255,.45);color:#F2F3F0;
   padding:6px 13px;font-size:12px}
 .topbar .btn:hover{background:rgba(255,255,255,.12);opacity:1}
+.topbar .btn.nav{text-decoration:none;display:inline-flex;align-items:center;
+  border-color:rgba(255,255,255,.7)}
 
 /* ── 日期列 ── */
 .daybar{background:var(--surface);border:1px solid var(--rule-3);border-radius:5px;overflow:hidden}
@@ -139,6 +141,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   background:var(--sunk)}
 .grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
+.grid th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
+  color:var(--ink-4);font-weight:400;margin-top:1px;text-transform:none}
 .grid th:nth-child(7){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
 .grid td{padding:9px 8px;border-bottom:1px solid #F0F2ED;vertical-align:top}
 .grid td:first-child{padding-left:16px}
@@ -413,6 +417,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <div class="rule"></div>
       <div class="code">PACKING / ENTRY</div>
       <div class="who" id="who">陳小姐（輸入專員）</div>
+      <a class="btn nav" href="index.html">儀表板 →</a>
       <button class="btn" id="logoutBtn">登出</button>
     </div>
   </div>
@@ -442,7 +447,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <div><div class="k">批次</div><div class="v" id="sumB">4</div></div>
         <div><div class="k">包裝量</div><div class="v" id="sumQ">4,425</div></div>
         <div><div class="k">工時</div><div class="v" id="sumH">6.0<small>h</small></div></div>
-        <div><div class="k">當日產能</div><div class="v" id="sumR">738<small>/工時</small></div></div>
+        <div><div class="k">當日產能</div><div class="v" id="sumR">738<small>單位/hr</small></div></div>
       </div>
     </div>
 
@@ -476,7 +481,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <thead>
           <tr>
             <th>品號</th><th>品名</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
-            <th class="num">人數</th><th class="num">工時</th><th class="num">產能</th><th></th>
+            <th class="num">人數</th><th class="num">工時<i>hr</i></th>
+            <th class="num">產能<i>單位/hr</i></th><th></th>
           </tr>
         </thead>
         <tbody id="rows"><tr data-key="1"><td class="" data-l="品號"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"></td><td class="name" data-l="品名">草莓蒟蒻餡(1*6kg) <span class="ct">· PE袋</span><button class="hist" type="button">歷史</button></td><td class="pair" data-l="起始"><input class="" data-f="start" value="08:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="09:30" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="380" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.50</td><td class="flag" data-l="產能">253</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="2"><td class="" data-l="品號"><input class="" data-f="sku" value="B2011" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"></td><td class="name" data-l="品名">＃1花生(1*2.8kg) <span class="ct">· 馬口鐵</span><button class="hist" type="button">歷史</button></td><td class="pair" data-l="起始"><input class="" data-f="start" value="09:30" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="12:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="2100" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">2.50</td><td class="flag" data-l="產能">840</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="3"><td class="" data-l="品號"><input class="" data-f="sku" value="A1020" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"></td><td class="name" data-l="品名">大圓草莓-新(1*440g) <span class="ct">· 玻璃瓶</span><button class="hist" type="button">歷史</button></td><td class="pair" data-l="起始"><input class="" data-f="start" value="13:00" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="14:20" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="1900" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="4" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">1.33</td><td class="flag" data-l="產能">1,425</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr><tr data-key="4"><td class="" data-l="品號"><input class="" data-f="sku" value="D0310" placeholder="打品號" list="skuList" autocapitalize="off" spellcheck="false"></td><td class="name" data-l="品名">草莓蒟蒻餡(1*6kg) <span class="ct">· PE袋</span><button class="hist" type="button">歷史</button></td><td class="pair" data-l="起始"><input class="" data-f="start" value="14:20" placeholder="0800"></td><td class="pair" data-l="結束"><input class="" data-f="end" value="15:00" placeholder="0930"></td><td class="pair" data-l="瓶數"><input class="num" data-f="bottles" value="45" placeholder="0" inputmode="numeric"></td><td class="pair" data-l="人數"><input class="num" data-f="head" value="5" placeholder="—" inputmode="numeric"></td><td class="calc" data-l="工時">0.67</td><td class="flag low" data-l="產能">67</td><td class="act"><button class="x" title="刪除這一列">×</button></td></tr></tbody>
@@ -489,7 +495,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
           <div class="line"></div>
           <div class="tally" id="checksTally">1 項待確認　·　3 項通過</div>
         </div>
-        <div class="list" id="checksList"><div class="ck warn"><div class="mark"></div><div class="body"><div class="t">D0310　產能 67／工時，低於平常水準（平均 256）</div><div class="d">多半是瓶數或時間打錯。確認數字沒問題可以標記為正常，不影響儲存。</div></div><div class="acts"><button class="btn ghost sm">查看該列</button><button class="btn ghost sm">確認無誤</button></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">品號 4 筆全部在品項主檔內</div></div><div class="acts"></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">4 批都有填人數</div></div><div class="acts"></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">同一支品項沒有時間重疊的情形</div></div><div class="acts"></div></div></div>
+        <div class="list" id="checksList"><div class="ck warn"><div class="mark"></div><div class="body"><div class="t">D0310　產能 67 單位/hr，低於平常 77%（平常水準 295）</div><div class="d">多半是瓶數或時間打錯。確認數字沒問題可以標記為正常，不影響儲存。</div></div><div class="acts"><button class="btn ghost sm">查看該列</button><button class="btn ghost sm">確認無誤</button></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">品號 4 筆全部在品項主檔內</div></div><div class="acts"></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">4 批都有填人數</div></div><div class="acts"></div></div><div class="ck pass"><div class="mark">✓</div><div class="body"><div class="t">同一支品項沒有時間重疊的情形</div></div><div class="acts"></div></div></div>
       </div>
 
       <div class="foot">

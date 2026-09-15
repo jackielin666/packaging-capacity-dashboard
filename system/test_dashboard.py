@@ -66,6 +66,11 @@ with sync_playwright() as p:
     ov = pg.inner_text("#ovBody") if pg.locator("#ovBody").count() else pg.inner_text("table")
     check("品項總覽欄名改為平常水準", "平常水準" in pg.inner_text("section"), "")
 
+    nav = pg.locator(".src a.nav")
+    check("儀表板有回輸入頁的入口", nav.count() == 1)
+    check("連到 entry.html", nav.get_attribute("href") == "entry.html",
+          nav.get_attribute("href"))
+
     print("\n── 按「讀取最新資料」會要求登入 ──")
     pg.click("#liveBtn")
     pg.wait_for_timeout(400)

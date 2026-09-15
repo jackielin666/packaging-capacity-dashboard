@@ -378,6 +378,13 @@ with sync_playwright() as p:
     pg.wait_for_timeout(200)
     check("顯示匯出筆數", "1 筆" in pg.inner_text("#expState"), pg.inner_text("#expState"))
 
+    print("\n── 兩個頁面互相連得到 ──")
+    nav = pg.locator(".topbar a.nav")
+    check("輸入頁有儀表板入口", nav.count() == 1)
+    check("連到 index.html", nav.get_attribute("href") == "index.html",
+          nav.get_attribute("href"))
+    check("按鈕文字清楚", "儀表板" in nav.inner_text(), nav.inner_text())
+
     print("\n── 產能單位標示 ──")
     pg.set_viewport_size({"width": 1280, "height": 1000})
     pg.wait_for_timeout(200)
