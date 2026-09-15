@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>包裝資料輸入</title>
+<title>產品包裝資料輸入</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
@@ -41,7 +41,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   padding:40px 36px;width:100%;max-width:390px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .login .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.18em;
   text-transform:uppercase;color:var(--ink-3)}
-.login h1{font-size:26px;margin:10px 0 28px}
+.login h1{font-size:25px;font-family:"Noto Sans TC",sans-serif;font-weight:700;
+  letter-spacing:.01em;margin:10px 0 28px}
 .field{margin-bottom:16px}
 .field label{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:6px}
 .field input{width:100%;padding:11px 13px;border:1px solid var(--rule-2);border-radius:3px;
@@ -51,10 +52,12 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .note{font-size:12.5px;color:var(--ink-3);margin-top:18px;line-height:1.6}
 
 /* ── 頂欄 ── */
-.topbar{background:var(--bar);color:#F2F3F0;height:54px;display:flex;align-items:center}
+.topbar{background:var(--bar);color:#F2F3F0;height:62px;display:flex;align-items:center}
 .topbar .in{max-width:1020px;margin:0 auto;padding:0 26px;width:100%;display:flex;
   align-items:center;gap:16px}
-.topbar .t{font-family:"Noto Serif TC",serif;font-size:16px;font-weight:600;letter-spacing:.04em}
+.topbar .t{font-family:"Noto Sans TC",sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.02em;line-height:1.2}
+.topbar .rule{width:1px;height:22px;background:rgba(242,243,240,.28)}
 .topbar .code{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;
   color:rgba(242,243,240,.55);flex:1}
 .topbar .who{font-size:12.5px;color:rgba(242,243,240,.7)}
@@ -109,7 +112,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   background:var(--sunk)}
 .grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
-.grid th:nth-child(6){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
+.grid th:nth-child(7){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
 .grid td{padding:9px 8px;border-bottom:1px solid #F0F2ED;vertical-align:top}
 .grid td:first-child{padding-left:16px}
 .grid td.calc,.grid td.flag{padding-top:17px}
@@ -135,8 +138,10 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   height:7px;border-radius:50%;margin-left:7px;vertical-align:1px}
 .grid .flag.low:after{border:1.5px solid var(--signal)}
 .grid .flag.high:after{border:1.5px solid var(--cool)}
-.grid .skuname{font-size:11px;color:var(--ink-3);padding:0 9px;margin-top:4px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid td.name{font-size:13px;color:var(--ink-2);padding-top:17px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:0}
+.grid td.name .ct{color:var(--ink-3);font-size:11.5px}
+.grid td.name.miss{color:var(--signal)}
 .grid .x{background:0;border:0;color:var(--ink-4);cursor:pointer;font-size:16px;
   padding:4px 8px;line-height:1;border-radius:3px}
 .grid .x:hover{color:var(--signal);background:var(--signal-wash)}
@@ -219,7 +224,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .htab .mk.high{color:var(--cool)}
 
 /* ── 匯出 ── */
-.exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:0 20px 16px}
+.exp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:14px 20px 16px;
+  border-top:1px solid var(--rule);background:var(--sunk);border-radius:0 0 5px 5px}
 .exp select,.exp .btn{height:34px;padding:0 13px;font:500 12.5px/1 "Noto Sans TC",sans-serif;
   border-radius:4px;box-sizing:border-box}
 .exp select{border:1px solid var(--rule-2);background:#fff;color:var(--ink);font-weight:400}
@@ -278,8 +284,9 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   /* 頂欄在 390px 會把標題擠成兩行，把裝飾性的字拿掉、姓名縮小 */
   .topbar{height:auto;padding:10px 0}
   .topbar .in{gap:10px}
-  .topbar .t{font-size:15px;white-space:nowrap}
-  .topbar .code{display:none}
+  .topbar{height:auto}
+  .topbar .t{font-size:17px;white-space:nowrap}
+  .topbar .code,.topbar .rule{display:none}
   .topbar .who{font-size:11.5px;flex:1;text-align:right;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap}
   /* 檢查項目的按鈕擠在文字旁邊會把說明壓成一條細柱，改成整排放到下面 */
@@ -302,6 +309,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
     font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
     margin-bottom:3px}
   .grid td.pair,.grid td.calc,.grid td.flag{display:inline-block;width:50%;vertical-align:top}
+  .grid td.name{max-width:none;padding-top:3px;white-space:normal}
   .grid input{border-color:var(--rule-2);background:#fff;padding:11px 10px;font-size:15px}
   .grid .calc,.grid .flag{text-align:left;background:0;padding-left:8px}
   .grid td.act{position:absolute;top:8px;right:4px;width:auto;padding:0}
@@ -324,14 +332,14 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 </style>
 <!-- ══ 載入中 ══ -->
 <div class="login-wrap" id="bootView">
-  <div class="login"><div class="eyebrow">包裝產能系統</div><h1>載入中…</h1></div>
+  <div class="login"><div class="eyebrow">產品包裝資料輸入</div><h1>載入中…</h1></div>
 </div>
 
 <!-- ══ 登入 ══ -->
 <div class="login-wrap" id="loginView" hidden>
   <form class="login" id="loginForm" autocomplete="on">
     <div class="eyebrow">包裝產能系統</div>
-    <h1>資料輸入</h1>
+    <h1>產品包裝資料輸入</h1>
 
     <div class="field">
       <label for="acc">帳號</label>
@@ -354,7 +362,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 <div id="appView" hidden>
   <div class="topbar">
     <div class="in">
-      <div class="t">包裝資料輸入</div>
+      <div class="t">產品包裝資料輸入</div>
+      <div class="rule"></div>
       <div class="code">PACKING / ENTRY</div>
       <div class="who" id="who"></div>
       <button class="btn" id="logoutBtn">登出</button>
@@ -412,13 +421,14 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 
       <table class="grid">
         <colgroup>
-          <col style="width:26%"><col style="width:11%"><col style="width:11%">
-          <col style="width:11%"><col style="width:8%"><col style="width:8%">
-          <col style="width:21%"><col style="width:44px">
+          <col style="width:12%"><col style="width:27%">
+          <col style="width:10%"><col style="width:10%"><col style="width:10%">
+          <col style="width:7%"><col style="width:8%"><col style="width:12%">
+          <col style="width:44px">
         </colgroup>
         <thead>
           <tr>
-            <th>品項</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
+            <th>品號</th><th>品名</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
             <th class="num">人數</th><th class="num">工時</th><th class="num">產能</th><th></th>
           </tr>
         </thead>
@@ -456,6 +466,12 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <div class="tally" id="calSub">—</div>
       </div>
       <div class="cal" id="cal"></div>
+      <div class="legend">
+        <span><i class="l-has"></i>已登記</span>
+        <span><i class="l-none"></i>無作業</span>
+        <span><i class="l-miss"></i>待補</span>
+        <span>六日不計入待補。國定假日請按「本日無包裝作業」。</span>
+      </div>
       <div class="exp">
         <span class="hint">匯出紀錄</span>
         <select id="expRange">
@@ -465,12 +481,6 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         </select>
         <button class="btn ghost sm" id="expBtn">下載 CSV</button>
         <span class="hint" id="expState"></span>
-      </div>
-      <div class="legend">
-        <span><i class="l-has"></i>已登記</span>
-        <span><i class="l-none"></i>無作業</span>
-        <span><i class="l-miss"></i>待補</span>
-        <span>六日不計入待補。國定假日請按「標記本日無包裝作業」。</span>
       </div>
     </div>
 
@@ -525,6 +535,12 @@ function today()      { return ymd(new Date()); }
 function monthStart() { var d = new Date(); return ymd(new Date(d.getFullYear(), d.getMonth(), 1)); }
 function isWeekend(s) { var w = parseYmd(s).getDay(); return w === 0 || w === 6; }
 var DOW = ['日', '一', '二', '三', '四', '五', '六'];
+
+function esc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
 
 function num(n, dp) {
   if (n === null || n === undefined || isNaN(n)) return '—';
@@ -848,11 +864,15 @@ function renderRow(r, editable) {
   }
 
   var sku = state.skus[r.sku];
-  var name = sku ? (sku.name + (sku.container ? '　·　' + sku.container : ''))
-                 : (r.sku ? '查無此品號' : '');
-  tr.appendChild(cell('品項', '', inp('sku', '', '打品號', 'list="skuList" autocapitalize="off" spellcheck="false"')
-    + '<div class="skuname">' + name
-    + (sku ? '<button class="hist" type="button">歷史</button>' : '') + '</div>'));
+  tr.appendChild(cell('品號', '', inp('sku', '', '打品號',
+    'list="skuList" autocapitalize="off" spellcheck="false"')));
+
+  // 品名獨立一欄：打完品號直接看到是什麼產品，不用回頭對照
+  var nm = sku
+    ? esc(sku.name) + (sku.container ? ' <span class="ct">· ' + esc(sku.container) + '</span>' : '')
+      + '<button class="hist" type="button">歷史</button>'
+    : (r.sku ? '查無此品號' : '');
+  tr.appendChild(cell('品名', 'name' + (!sku && r.sku ? ' miss' : ''), nm));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
@@ -956,7 +976,7 @@ function recalc() {
   state.rows.filter(function (r) { return !r.deleted; }).forEach(function (r) {
     var tr = tb.querySelector('tr[data-key="' + r.key + '"]');
     if (!tr) return;
-    var cH = tr.children[5], cR = tr.children[6];
+    var cH = tr.children[6], cR = tr.children[7];
     var v = rowRate(r), flag = rateFlag(r);
 
     cH.textContent = v ? v.hours.toFixed(2) : '—';

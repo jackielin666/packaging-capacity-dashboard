@@ -118,26 +118,33 @@ with sync_playwright() as p:
     en = row.locator('input[data-f="end"]').input_value()
     check("0800 → 08:00", st == "08:00", st)
     check("930 → 09:30", en == "09:30", en)
-    check("品名與容器都帶出來", "草莓蒟蒻餡" in row.locator(".skuname").inner_text()
-          and "PE袋" in row.locator(".skuname").inner_text(),
-          row.locator(".skuname").inner_text())
+    nm = pg.locator("#rows tr").first.locator("td.name")
+    check("品名自成一欄", nm.count() == 1)
+    check("品名與容器都帶出來", "草莓蒟蒻餡" in nm.inner_text() and "PE袋" in nm.inner_text(),
+          nm.inner_text())
+    check("品名欄排在起始時間之前",
+          pg.evaluate("""() => {
+            const tds = document.querySelectorAll('#rows tr td');
+            return tds[1].classList.contains('name')
+                && tds[2].querySelector('input[data-f=\"start\"]') !== null;
+          }"""))
 
     cells = pg.locator("#rows tr").first.locator("td")
-    check("工時 = 1.50", cells.nth(5).inner_text().strip() == "1.50",
-          cells.nth(5).inner_text())
-    check("產能欄只放數字，不放說明", cells.nth(6).inner_text().strip() == "300",
+    check("工時 = 1.50", cells.nth(6).inner_text().strip() == "1.50",
           cells.nth(6).inner_text())
+    check("產能欄只放數字，不放說明", cells.nth(7).inner_text().strip() == "300",
+          cells.nth(7).inner_text())
     check("正常範圍不加狀態 class",
-          (cells.nth(6).get_attribute("class") or "").strip() == "flag",
-          cells.nth(6).get_attribute("class"))
+          (cells.nth(7).get_attribute("class") or "").strip() == "flag",
+          cells.nth(7).get_attribute("class"))
 
     print("\n── 異常提示移到檢查清單 ──")
     row.locator('input[data-f="bottles"]').fill("120")
     row.locator('input[data-f="bottles"]').blur()
     cells = pg.locator("#rows tr").first.locator("td")
-    check("偏低時表格只多一個 low class", "low" in (cells.nth(6).get_attribute("class") or ""),
-          cells.nth(6).get_attribute("class"))
-    check("表格裡沒有說明文字", "偏低" not in cells.nth(6).inner_text(), cells.nth(6).inner_text())
+    check("偏低時表格只多一個 low class", "low" in (cells.nth(7).get_attribute("class") or ""),
+          cells.nth(7).get_attribute("class"))
+    check("表格裡沒有說明文字", "偏低" not in cells.nth(7).inner_text(), cells.nth(7).inner_text())
     checks_txt = pg.inner_text("#checksList")
     check("檢查清單說明偏低的原因", "低於平常水準" in checks_txt, checks_txt[:120])
     check("檢查清單帶出該品項的平均", "256" in checks_txt, checks_txt[:120])
@@ -150,8 +157,8 @@ with sync_playwright() as p:
     warn.locator("button", has_text="確認無誤").click()
     pg.wait_for_timeout(250)
     cells = pg.locator("#rows tr").first.locator("td")
-    check("確認後表格不再標記", "low" not in (cells.nth(6).get_attribute("class") or ""),
-          cells.nth(6).get_attribute("class"))
+    check("確認後表格不再標記", "low" not in (cells.nth(7).get_attribute("class") or ""),
+          cells.nth(7).get_attribute("class"))
     check("確認後清單不再列出", "低於平常水準" not in pg.inner_text("#checksList"))
 
     row.locator('input[data-f="bottles"]').fill("450")
@@ -164,8 +171,8 @@ with sync_playwright() as p:
     row.locator('input[data-f="bottles"]').fill("60")
     row.locator('input[data-f="bottles"]').blur()
     cells = pg.locator("#rows tr").first.locator("td")
-    check("批次數不足不標記", (cells.nth(6).get_attribute("class") or "").strip() == "flag",
-          cells.nth(6).get_attribute("class"))
+    check("批次數不足不標記", (cells.nth(7).get_attribute("class") or "").strip() == "flag",
+          cells.nth(7).get_attribute("class"))
 
     print("\n── 阻擋型檢查 ──")
     r0 = pg.locator("#rows tr").first
@@ -334,6 +341,26 @@ with sync_playwright() as p:
           lines[1])
     pg.wait_for_timeout(200)
     check("顯示匯出筆數", "1 筆" in pg.inner_text("#expState"), pg.inner_text("#expState"))
+
+    print("\n── 標題與間距 ──")
+    pg.set_viewport_size({"width": 1280, "height": 1000})   # 前面截圖縮成手機寬了，量桌機版
+    pg.wait_for_timeout(200)
+    t = pg.evaluate("""() => {
+      const el = document.querySelector('.topbar .t');
+      const cs = getComputedStyle(el);
+      return {text: el.textContent, size: parseFloat(cs.fontSize), weight: cs.fontWeight};
+    }""")
+    check("標題文字正確", t["text"] == "產品包裝資料輸入", t["text"])
+    check("標題放大到 21px", t["size"] >= 20, t["size"])
+    check("標題是粗體", int(t["weight"]) >= 700, t["weight"])
+    gap = pg.evaluate("""() => {
+      const cal = document.querySelector('.legend').getBoundingClientRect();
+      const exp = document.querySelector('.exp').getBoundingClientRect();
+      return Math.round(exp.top - cal.bottom);
+    }""")
+    check("匯出列與上方分開（有分隔線與間距）", gap >= 0, gap)
+    check("匯出列有分隔線",
+          pg.evaluate("getComputedStyle(document.querySelector('.exp')).borderTopWidth") == "1px")
 
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
