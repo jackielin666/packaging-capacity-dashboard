@@ -27,17 +27,27 @@ LIVE.append({"sku_code": "B2011", "prod_date": "2026-09-18",
 # 逐月走勢線、月份×品項熱圖、燈號的「近 3 個生產月」都需要跨月資料；
 # 人力分配橫條圖至少要三支品項才畫。以上都不影響 9 月的數字（月報只取當月）。
 HIST = []
-for ym, mul in (("2026-07", 1.00), ("2026-08", 0.88)):
+for ym, mul in (("2026-07", 1.00), ("2026-08", 0.92)):
     for d in range(1, 13):
         HIST.append({"sku_code": "D0310", "prod_date": "%s-%02d" % (ym, d),
                      "hours": 1.5, "bottles": round((380 + d) * mul), "headcount": 5})
         HIST.append({"sku_code": "B2011", "prod_date": "%s-%02d" % (ym, d),
                      "hours": 2.5, "bottles": round((2000 + d) * mul), "headcount": 3})
-# 第三支品項：三個月都有做，讓熱圖與人力橫條至少有三列
+# 第三支品項：三個月都有做，讓熱圖至少有三列
 for ym in ("2026-07", "2026-08", "2026-09"):
     for d in range(1, 13):
         HIST.append({"sku_code": "C1010", "prod_date": "%s-%02d" % (ym, d),
                      "hours": 2.0, "bottles": 900 + d * 3, "headcount": 4})
+# 8 月放幾批真的異常的，而且工時都 ≥ 1 小時 —— 短批次不列入主名單，測不到
+HIST.append({"sku_code": "D0310", "prod_date": "2026-08-20",
+             "hours": 3.0, "bottles": 300, "headcount": 5})    # 線體與人均都低
+HIST.append({"sku_code": "B2011", "prod_date": "2026-08-22",
+             "hours": 2.5, "bottles": 2010, "headcount": 8})   # 線體正常、人均低
+HIST.append({"sku_code": "C1010", "prod_date": "2026-08-26",
+             "hours": 2.0, "bottles": 480, "headcount": 2})    # 線體低、人均正常
+# 一批工時過短的離群，驗證它被分流到「僅供參考」而不是主名單
+HIST.append({"sku_code": "D0310", "prod_date": "2026-08-27",
+             "hours": 0.4, "bottles": 40, "headcount": 4})
 LIVE = HIST + LIVE
 LIVE.sort(key=lambda x: x["prod_date"])
 
@@ -132,23 +142,41 @@ with sync_playwright() as p:
     check("確實去讀了資料庫", calls["batches"] >= 1, calls)
     check("已不提供 Excel 上傳", pg.locator("#pickFile").count() == 0)
     check("已移除起始年度選單", pg.locator("#startYear").count() == 0)
-    # 期間預設是最新的月份，KPI 只算那個月（9 月共 90 hr）
-    check("期間預設最新月份", "2026 年 9 月" in pg.inner_text("#periodNow"),
+    # 會議主體預設看「上一個完整月」—— 當月還沒過完，比絕對量就是比日曆
+    check("預設是上一個完整月", "2026 年 8 月" in pg.inner_text("#periodNow"),
           pg.inner_text("#periodNow"))
+    opts = pg.eval_on_selector_all("#periodSel option", "es => es.map(e => e.value)")
+    check("未完成的月份另成一種模式", "p:2026-09" in opts, opts)
+    check("完整月不會被標成本月至今", "m:2026-08" in opts, opts)
     kpi = pg.inner_text("#periodKpi")
-    check("概況是本期的數字", "90" in kpi, kpi[:160])
+    check("概況帶單位", "單位／人·hr" in kpi and "公斤" in kpi, kpi[:200])
+    check("KPI 有處理效率", "處理效率" in kpi, kpi[:200])
     check("有本期重點", pg.locator("#hiliteBox .rtab.hl tr").count() > 0)
     check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 2,
           pg.locator("section.noprint").count())
     check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
-    # 切到全期，整頁跟著變
+
+    # 本月至今：絕對量不比較，並且要講出資料截至哪一天
+    pg.select_option("#periodSel", "p:2026-09")
+    pg.wait_for_timeout(800)
+    check("本月至今標示在標題上", "至今" in pg.inner_text("#periodNow"),
+          pg.inner_text("#periodNow"))
+    note = pg.inner_text("#periodNote")
+    check("寫出資料截至哪一天", "資料截至" in note, note[:160])
+    check("說明為何不比絕對量", "不與上期比較" in note, note[:200])
+    arrows = pg.eval_on_selector_all("#periodKpi .rep-kpi > div",
+        "es => es.slice(0,3).filter(e => e.querySelector('.d.up, .d.dn')).length")
+    check("本月至今：包裝量／重量／工時都不給箭頭", arrows == 0, arrows)
+    rates = pg.eval_on_selector_all("#periodKpi .rep-kpi > div",
+        "es => es.slice(3,5).filter(e => e.querySelector('.d.up, .d.dn')).length")
+    check("率仍然比較（不受天數影響）", rates >= 1, rates)
+    check("畫面上有醒目警語", pg.locator("#hiliteBox .warnbar").count() == 1)
+
     pg.select_option("#periodSel", "all:")
     pg.wait_for_timeout(700)
     check("切到全期後期間跟著變", "全期" in pg.inner_text("#periodNow"),
           pg.inner_text("#periodNow"))
-    check("全期的數字涵蓋三個月", "234" in pg.inner_text("#periodKpi"),
-          pg.inner_text("#periodKpi")[:160])
-    pg.select_option("#periodSel", "m:2026-09")
+    pg.select_option("#periodSel", "m:2026-08")
     pg.wait_for_timeout(700)
 
     # ── 品名：只給品號的表，看的人要先去翻對照表才知道在講哪支產品 ──
@@ -175,7 +203,9 @@ with sync_playwright() as p:
     print("\n── 燈號與正常範圍 ──")
     lg = pg.inner_text("#lampLegend")
     check("燈號說明寫明是比率", "離群批次佔" in lg and "%" in lg, lg[:160])
-    check("說明為何不用「有沒有」", "有一兩批離群本來就是常態" in lg, lg[:400])
+    check("燈號只看選定的期間", "只看選定的那個期間" in lg, lg[:400])
+    check("說明短批次為何不列入", "站不住腳" in lg, lg[:600])
+    check("說明水準下移升格成議題", "升格成" in lg, lg[:600])
     # td.dv 不能被上方工具列的 .bar 撞名成 flex，否則橫條會被壓成 0 寬
     dvw = pg.eval_on_selector("#tbOverview td.dv .dvb", "e => e.clientWidth")
     check("偏離橫條畫得出來（寬度 > 0）", dvw > 20, dvw)
@@ -267,35 +297,35 @@ with sync_playwright() as p:
     pg3.wait_for_timeout(1200)
 
     opts = pg3.locator("#periodSel option").count()
-    check("期間選單有月份、近三月與全期", opts >= 5, opts)
+    check("期間選單有月份與全期", opts >= 3, opts)
     first = pg3.locator("#periodSel option").first.inner_text()
-    check("最新的月份排最前面", "2026 年 9 月" in first, first)
+    check("尚未結束的月份排最前面且標示至今", "至今" in first, first)
 
-    pg3.select_option("#periodSel", "m:2026-09")
+    pg3.select_option("#periodSel", "m:2026-08")
     pg3.wait_for_timeout(800)
     body = pg3.inner_text(".wrap")
-    check("標題是所選期間", "2026 年 9 月" in pg3.inner_text("#periodNow"),
+    check("標題是所選期間", "2026 年 8 月" in pg3.inner_text("#periodNow"),
           pg3.inner_text("#periodNow"))
     check("有本期概況", "本期概況" in body)
     check("有品項狀態總覽", "品項狀態總覽" in body)
     check("有需要說明的批次", "需要說明的批次" in body)
     import re as _re
     check("情況欄標出差距百分比",
-          _re.search(r"(低於|高於)平常 \d+%", body) is not None,
-          [l for l in body.split("\n") if "於平常" in l][:3])
+          _re.search(r"(低於|高於)平常 \d+%", pg3.inner_text("#oddBox")) is not None,
+          pg3.inner_text("#oddBox")[:200])
     check("有吃工時的品項段落", "吃工時但產量不高" in body)
     check("標明責任歸屬", "不是包裝作業的問題" in body)
 
     rows = pg3.locator("#tbOverview tr").count()
     check("品項表有資料", rows > 0, rows)
-    # 9 月共 45 批
-    check("批次數與資料一致", "45" in pg3.inner_text("#periodKpi"),
-          pg3.inner_text("#periodKpi")[:160])
+    # 8 月共 36 批
+    check("批次數與資料一致", "40 批" in pg3.inner_text("#periodNow"),
+          pg3.inner_text("#periodNow"))
 
     check("產生 PDF 按鈕存在", pg3.is_visible("#pdfBtn"))
-    check("列印抬頭帶入期間", "2026 年 9 月" in pg3.inner_html("#printHead"),
+    check("列印抬頭帶入期間", "2026 年 8 月" in pg3.inner_html("#printHead"),
           pg3.inner_html("#printHead")[:160])
-    check("表頭標出產能單位", "單位/hr" in pg3.inner_text("#overviewTable thead"),
+    check("表頭標出效率單位", "單位／人·hr" in pg3.inner_text("#overviewTable thead"),
           pg3.inner_text("#overviewTable thead")[:200])
     check("平常水準說明是中位數", "中位數" in body)
     check("有資料完整性段落", "資料完整性" in body)
@@ -312,10 +342,14 @@ with sync_playwright() as p:
     check("有批次落點圖", pg3.locator("#oddBox .rep-fig svg").count() > 0)
     figleg = pg3.inner_text("#oddBox .rep-figleg")
     check("落點圖說明 Y 軸是相對自己的倍率", "平常水準" in figleg, figleg[:160])
-    check("有人力分配橫條圖", pg3.locator("#labBox .lbt .lb i.ph").count() > 0,
-          pg3.locator("#labBox .lbt").count())
-    check("橫條圖同時畫人時與公斤", pg3.locator("#labBox .lbt .lb i.kg").count() > 0)
-    check("橫條圖標明收件者是業務與生管", "業務與生管" in pg3.inner_text("#labBox"), "")
+    # 人力橫條圖已移除（沒有結論）；逐支品項的處理效率改放在第 03 節
+    check("已移除人力分配橫條圖", pg3.locator("#labBox .lbt").count() == 0)
+    check("總覽有處理效率欄", "單位／人·hr" in pg3.inner_text("#overviewTable thead"),
+          pg3.inner_text("#overviewTable thead")[:200])
+    cost = pg3.inner_text("#heavyBox")
+    check("工時成本表兩個單位並列", "每千單位工時" in cost and "每千公斤工時" in cost, cost[:200])
+    check("工時成本表不做好壞判定", "不做好壞判定" in cost, cost[-400:])
+    check("工時成本表點名收件者", "業務" in cost and "生管" in cost, cost[-400:])
     check("有月份 × 品項熱圖", pg3.locator("#heatBox .heat tbody tr").count() > 0,
           pg3.locator("#heatBox .heat").count())
     check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#heatBox .heatleg"),
@@ -326,7 +360,7 @@ with sync_playwright() as p:
     print("\n── 本期重點 ──")
     hl = pg3.inner_text("#hiliteBox")
     check("有本期重點區塊", "本期重點" in hl, hl[:60])
-    check("第一條講整體產能", "整體產能" in hl, hl[:120])
+    check("第一條講產出與效率", "公斤" in hl and "工時" in hl, hl[:160])
     check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務", "管理層")), hl[:400])
     rows_hl = pg3.locator("#hiliteBox .rtab.hl tbody tr").count()
     check("重點不超過 6 條", 1 <= rows_hl <= 6, rows_hl)
@@ -338,10 +372,11 @@ with sync_playwright() as p:
     check("hr 沒有被強制變成大寫 HR", "人·HR" not in body,
           [l for l in body.split("\n") if "人·HR" in l][:2])
     check("標出人數覆蓋率", "覆蓋率" in lb, lb[:600])
-    check("說明兩者差別來自包裝規格", "包裝規格" in lb, lb[-900:])
+    check("說明處理效率不可跨品項排名", "不可跨品項排名" in lb, lb[:600])
+    full = pg3.inner_text(".wrap")
     check("四象限診斷有出現",
-          "線體正常但人均偏低" in lb or "線體偏低但人均正常" in lb, lb[-900:])
-    check("診斷標出負責單位", "生管排班" in lb, lb[-900:])
+          "線體正常但人均偏低" in full or "線體偏低但人均正常" in full, lb[:300])
+    check("診斷標出負責單位", "包裝班" in full or "生管排班" in full, lb[:300])
     check("需要說明的批次最多 12 筆",
           pg3.locator("#oddBox .rtab tbody tr").count() <= 12,
           pg3.locator("#oddBox .rtab tbody tr").count())
