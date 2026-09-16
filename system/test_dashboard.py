@@ -123,6 +123,12 @@ with sync_playwright() as p:
           tabs.nth(0).get_attribute("href"))
     check("系統名稱與輸入頁一致", pg.inner_text(".topbar .t") == "包裝產能系統",
           pg.inner_text(".topbar .t"))
+    # index.html 一直沒有 charset 宣告，靠瀏覽器猜 —— 改個 CSS 就可能猜錯，整頁變亂碼
+    check("有 charset 宣告，中文不會變亂碼", "包裝產能系統" in pg.inner_text(".topbar"),
+          pg.inner_text(".topbar")[:60])
+    # 兩個分頁按鈕字數不同（4 字 vs 3 字），不設等寬看起來一長一短
+    ws = pg.eval_on_selector_all(".tabs a", "es => es.map(e => Math.round(e.offsetWidth))")
+    check("兩個分頁按鈕等寬", len(set(ws)) == 1, ws)
     bar = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     check("頂欄底色與輸入頁相同（rgb(10,106,93)）", bar == "rgb(10, 106, 93)", bar)
 
@@ -375,7 +381,8 @@ with sync_playwright() as p:
     check("說明處理效率不可跨品項排名", "不可跨品項排名" in lb, lb[:600])
     full = pg3.inner_text(".wrap")
     check("四象限診斷有出現",
-          "線體正常但人均偏低" in full or "線體偏低但人均正常" in full, lb[:300])
+          "線性正常，每人處理量偏低" in full or "線性偏低，每人處理量正常" in full, lb[:300])
+    check("不再用「線體」這個現場聽不懂的詞", "線體" not in full, "")
     check("診斷標出負責單位", "包裝班" in full or "生管排班" in full, lb[:300])
     check("需要說明的批次最多 12 筆",
           pg3.locator("#oddBox .rtab tbody tr").count() <= 12,
