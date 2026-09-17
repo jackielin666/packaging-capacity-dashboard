@@ -189,6 +189,10 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .hilite{border:1.5px solid var(--ink);border-radius:5px;margin:18px 0 6px;overflow:hidden}
 .hilite .hd{background:var(--ink);color:var(--paper);font-family:"Noto Serif TC",serif;
   font-weight:600;font-size:13.5px;padding:8px 14px;letter-spacing:.06em}
+/* 兩個比較基準的說明條，夾在標題與重點清單之間 */
+.hilite .hbase{padding:8px 14px;border-bottom:1px solid var(--rule);
+  background:var(--sunk);font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+.hilite .hbase b{color:var(--ink);font-weight:600}
 .rtab.hl{margin:0}
 .rtab.hl td{padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
 .rtab.hl td.who{padding-right:13px}
@@ -1255,13 +1259,32 @@ const state = { R: null, source: '', skuMeta: {}, noOpDays: new Set() };
    都把品名帶出來。圖表的圖例除外：那裡寬度有限，塞進去會互相蓋住。 */
 const esc = v => String(v).replace(/[&<>"]/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const nameOf = code => (state.skuMeta[code] || {}).name || '';
+/* ── 品名的顯示整理 ──
+   只在畫面這一層做，資料庫的品名一個字都不動 —— 主檔是業務與生管在維護的，
+   儀表板沒有立場去改它，改了兩邊還會對不起來。
+   處理的是三件會讓同一系列看起來像不同東西的事：
+     ·「＃」半形全形混用（#2草莓果醬 與 ＃1草莓 是同一系列）
+     · 殘留的「°」（草莓餡50°、草莓餡° —— 度數符號在果醬品名裡沒有意義）
+     · 多餘的空白（天天熱帶水果餡 4.5KG）
+   其餘一律照原文，包括全形括號與大小寫。 */
+const tidyName = n => String(n)
+  .replace(/#/g, '＃')
+  .replace(/°/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+const nameOf = code => tidyName((state.skuMeta[code] || {}).name || '');
 /** 表格用：品名換行放在品號底下，欄寬不會被撐開 */
 const skuName = code => {
   const n = nameOf(code);
   return n ? `<span class="nm">${esc(n)}</span>` : '';
 };
 const cut = (v, n) => v.length > n ? v.slice(0, n - 1) + '…' : v;
+
+/* ── 資料截至哪一天 ──
+   整頁只能有一個答案。以前封面用「批次陣列的最後一筆」，頁尾用「日期的最大值」：
+   資料庫回來的順序一變，兩處就會對不起來，而且封面那個會是錯的。
+   一律用日期的最大值，兩處共用這一個來源。 */
+const cutoff = () => state.R.meta.period[1];
 /** 內文用：品號後面接品名。品名本身常帶括號（規格），所以不再加一層括號 */
 const withName = code => {
   const n = nameOf(code);
@@ -1829,10 +1852,12 @@ function render() {
   const m = state.R.meta;
   $('eyebrow').textContent =
     `包裝工時記錄表 · ${m.period[0]} – ${m.period[1]} · ${m.skuCount} 個品項`;
-  $('srcNow').innerHTML = `${state.source}　<b>${fmt(m.records)}</b> 筆紀錄 ·
+  $('srcNow').innerHTML = `${state.source}（資料截至 ${cutoff()}）　`
+    + `<b>${fmt(m.records)}</b> 筆紀錄 ·
     <b>${m.skuCount}</b> 個品項 · <b>${m.workDays}</b> 個作業日`;
   $('footMeta').textContent =
-    `${state.source} · ${m.records} 筆 / ${m.skuCount} 品項 · ${m.period[0]} – ${m.period[1]}`;
+    `${state.source}（資料截至 ${cutoff()}） · ${m.records} 筆 / ${m.skuCount} 品項`
+    + ` · 期間 ${m.period[0]} – ${m.period[1]}`;
   fillSelects();
   buildPeriodOptions();
   renderPeriod();
@@ -1895,6 +1920,20 @@ const HEAD_MIN_PCT = 80;     // 覆蓋率低於此不出人均數字
 const HEAD_MIN_N   = 3;      // 批次數太少也不出
 
 const kgOf = sku => (state.skuMeta[sku] || {}).kg || 0;
+
+/* ── 人數資料是從哪個月開始有的 ──
+   人數是後來才加的欄位，之前的月份一筆都沒有。那些月份的覆蓋率是 0%，
+   但畫面上只寫 0% 會被讀成「這個月沒人填」——實際上是那個月根本還沒有這個欄位。
+   月份由資料自己決定，不寫死，補登往前推的時候不用改程式。 */
+function headStartMonth() {
+  const ms = (state.R ? state.R.batches : []).filter(x => x.n > 0).map(x => x.m);
+  return ms.length ? ms.reduce((a, b) => a < b ? a : b) : null;
+}
+/** 本期完全沒有人數時的說法。有部分人數的期間不適用（那是真的沒填完）。 */
+function noHeadNote() {
+  const st = headStartMonth();
+  return st ? `人數資料自 ${ymLabel(st)}起才有` : '尚無任何人數資料';
+}
 
 /** 一組批次的人力彙總。只計入有填人數的批次。 */
 function labourOf(rows) {
@@ -2191,6 +2230,9 @@ function oddDotSvg(rows, skuOf) {
     return { ...x, rel: (x.b / x.h) / s.med, usual: s.med };
   }).filter(Boolean);
   if (pts.length < 3) return '';
+  /* 圖例必須加總回本期的批數。少了這一項，圖例上的批數會比第 02 節的
+     「本期批次」少，而那個差額（樣本不足的品項）在會議上是問不出來的。 */
+  const thinN = rows.length - pts.length;
 
   const W = 900, H = 300, L = 44, R = 96, T = 16, B = 36;
   const pw = W - L - R, ph = H - T - B;
@@ -2268,10 +2310,14 @@ function oddDotSvg(rows, skuOf) {
       <span><i class="dot ok"></i>正常 ${pts.length - outs.length} 批</span>
       <span><i class="dot bad"></i>離群 ${outLong} 批</span>
       ${outShort ? `<span><i class="dot hollow"></i>離群但工時未滿 1 小時 ${outShort} 批</span>` : ''}
+      ${thinN ? `<span style="color:var(--ink-3)">樣本不足未入圖 ${thinN} 批</span>` : ''}
       <span style="flex-basis:100%;color:var(--ink-3);margin-top:3px">
+        以上合計 <b>${rows.length} 批</b>，就是本期的全部批次。
         Y 軸＝這批 ÷ 該品項自己的平常水準，所以不同包裝型式可以畫在同一張圖上，
         1.0 就是跟平常一樣。<b>掉出範圍的點直接標了品號</b>。
-        空心圈是工時過短或超出 ${REL_TOP} 倍的批次，僅供參考。</span>
+        空心圈是工時過短或超出 ${REL_TOP} 倍的批次，僅供參考。${
+        thinN ? `「樣本不足」＝該品項全期不到 ${MIN_REPORT_BATCHES} 批，
+          撐不起離群門檻，所以不畫也不判定。` : ''}</span>
     </div>`;
 }
 
@@ -2613,8 +2659,18 @@ function renderHilite(S) {
        + (lab.usable ? `　·　總人時 ${fmt(lab.personHours)} 人·小時（Σ 工時×人數）` : ''),
     d: lab.usable
       ? `每人每小時處理 ${fmt(lab.perUnit)} 件`
-        + (prev && !partial() ? `，${prevLabel} 為 ${fmt(labourOf(prevRows().rows).perUnit || 0)} 件` : '')
-      : '本期人數覆蓋率不足，無法計算處理效率' });
+        + (() => {
+            if (!prev || partial()) return '';
+            const lp = labourOf(prevRows().rows);
+            // 上一期沒有人數就不比 —— 印「為 0 件」會讀成效率掉到零，
+            // 實際上是那個月還沒有這個欄位。
+            if (!lp.usable) return `（${prevLabel}無人數資料，不比較；${noHeadNote()}）`;
+            return `，${prevLabel} 為 ${fmt(lp.perUnit)} 件`;
+          })()
+      : (lab.withHead === 0
+          ? `本期沒有人數資料，無法計算處理效率 —— ${noHeadNote()}`
+          : `本期人數覆蓋率只有 ${lab.pct}%（${lab.withHead} / ${lab.n} 批），`
+            + '不足以計算處理效率') });
 
   // 全廠整體水準。近期幾乎每一支都「比平常慢」時，原因多半在這裡，不在個別品項。
   const pl = state.R.meta.plant || [];
@@ -2629,17 +2685,23 @@ function renderHilite(S) {
       sub: '算法：每一支產品拿「本期單位/hr ÷ 自己全期的中位數」，再取全部產品的中位數',
       d: off < 0
         ? '這是全廠一起的變化，不是某一支產品的問題。'
-          + `下面第 03 節的燈號已經先除掉這個 ${Math.abs(off)}%，只標出比大盤更差的產品 ——`
-          + '否則全廠一起慢的時候，每一支都會亮紅燈。'
+          + `第 03 節的燈號是每支產品跟<b>自己</b>的平常水準比，並沒有扣掉這 ${Math.abs(off)}%：`
+          + `所以一支「比平常慢 ${Math.abs(off)}%」的產品，其實只是跟著大盤走，`
+          + `要慢得比 ${Math.abs(off)}% 更多才是它自己的問題。`
+          + '全廠一起慢的原因（人力、排程、機況）請在會議上一併討論。'
         : '全廠整體優於常態。' });
   }
 
-  const slow = list.filter(g => g.vs !== null && g.vs <= -10 && g.n >= 3)
+  /* 本期有生產的品項全部納入，不因為「這個月只做 1、2 批」就排除 ——
+     一支品項當月做幾批完全看業務接單，不是它該不該被檢視的理由。
+     改為在每一列標出批數，讀的人自己知道那個百分比背後有幾批。 */
+  const slow = list.filter(g => g.vs !== null && g.vs <= -10)
                    .sort((a, b) => a.vs - b.vs);
   if (slow.length) pts.push({ who: '製造',
     t: `${slow.length} 支品項的當月線性產能低於平常水準 10% 以上`,
-    sub: '線性產能＝單位數 ÷ 工時；平常水準＝該品項全期每批產能的中位數',
-    rows: slow.map(g => [g.s, cut(nameOf(g.s), 16), g.vs + '%']) });
+    sub: '線性產能＝單位數 ÷ 工時；平常水準＝該品項全期每批產能的中位數。'
+       + '<b>本期有生產的品項全部列入，不分批數多寡</b>，括號內是該品項本期的批數',
+    rows: slow.map(g => [g.s, cut(nameOf(g.s), 16), `${g.vs}%（${g.n} 批）`]) });
 
   if (odd.length) {
     const worst = odd.slice().sort((a, b) => b.gap - a.gap);
@@ -2711,8 +2773,16 @@ function renderHilite(S) {
     });
   });
 
+  /* 整份報告只有兩個比較基準，一句話講完，讀的人不必邊看邊拼湊：
+     個別品項跟自己比，全廠拿全部品項的比值再取中位數。 */
+  const base = '本頁所有「比平常」都是同一個算法：'
+    + '<b>每支產品跟自己的平常水準比</b>（平常水準＝該品項全期每批線性產能的中位數）；'
+    + '<b>全廠</b>則是把每支產品的這個比值再取一次中位數。'
+    + '跨品項不直接比產能 —— 瓶型不同，比了沒有意義。';
+
   $('hiliteBox').innerHTML = `<div class="hilite">
     <div class="hd">本期重點　·　${periodLabel()}</div>
+    <div class="hbase">${base}</div>
     <table class="rtab hl"><tbody>${head}</tbody></table></div>`
     + (partial() ? `<div class="warnbar">${partialNote()}</div>` : '')
     + lastPeriodFollowUp(S);
@@ -2741,7 +2811,10 @@ function renderPeriodKpi(S, lab) {
       <div class="u">小時</div>${dAbs(cur.H, prev && prev.H)}</div>
     <div><div class="k">處理效率</div><div class="v">${lab.usable ? fmt(lab.perUnit) : '—'}</div>
       <div class="u">單位／人·hr</div>${
-        lab.usable && labPrev && labPrev.usable ? delta(lab.perUnit, labPrev.perUnit) : ''}</div>
+        lab.usable
+          ? (labPrev && labPrev.usable ? delta(lab.perUnit, labPrev.perUnit) : '')
+          : `<div class="d">${lab.withHead === 0 ? noHeadNote()
+              : `人數覆蓋率 ${lab.pct}%，不足以計算`}</div>`}</div>
     <div><div class="k">線性產能</div><div class="v">${fmt(cur.rate)}</div>
       <div class="u">單位／hr</div>${prev ? delta(cur.rate, prev.rate) : ''}</div>
     <div><div class="k">離群批次</div><div class="v">${S.odd.length}</div>
@@ -2807,9 +2880,12 @@ function renderOdd(S) {
 function renderLabour(S, lab, labS, quads) {
   const { cur } = S;
   if (!lab.usable) {
-    $('labBox').innerHTML = `<div class="rep-empty">本期人數覆蓋率 ${lab.pct}%
-      （${lab.withHead} / ${lab.n} 批），未達 ${HEAD_MIN_PCT}%，不足以判讀人力配置。<br>
-      只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`;
+    $('labBox').innerHTML = lab.withHead === 0
+      ? `<div class="rep-empty">本期沒有任何一批填了人數，無法判讀人力配置。<br>
+          ${noHeadNote()}；在那之前的月份只有線性產能，沒有處理效率。</div>`
+      : `<div class="rep-empty">本期人數覆蓋率 ${lab.pct}%
+          （${lab.withHead} / ${lab.n} 批），未達 ${HEAD_MIN_PCT}%，不足以判讀人力配置。<br>
+          只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`;
     return;
   }
   /* 逐支品項的人均數字已經在第 03 節的「處理效率」欄，不再重複一張表。
@@ -2929,13 +3005,13 @@ async function fillCheck() {
       請在上方把期間切到單一月份來查看。</div>`;
     return;
   }
-  if (!sess || !sess.refresh) { box.innerHTML = ''; return; }
+  if (!sess || !sess.refresh) { box.innerHTML = derivedCheck(period.ym); return; }
   box.innerHTML = '<div class="rep-empty">讀取中…</div>';
   const ym = period.ym;
   try {
     const r = (await dbGet(`month_status?select=*&ym=eq.${ym}`))[0];
     if (period.ym !== ym) return;          // 使用者已經切走，別把舊結果蓋上去
-    if (!r) { box.innerHTML = `<div class="rep-empty">查不到 ${ymLabel(ym)} 的登記狀態。</div>`; return; }
+    if (!r) { box.innerHTML = derivedCheck(ym); return; }
     const okDays = r.missing_days === 0;
     box.innerHTML = `<table class="rtab"><thead><tr>
       <th class="num">應登記工作日</th><th class="num">已登記</th><th class="num">無作業</th>
@@ -2957,8 +3033,41 @@ async function fillCheck() {
       }${r.head_pct !== null && r.head_pct < 100
           ? ' 人數尚未補齊，人均效率分析暫不適用本月。' : ''}</div>`;
   } catch (e) {
-    box.innerHTML = '<div class="rep-empty">讀不到資料完整性，其餘數字不受影響。</div>';
+    box.innerHTML = derivedCheck(ym);
   }
+}
+
+/* month_status 讀不到時的退路（沒登入、沒有那個月的列、或連線失敗）。
+   原本這一格會整片空白，讀的人分不出「這個月很完整」和「這一格壞了」。
+   手上的批次資料已經足以算出同樣那幾個數字，只有「待補天數」算不出來 ——
+   因為「那天沒生產」和「那天還沒登」在批次資料裡長得一模一樣，
+   那是 daily_status 才知道的事。算不出來就寫算不出來，不猜。 */
+function derivedCheck(ym) {
+  if (!ym || !state.R) return '<div class="rep-empty">讀不到資料完整性，其餘數字不受影響。</div>';
+  const rows = state.R.batches.filter(x => x.m === ym);
+  const days = new Set(rows.map(x => x.d));
+  const wk = [...days].filter(d => {
+    const dow = new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8)).getDay();
+    return dow === 0 || dow === 6;
+  }).length;
+  const withHead = rows.filter(x => x.n > 0).length;
+  const pct = rows.length ? Math.round(100 * withHead / rows.length) : null;
+  return `<table class="rtab"><thead><tr>
+      <th class="num">應登記工作日</th><th class="num">有生產紀錄的日數</th>
+      <th class="num">其中假日</th><th class="num">待補</th>
+      <th class="num">人數已填</th></tr></thead><tbody><tr>
+      <td class="num">—</td>
+      <td class="num">${days.size}</td>
+      <td class="num">${wk || '—'}</td>
+      <td class="num">—</td>
+      <td class="num">${withHead} / ${rows.length}（${pct === null ? '—' : pct + '%'}）</td>
+      </tr></tbody></table>
+    <div class="rep-note"><b>這一列是由批次資料直接算出來的</b>，不是讀登記狀態表 ——
+      沒有登入、那個月還沒有登記狀態，或讀取失敗時就會走這條路。<br>
+      「應登記工作日」與「待補」需要每日的登記紀錄才分得出來 ——
+      「那天沒生產」和「那天還沒登」在批次資料裡長得一模一樣。
+      這裡算不出來就留白，不猜。${pct !== null && pct < 100
+        ? ` 人數尚未補齊（${pct}%），人均效率分析暫不適用本月。` : ''}</div>`;
 }
 
 /* ─────────── 從資料庫讀最新資料 ───────────
@@ -3088,8 +3197,7 @@ async function loadLive(quiet) {
     if (!batches.length) throw new Error('資料庫目前沒有任何批次紀錄。');
     state.skuMeta = skus;
     state.noOpDays = noOp;
-    const last = batches[batches.length - 1].d;
-    load(batches, `資料庫（到 ${last}）`);
+    load(batches, '資料庫');
     showWho();
     $('srcErr').hidden = true;
   } catch (err) {
