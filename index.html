@@ -45,7 +45,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .topbar .btn{background:transparent;border-color:rgba(255,255,255,.45);color:#F2F3F0;
   padding:7px 14px;font-size:12.5px}
 .topbar .btn:hover{background:rgba(255,255,255,.12);opacity:1}
-@media(max-width:760px){
+@media screen and (max-width:760px){
   .topbar{height:auto;padding:10px 0}
   .topbar .in{gap:10px;flex-wrap:wrap;padding:0 14px}
   .topbar .t{font-size:16px}
@@ -126,8 +126,12 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
   margin-right:8px}
 .rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
-.rep-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;
+.rep-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
   background:var(--rule);border:1px solid var(--rule)}
+@media screen and (min-width:900px){.rep-kpi{grid-template-columns:repeat(6,1fr)}}
+@media screen and (max-width:560px){.rep-kpi{grid-template-columns:repeat(2,1fr)}}
+/* 列印時 A4 放得下六格，但別讓最後一格落單 */
+@media print{.rep-kpi{grid-template-columns:repeat(6,1fr)}}
 .rep-kpi div{background:var(--sunk);padding:10px 12px}
 .rep-kpi{padding:0}
 .rep-kpi > div{padding:13px 14px 15px;background:var(--surface)}
@@ -187,7 +191,7 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   font-weight:600;font-size:13.5px;padding:8px 14px;letter-spacing:.06em}
 .rtab.hl{margin:0}
 .rtab.hl td{padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
-.rtab.hl td.who{padding-right:14px}
+.rtab.hl td.who{padding-right:13px}
 /* 重點裡的品項清單：品號、品名、幅度三欄各自對齊，不要黏成一段 */
 .hlist{list-style:none;margin:5px 0 0;padding:0}
 .rtab.hl{table-layout:fixed;width:100%}
@@ -204,8 +208,8 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rtab.hl td .t{font-size:15px;color:var(--ink);line-height:1.5;font-weight:500}
 .rtab.hl td .sub{font-size:12px;color:var(--ink-3);margin-top:2px;line-height:1.55}
 .rtab.hl td .d{font-size:13px;color:var(--ink-2);margin-top:5px;line-height:1.6}
-.rtab.hl td.who{width:98px;text-align:right}
-.rtab.hl td.who span{display:inline-block;width:88px;box-sizing:border-box;text-align:center;
+.rtab.hl td.who{width:112px;text-align:right}
+.rtab.hl td.who span{display:inline-block;width:86px;box-sizing:border-box;text-align:center;
   font-size:12px;padding:3px 4px;border-radius:3px;
   background:var(--signal-wash);color:var(--signal);border:1px solid rgba(180,84,26,.35);
   white-space:nowrap}
@@ -299,12 +303,12 @@ td.n i.bad{color:var(--signal);font-weight:600}
 /* ── sections ── */
 section{padding:50px 0 6px;border-top:1px solid var(--rule)}
 .sec-head{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
-.sec-num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);
+.sec-num{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;color:var(--accent);
   font-weight:600;letter-spacing:.08em;padding-top:5px}
 .sec-head h2{font-size:23px;font-weight:700;letter-spacing:-.005em}
 .sec-sub{color:var(--ink-2);font-size:14px;max-width:none;margin:0 0 24px 38px}
 .body{margin-left:38px}
-@media(max-width:760px){.sec-sub,.body{margin-left:0}}
+@media screen and (max-width:760px){.sec-sub,.body{margin-left:0}}
 
 /* ── table ── */
 .tw{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);border-radius:3px}
@@ -313,10 +317,10 @@ th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.07em;
   /* 欄位標題原本是 10px 淺灰全大寫 —— 掃過去等於沒有標題，欄位對不上意思。
      改成 12px、深一階的灰、不轉大寫，並用較粗的底線把標題列和資料分開。 */
   text-transform:none;color:var(--ink-2);font-weight:600;text-align:left;padding:9px 13px 8px;
-  border-bottom:2px solid var(--rule-2);white-space:nowrap;background:var(--sunk);
+  border-bottom:2px solid var(--rule-2);background:var(--sunk);vertical-align:bottom;
   font-size:13px;letter-spacing:.01em}
 th i{display:block;font-style:normal;font-size:11.5px;font-weight:400;letter-spacing:0;
-  color:var(--ink-3);margin-top:1px}
+  color:var(--ink-3);margin-top:1px;white-space:normal;line-height:1.4}
 /* 一列裡有品名（兩行）、數字（一行）、迷你圖（22px），靠上對齊會參差不齊 */
 td{padding:11px 13px;border-bottom:1px solid var(--rule);vertical-align:middle;font-size:14.5px}
 tbody tr:last-child td{border-bottom:0}
@@ -335,8 +339,8 @@ td.dv b{display:block;font-size:11.5px;font-weight:500;margin-top:3px}
 .dvb i{position:absolute;top:0;bottom:0;border-radius:2px;min-width:2px}
 .dvb i.dn{background:var(--signal)} .dvb i.up{background:var(--accent)}
 .dvb i.flat{background:var(--ink-4)}
-td.sp{text-align:center;vertical-align:middle}
-.spark{width:92px;height:22px;display:inline-block;vertical-align:middle}
+td.sp{text-align:center;vertical-align:middle;padding-left:6px;padding-right:6px}
+.spark{width:100%;max-width:170px;height:auto;aspect-ratio:150/40;display:block;margin:0 auto}
 /* 名詞定義。摺疊起來不佔版面，但隨時打得開 —— 看不懂一個數字就無法相信它 */
 .defs{margin-top:20px;border:1px solid var(--rule-2);border-radius:4px;background:var(--surface)}
 .defs summary{cursor:pointer;padding:11px 16px;font-size:13px;font-weight:500;
@@ -348,7 +352,8 @@ td.sp{text-align:center;vertical-align:middle}
 .deft td.df{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2)}
 .deft td.du{color:var(--ink-3);font-size:12.5px}
 .sparkna{color:var(--ink-4);font-family:"IBM Plex Mono",monospace;font-size:11px}
-td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em}
+td.sku{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.02em;
+  word-break:break-word}
 /* 品號底下帶一行品名。只給品號的表，要先去查對照表才看得懂在講哪支產品 ——
    那一步就是現場不看報表的原因。品名用內文字體、放小一級，不跟品號搶。 */
 td.sku .nm{display:block;margin-top:1px;font-family:"Noto Sans TC","PingFang TC",sans-serif;
@@ -358,9 +363,12 @@ tbody tr.clickable:hover{background:var(--accent-wash)}
 .skuname{display:flex;align-items:baseline;gap:10px;margin:0 0 14px;flex-wrap:wrap}
 .skuname b{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600;letter-spacing:.02em}
 .skuname span{font-family:"Noto Serif TC",serif;font-size:17px;font-weight:600;color:var(--ink-2)}
-.lamp{white-space:nowrap;font-size:12.5px;display:flex;align-items:baseline;gap:7px}
+.lamp{font-size:13px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.lamp b{white-space:nowrap}
 .lamp b{font-weight:600}
-.lamp .why{color:var(--ink-3);font-size:11.5px;font-weight:400}
+.lamp .why{color:var(--ink-3);font-size:12px;font-weight:400;white-space:normal;line-height:1.5}
+td.st .ref{margin-top:4px;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  color:var(--accent);letter-spacing:.04em}
 .lamp::before{content:"";width:8px;height:8px;border-radius:50%;flex:none;
   background:currentColor;transform:translateY(-1px)}
 .lamp.thin::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink-3)}
@@ -427,7 +435,7 @@ select:focus,input:focus,.btn:focus-visible{outline:2px solid var(--accent);outl
 .note li{padding:4px 0;border-bottom:1px solid var(--rule);
   font-family:"IBM Plex Mono",monospace;display:flex;justify-content:space-between;gap:12px}
 .note li:last-child{border-bottom:0}
-@media(max-width:860px){.notes{grid-template-columns:1fr}
+@media screen and (max-width:860px){.notes{grid-template-columns:1fr}
   /* 三欄在 390px 會撐破版面（每格最少也要 136px），改成兩欄 */
   .skukpi{grid-template-columns:1fr 1fr}
   .skukpi div{padding:11px 12px 13px;min-width:0}
@@ -453,7 +461,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px;cursor:point
 .calc .out .s{font-size:11.5px;color:var(--ink-3);margin-top:3px;line-height:1.5}
 .calc .out div.pick{background:var(--accent-wash)}
 .calc .out div.pick .v{color:var(--accent)}
-@media(max-width:640px){.calc .out{grid-template-columns:1fr}
+@media screen and (max-width:640px){.calc .out{grid-template-columns:1fr}
   .calc .out div+div{border-left:0;border-top:1px solid var(--rule)}}
 
 /* ── alerts ── */
@@ -474,7 +482,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 [hidden]{display:none!important}
 
 /* 手機上表格橫向捲動會把「狀態」擠出畫面 —— 改成一列一張卡片 */
-@media(max-width:760px){
+@media screen and (max-width:760px){
   #overviewTable thead{display:none}
   #overviewTable,#overviewTable tbody,#overviewTable tr,#overviewTable td{display:block;width:100%}
   #overviewTable tr{padding:12px 14px;border-bottom:1px solid var(--rule)}
@@ -526,7 +534,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   .rep-figleg { font-size:9px; margin-bottom:5px }
   h2, h3 { break-after:avoid }
   tr { break-inside:avoid }
-  .hilite, .rep-fig, .heatwrap, .rep-kpi { break-inside:avoid }
+  /* 本期重點現在會列滿整份清單，整塊不分頁的話第 1 頁會只剩抬頭 ——
+     改成允許跨頁，但每一列不切斷。 */
+  .hilite { break-inside:auto }
+  .hilite .hd { break-after:avoid }
+  .rep-fig, .heatwrap, .rep-kpi, .follow { break-inside:avoid }
   .heatwrap { overflow:visible }
   footer { font-size:9.5px }
   @page { size:A4; margin:13mm }
@@ -634,18 +646,18 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       <button class="btn ghost" id="toggleAll" style="margin-left:auto">顯示全部品項</button>
     </div>
     <div class="tw">
-      <table id="overviewTable">
+      <table id="overviewTable" style="table-layout:fixed">
         <colgroup>
-          <col style="width:22%"><col style="width:11%"><col style="width:10%">
-          <col style="width:11%"><col style="width:12%"><col style="width:12%">
-          <col style="width:22%">
+          <col style="width:20%"><col style="width:10%"><col style="width:8%">
+          <col style="width:10%"><col style="width:18%"><col style="width:11%">
+          <col style="width:23%">
         </colgroup>
         <thead><tr>
           <th>品號 / 品名</th>
           <th class="n">本期包裝量<i>單位 ／ 公斤</i></th>
           <th class="n">批次</th>
           <th class="n">處理效率<i>單位／人·hr</i></th>
-          <th class="c">逐月走勢<i>全期 vs 平常</i></th>
+          <th class="c">逐月走勢<i>100 ＝ 跟自己平常一樣</i></th>
           <th class="c">本期<i>vs 平常</i></th><th>狀態</th>
         </tr></thead>
         <tbody id="tbOverview"></tbody>
@@ -656,7 +668,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 </section>
 
 <section>
-  <div class="sec-head"><div class="sec-num">04</div><h2>需要說明的批次</h2></div>
+  <div class="sec-head"><div class="sec-num">04</div><h2>需要特別關注的批次</h2></div>
   <p class="sec-sub">每一批一個點，縱軸是「這批 ÷ 該品項自己的平常水準」，所以不同瓶型可以畫在同一張圖上。
     掉出淺綠色範圍的那幾批，請製造單位就當天狀況說明。</p>
   <div class="body"><div id="oddBox"></div></div>
@@ -1104,13 +1116,34 @@ function analyse(batches, kgPer) {
      判定單一品項時要先扣掉它 —— 否則全廠一起慢的時候，每一支都會被標成異常，
      然後十個課長被叫去說明同一件事。 */
   const rated = skus.filter(s => s.n >= MIN_BATCHES);
-  const plant = {};
+  const plant = {}, plantPP = {};
+  /* 每支產品每月的「單位／人·hr」，以及它自己全期的中位數。
+     「跟誰比」的答案：跟自己比。全廠水準＝每支產品各自跟自己比之後取中位數，
+     所以它不受當月接單品項組合的影響 —— 那正是「單位/hr 直接加總」做不到的。 */
+  const ppBySku = new Map();
+  for (const [sku, list] of bySku) {
+    const h = list.filter(x => x.n > 0);
+    if (h.length < 3) continue;
+    const own = median(h.map(x => x.b / (x.h * x.n)));
+    const byM = new Map();
+    h.forEach(x => {
+      if (!byM.has(x.m)) byM.set(x.m, [0, 0]);
+      const e = byM.get(x.m); e[0] += x.b; e[1] += x.h * x.n;
+    });
+    ppBySku.set(sku, { own, byM });
+  }
   allMonths.forEach(m => {
     const v = rated.map(s => {
       const x = s.months.find(y => y.m === m);
       return x && s.med ? x.rate / s.med : null;
     }).filter(v => v !== null);
     plant[m] = v.length >= 5 ? median(v) : 1;      // 樣本太少就不調整
+    const w = [];
+    ppBySku.forEach(({ own, byM }) => {
+      const e = byM.get(m);
+      if (e && e[1] > 0 && own) w.push((e[0] / e[1]) / own);
+    });
+    plantPP[m] = w.length >= 5 ? median(w) : null;  // 沒有人數資料的月份就是 null
   });
 
   /* 「水準下移」仍然要算 —— 它不當燈號，但會升格成議題。
@@ -1166,7 +1199,8 @@ function analyse(batches, kgPer) {
     solo8, months: allMonths,
     mixedN: batches.filter(x => x.mixed).length,
     // 全廠每月相對水準。判定單一品項時要扣掉它，同時它自己也是一條要看的線。
-    plant: allMonths.map(m => ({ m, rel: +(plant[m] || 1).toFixed(3) })),
+    plant: allMonths.map(m => ({ m, rel: +(plant[m] || 1).toFixed(3),
+      pp: plantPP[m] === null || plantPP[m] === undefined ? null : +plantPP[m].toFixed(3) })),
     // 每月產出與效率，給「產出／效率」兩張圖用。
     // 單位數與公斤會分歧 —— 平均每單位重量全期在 1.39～2.25kg 之間跳動，
     // 所以只給「單位/hr」一個數字，跨月比較幾乎沒有意義。
@@ -1471,7 +1505,7 @@ document.addEventListener('click', ev => {
 });
 
 /* ── 01 品項總覽 ── */
-let tab = 'freq', showAll = false, lastStats = null;
+let tab = 'freq', showAll = false, lastStats = null, hiliteRef = {};
 const TOP_N = 10;   // 總覽預設顯示的列數
 
 const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太少' };
@@ -1545,7 +1579,7 @@ const SPARK_LO = 0.6, SPARK_HI = 1.4;
 function sparkSvg(s) {
   const ms = s.months || [];
   if (ms.length < 2 || !s.med) return '<span class="sparkna">—</span>';
-  const W = 92, H = 22, P = 2;
+  const W = 150, H = 40, P = 3;
   const X = i => P + (i / (ms.length - 1)) * (W - 2 * P);
   const Y = v => {
     const t = (Math.min(Math.max(v, SPARK_LO), SPARK_HI) - SPARK_LO) / (SPARK_HI - SPARK_LO);
@@ -1560,9 +1594,12 @@ function sparkSvg(s) {
       aria-label="逐月走勢，最後一個月為平常水準的 ${Math.round(last * 100)}%">
     <line x1="${P}" y1="${Y(1)}" x2="${W - P}" y2="${Y(1)}"
       stroke="var(--rule-2)" stroke-dasharray="2 3"/>
-    <path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="1.4"
-      stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>
-    <circle cx="${X(rel.length - 1)}" cy="${Y(last)}" r="2.6" fill="${col}"/>
+    <path d="${d}" fill="none" stroke="var(--ink-2)" stroke-width="2"
+      stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
+    <circle cx="${X(rel.length - 1)}" cy="${Y(last)}" r="4" fill="${col}"/>
+    <text x="${X(rel.length - 1) - 6}" y="${Y(last) + (last < 1 ? 13 : -5)}"
+      font-size="10" font-family="'IBM Plex Mono',monospace" fill="${col}"
+      text-anchor="end">${Math.round(last * 100)}</text>
     <title>${ms.map(m => `${monthLabel(m.m)} ${fmt(m.rate)}`).join('　')}</title>
   </svg>`;
 }
@@ -1605,7 +1642,10 @@ function renderOverview(S) {
       <td class="dv delta ${cls}" data-l="本期 vs 平常">${bar}<b>${
         pct == null ? '—' : (pct > 0 ? '+' : '') + pct + '%'}</b></td>
       <td class="st"><div class="lamp ${g.lamp.k}"><b>${LAMP[g.lamp.k]}</b>
-        <span class="why">${g.lamp.why}</span></div></td></tr>`;
+        <span class="why">${g.lamp.why}</span></div>${
+        (hiliteRef[g.s] || []).length
+          ? `<div class="ref">本期重點 ${(hiliteRef[g.s]).map(i => '①②③④⑤⑥'[i]).join('')}</div>`
+          : ''}</td></tr>`;
   }).join('');
 
   const t = E.thresholds, c = {};
@@ -2001,7 +2041,8 @@ const ymLabel = m => `${m.slice(0, 4)} 年 ${+m.slice(5)} 月`;
    數量級不同，畫同一軸會有一條被壓平。 */
 function trendSvg(monthly, plant) {
   const ms = monthly.slice(-12);
-  const plantOf = {}; (plant || []).forEach(x => { plantOf[x.m] = x.rel; });
+  const plantOf = {}, ppOf = {};
+  (plant || []).forEach(x => { plantOf[x.m] = x.rel; ppOf[x.m] = x.pp; });
   if (ms.length < 3) return '';
   const W = 900, H = 400, L = 62, R = 66, T = 18, GAP = 26;
   const ph1 = 150, ph2 = 120;
@@ -2022,7 +2063,7 @@ function trendSvg(monthly, plant) {
     aria-label="每月產出與效率趨勢">`;
 
   // ── 上：產出 ──
-  g += `<text x="${L}" y="${T - 4}" font-size="12" font-weight="600" fill="var(--ink)">產出</text>`;
+  g += `<text x="${L}" y="${T - 4}" font-size="13" font-weight="700" fill="var(--ink)">產出</text>`;
   for (let i = 0; i <= 3; i++) {
     const y = T + ph1 - (i / 3) * ph1;
     g += `<line x1="${L}" y1="${y}" x2="${W - R}" y2="${y}" stroke="${rule}"/>`;
@@ -2051,12 +2092,14 @@ function trendSvg(monthly, plant) {
   const mKg = med(ms.map(m => m.kgHr).filter(Boolean)) || 1;
   const mU  = med(ms.map(m => m.unitHr).filter(Boolean)) || 1;
   const rel = ms.map(m => ({ ...m, rKg: m.kgHr / mKg, rU: m.unitHr / mU }));
-  rel.forEach(r => { r.rP = plantOf[r.m] || 1; });
-  const lo = Math.min(0.75, ...rel.map(r => Math.min(r.rKg, r.rU, r.rP))) - 0.05;
-  const hi = Math.max(1.25, ...rel.map(r => Math.max(r.rKg, r.rU, r.rP))) + 0.05;
+  rel.forEach(r => { r.rP = plantOf[r.m] || 1; r.rPP = ppOf[r.m]; });
+  const vals = rel.flatMap(r => [r.rP, r.rPP]).filter(v => v != null);
+  const lo = Math.min(0.75, ...vals) - 0.05;
+  const hi = Math.max(1.25, ...vals) + 0.05;
   const Y2 = v => T2 + ph2 - ((v - lo) / (hi - lo)) * ph2;
-  g += `<text x="${L}" y="${T2 - 4}" font-size="12" font-weight="600" fill="var(--ink)">效率</text>`;
-  g += `<text x="${L + 40}" y="${T2 - 4}" font-size="10.5" fill="${muted}">相對全期中位數，100 ＝ 跟常態一樣</text>`;
+  g += `<text x="${L}" y="${T2 - 4}" font-size="13" font-weight="700" fill="var(--ink)">效率</text>`;
+  g += `<text x="${L + 44}" y="${T2 - 4}" font-size="11" fill="${muted}">`
+     + `每支產品先跟自己的常態比，再取全部產品的中位數　·　100 ＝ 跟自己平常一樣</text>`;
   [lo, 1, hi].forEach(v => {
     const one = Math.abs(v - 1) < 1e-9;
     g += `<line x1="${L}" y1="${Y2(v)}" x2="${W - R}" y2="${Y2(v)}"
@@ -2070,27 +2113,42 @@ function trendSvg(monthly, plant) {
      在報表上就只是一個沒有佐證的斷言。
      它跟上面兩條不一樣：前兩條是把全廠當一條線算（量大的品項權重高），
      這一條是每支產品各自跟自己比之後取中位數，代表「典型的一支產品」。 */
-  rel.forEach(r => { r.rP = plantOf[r.m] || 1; });
-  const series = [['rKg', 'var(--accent)', '公斤/hr'], ['rU', 'var(--cool)', '單位/hr'],
-                  ['rP', 'var(--signal)', '全廠水準']];
+  /* 這一格只放「跟自己比」的線。
+     「當月所有品項加總的單位/hr」沒有比較基準 —— 這個月做大包裝它就低，
+     做小包裝它就高，跟效率無關。所以那兩條（公斤/hr、單位/hr）拿掉了。
+
+     留下的兩條都是：每支產品拿「本月 ÷ 自己全期的中位數」，再取全部產品的中位數。
+     產品組合換了也不影響，這才是客觀的月對月比較。 */
+  const series = [['rP', 'var(--signal)', '線性產能'],
+                  ['rPP', 'var(--accent)', '處理效率']];
   series.forEach(([k, c, lab]) => {
-    g += `<path d="${rel.map((r, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${Y2(r[k]).toFixed(1)}`).join('')}"
-           fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>`;
+    // 人數是 2026-08 才開始有的，之前的月份沒有「處理效率」——
+    // 缺的月份要斷線，不能硬連起來假裝有資料
+    let d = '', pen = false;
     rel.forEach((r, i) => {
-      g += `<circle cx="${cx(i)}" cy="${Y2(r[k])}" r="3.8" fill="${c}"
-             stroke="#fff" stroke-width="1.2"><title>${monthLabel(r.m)}　${lab} ${
-             fmt(k === 'rKg' ? r.kgHr : r.unitHr)}（常態的 ${Math.round(r[k] * 100)}%）</title></circle>`;
+      if (r[k] == null) { pen = false; return; }
+      d += `${pen ? 'L' : 'M'}${cx(i).toFixed(1)},${Y2(r[k]).toFixed(1)}`;
+      pen = true;
+    });
+    if (d) g += `<path d="${d}" fill="none" stroke="${c}" stroke-width="2.4"
+                  stroke-linejoin="round"/>`;
+    rel.forEach((r, i) => {
+      if (r[k] == null) return;
+      g += `<circle cx="${cx(i)}" cy="${Y2(r[k])}" r="4" fill="${c}"
+             stroke="#fff" stroke-width="1.3"><title>${monthLabel(r.m)}　${lab} ${
+             Math.round(r[k] * 100)}%（100 ＝ 跟自己平常一樣）</title></circle>`;
     });
   });
   // 兩條線的末端常常靠得很近，標籤會疊在一起 —— 差距太小就上下推開
   const last = rel[rel.length - 1];
   // 三條線的末端常常擠在一起，標籤會疊住 —— 由上而下排開，至少隔 13px
-  const order = series.map((x, i) => [i, Y2(last[x[0]])]).sort((a, b) => a[1] - b[1]);
-  const ys = new Array(series.length);
+  const shown = series.filter(([k]) => last[k] != null);
+  const order = shown.map((x, i) => [i, Y2(last[x[0]])]).sort((a, b) => a[1] - b[1]);
+  const ys = new Array(shown.length);
   let prevY = -1e9;
-  order.forEach(([i, y]) => { const v = Math.max(y, prevY + 13); ys[i] = v; prevY = v; });
-  series.forEach(([k, c, lab], i) => {
-    g += `<text x="${W - R + 7}" y="${ys[i] + 4}" fill="${c}" font-size="11" ${mono}>${lab}</text>`;
+  order.forEach(([i, y]) => { const v = Math.max(y, prevY + 14); ys[i] = v; prevY = v; });
+  shown.forEach(([k, c, lab], i) => {
+    g += `<text x="${W - R + 7}" y="${ys[i] + 4}" fill="${c}" font-size="11.5" ${mono}>${lab}</text>`;
   });
 
   // 月份刻度（共用）
@@ -2109,14 +2167,14 @@ function trendSvg(monthly, plant) {
     <div class="rep-figleg">
       <span><i class="dot" style="background:var(--accent)"></i>公斤</span>
       <span><i class="dot" style="background:var(--cool)"></i>單位數</span>
-      <span><i class="dot" style="background:var(--signal)"></i>全廠水準（下圖）</span>
       <span style="flex-basis:100%;color:var(--ink-3);margin-top:3px">
-        <b>上下兩條線分開的時候，代表接單的包裝規格變了</b>，不是效率變了 ——
-        最底下那排「kg/件」就是原因：全期在 1.39～2.25 公斤之間跳動。
-        所以<b>「單位/hr」跨月比較幾乎沒有意義</b>，它主要反映接單結構。<br>
-        <b>橘色的「全廠水準」是每一支產品各自跟自己比之後取中位數</b>，
-        代表「典型的一支產品這個月比自己平常快還是慢」——
-        第 01 節②講的就是這條線，判定個別產品時也是先除掉它。</span>
+        <b>上圖</b>：長條是重量、折線是件數。兩條分開的時候代表<b>接單的包裝規格變了</b>，
+        不是效率變了 —— 最底下那排「kg/件」就是原因，全期在 1.39～2.25 公斤之間跳動。<br>
+        <b>下圖只放「跟自己比」的線。</b>「當月所有品項加總的單位/hr」沒有比較基準 ——
+        這個月做大包裝它就低、做小包裝它就高，跟效率無關。
+        下圖的算法是：<b>每支產品拿「本月 ÷ 自己全期的中位數」，再取全部產品的中位數</b>，
+        產品組合換了也不影響。<b>線性產能</b>＝單位數÷工時，
+        <b>處理效率</b>＝單位數÷(工時×人數)；人數 2026-08 才開始有，之前的月份沒有這條線。</span>
     </div>`;
 }
 
@@ -2190,6 +2248,18 @@ function oddDotSvg(rows, skuOf) {
       <title>${p.d}　${p.s}　${p.h.toFixed(2)}h　${fmt(Math.round(p.b / p.h))} 單位/hr（平常 ${
         fmt(p.usual)}）　${Math.round(p.rel * 100)}%${sh ? '　工時未滿 1 小時' : ''}</title></circle>`;
   });
+  /* 離群的點直接標品號 —— 圖上看到一顆紅點卻要翻下面的表才知道是哪一支，
+     等於少了一步。標籤上下交錯放，避免同一天的兩顆疊在一起。 */
+  const labelled = pts.filter(p => (p.rel < lo || p.rel > hi)
+    && p.h >= E.thresholds.SHORT_BATCH_H)
+    .sort((a, b) => X(a.d) - X(b.d));
+  let lastX = -1e9, up = true;
+  labelled.forEach(p => {
+    const x = X(p.d), y = Y(p.rel);
+    if (x - lastX < 46) up = !up; else up = true;
+    lastX = x;
+    g += label(x, y + (up ? 17 : 28), p.s, 'var(--signal)', 'middle');
+  });
   const outs = pts.filter(p => p.rel < lo || p.rel > hi);
   const outLong = outs.filter(p => p.h >= E.thresholds.SHORT_BATCH_H).length;
   const outShort = outs.length - outLong;
@@ -2199,7 +2269,8 @@ function oddDotSvg(rows, skuOf) {
       <span><i class="dot bad"></i>離群 ${outLong} 批</span>
       ${outShort ? `<span><i class="dot hollow"></i>離群但工時未滿 1 小時 ${outShort} 批</span>` : ''}
       <span style="flex-basis:100%;color:var(--ink-3);margin-top:3px">
-        Y 軸＝這批 ÷ 該品項自己的平常水準，所以不同瓶型可以畫在同一張圖上，1.0 就是跟平常一樣。
+        Y 軸＝這批 ÷ 該品項自己的平常水準，所以不同包裝型式可以畫在同一張圖上，
+        1.0 就是跟平常一樣。<b>掉出範圍的點直接標了品號</b>。
         空心圈是工時過短或超出 ${REL_TOP} 倍的批次，僅供參考。</span>
     </div>`;
 }
@@ -2573,7 +2644,7 @@ function renderHilite(S) {
   if (odd.length) {
     const worst = odd.slice().sort((a, b) => b.gap - a.gap);
     pts.push({ who: '製造',
-      t: `${odd.length} 批需要說明`,
+      t: `${odd.length} 批需要關注`,
       sub: '該批線性產能偏離該品項平常水準的幅度，詳見第 04 節',
       rows: worst.map(x => [x.s, cut(nameOf(x.s), 16),
         `${x.d}　${x.kind === 'lo' ? '慢' : '快'} ${x.gap}%`]) });
@@ -2589,13 +2660,24 @@ function renderHilite(S) {
   // 只陳述成本，不斷言原因。
   // 「小包裝天生吃工時」對某些品項是錯的 —— 例如蜜餞水果是 1kg 包裝，
   // 它慢是因為靠手工挑揀，跟包裝規格無關。原因交給現場的人說，數字這邊只給事實。
-  if (worstCost && avgKg && worstCost.hPerKg > avgKg * 2) pts.push({ who: '業務・生管',
-    t: `${withName(worstCost.s)} 最吃工時：每 1,000 公斤要 ${worstCost.hPerKg} 小時`,
-    sub: `全廠平均是每 1,000 公斤 ${avgKg.toFixed(2)} 小時。`
-       + `換句話說，同樣的工時，這支產品的產出重量只有全廠平均的 `
-       + `${(avgKg / worstCost.hPerKg * 100).toFixed(0)}%`,
-    d: '接單與排程時，這支的工時成本要按實績估，不能套全廠平均。'
-       + '原因（手工作業、瓶型、批量）請由現場說明 —— 詳見第 06 節的工時成本對照。' });
+  /* 「每千公斤要 X 小時」沒有人有感覺，因為沒有比較對象。
+     改成「同樣一小時，全廠平均做幾件／幾公斤，這支做幾件／幾公斤」——
+     一小時是大家都有概念的單位。
+     這一條只是提醒，不是異常，所以不掛負責單位。 */
+  if (worstCost && avgKg && worstCost.hPerKg > avgKg * 2) {
+    const avgU = cur.H ? cur.B / cur.H : 0;
+    const avgKgHr = cur.H ? cur.rows.reduce((a, x) => a + x.b * kgOf(x.s), 0) / cur.H : 0;
+    const itU = worstCost.rate, itKg = worstCost.h ? worstCost.kg / worstCost.h : 0;
+    pts.push({
+      t: `${withName(worstCost.s)} 最吃工時 —— 同樣 1 小時，`
+         + `全廠平均做 ${fmt(Math.round(avgU))} 件／${fmt(Math.round(avgKgHr))} 公斤，`
+         + `這支只做 ${fmt(Math.round(itU))} 件／${fmt(Math.round(itKg))} 公斤`,
+      sub: `產出重量只有全廠平均的 ${(itKg / avgKgHr * 100).toFixed(0)}%，`
+         + `件數是 ${(itU / avgU * 100).toFixed(0)}%。`
+         + `它用掉全廠 ${worstCost.hShare}% 的工時，產出 ${worstCost.kgShare}% 的重量`,
+      d: '接單與排程時，這支的工時成本要按實績估，不能套全廠平均。'
+         + '原因（手工作業、包裝型式、批量）請由現場說明 —— 詳見第 06 節。' });
+  }
 
   // 「線性正常，每人處理量偏低」＝人配得比平常多，但線沒有跟上。
   // 負責單位是包裝班（人是他們在現場配的），所以措辭要對著包裝班說，
@@ -2619,6 +2701,15 @@ function renderHilite(S) {
         `<li><b>${r[0]}</b><span>${esc(r[1])}</span><em>${r[2]}</em></li>`).join('')}</ul>` : ''}${
       x.d ? `<div class="d">${x.d}</div>` : ''}</td>
     <td class="who">${x.who ? `<span>${x.who}</span>` : ''}</td></tr>`).join('');
+
+  // 總覽要能跟這裡對得起來 —— 記下每支產品出現在第幾條
+  hiliteRef = {};
+  pts.slice(0, 6).forEach((x, i) => {
+    (x.rows || []).forEach(r => {
+      hiliteRef[r[0]] = hiliteRef[r[0]] || [];
+      if (hiliteRef[r[0]].indexOf(i) < 0) hiliteRef[r[0]].push(i);
+    });
+  });
 
   $('hiliteBox').innerHTML = `<div class="hilite">
     <div class="hd">本期重點　·　${periodLabel()}</div>
@@ -2698,7 +2789,7 @@ function renderOdd(S) {
       且該品項全期至少 ${MIN_REPORT_BATCHES} 批、<b>該批工時至少 1 小時</b>。<br>
       <b>背景值：本期全廠整體是常態的 ${Math.round(plantRel * 100)}%。</b>
       全廠一起慢的時候，單一品項要慢得更多才算它的問題 —— 請帶著這個數字看上表。</div>`
-    : '<div class="rep-empty">本期沒有偏離平常水準的批次（工時 1 小時以上）。</div>')
+    : '<div class="rep-empty">本期沒有需要特別關注的批次（工時 1 小時以上）。</div>')
     + (shortRows ? `<details class="sub"><summary>另有 ${S.oddShort.length}
       批工時未滿 1 小時也落在範圍外 —— 僅供參考，不列入上表</summary>
       <table class="rtab"><thead><tr>
@@ -2730,8 +2821,7 @@ function renderLabour(S, lab, labS, quads) {
     <td class="num">${(labS.get(q.s) && labS.get(q.s).avgHead || 0).toFixed(1)}</td>
     <td class="num ${q.lineLow ? 'lo' : ''}">${fmt(q.line)}</td>
     <td class="num ${q.ppLow ? 'lo' : ''}">${fmt(q.pp)}</td>
-    <td>${QUAD[q.kind].t}</td>
-    <td class="nm">${QUAD[q.kind].who}</td></tr>`).join('');
+    <td>${QUAD[q.kind].t}</td></tr>`).join('');
 
   $('labBox').innerHTML = `<div class="rep-kpi">
     <div><div class="k">處理效率</div><div class="v">${fmt(lab.perUnit)}</div>
@@ -2750,9 +2840,9 @@ function renderLabour(S, lab, labS, quads) {
     要比人力花在哪一支，請看「公斤／人·hr」。</div>
   ${rows ? `<div class="fig-t" style="margin-top:20px">同一個「這批慢」，原因不一定一樣</div>
   <table class="rtab"><thead><tr>
-    <th>日期</th><th>品號 / 品名</th><th class="num">當批人數</th><th class="num">平常派</th>
+    <th>日期</th><th>品號 / 品名</th><th class="num">當批人數</th><th class="num">平均人數</th>
     <th class="num">線性產能<i>單位/hr</i></th><th class="num">處理效率<i>單位／人·hr</i></th>
-    <th>情況</th><th>負責</th>
+    <th>情況</th>
   </tr></thead><tbody>${rows}</tbody></table>
   <div class="rep-note"><b>判定基準</b>：兩個都跟「這支產品自己的中位數」比，
     低於 ${Math.round(Q_LOW * 100)}% 算偏低。

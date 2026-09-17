@@ -158,6 +158,14 @@ with sync_playwright() as p:
     check("概況帶單位", "單位／人·hr" in kpi and "公斤" in kpi, kpi[:200])
     check("KPI 有處理效率", "處理效率" in kpi, kpi[:200])
     check("有本期重點", pg.locator("#hiliteBox .rtab.hl tr").count() > 0)
+    # A4 可用寬度只有 695px，比手機斷點 760px 還窄 —— 沒排除 print 的話
+    # 整份 PDF 的表格都會退回「一列一張卡片」的手機排版
+    css = open("index.html", encoding="utf-8").read()
+    check("手機排版不會在列印時觸發", "@media(max-width:760px){" not in css
+          and "@media screen and (max-width:760px){" in css)
+    check("本期重點允許跨頁", ".hilite { break-inside:auto }" in css)
+    # 標題說幾筆就要列幾筆 —— 列表短一截，連那個數字都會被懷疑
+    check("重點清單不截斷", "slice(0, 3)" not in css and "over.slice(0, 5)" not in css)
     check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 2,
           pg.locator("section.noprint").count())
     check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
