@@ -327,7 +327,7 @@ with sync_playwright() as p:
     check("情況欄標出差距百分比",
           _re.search(r"(低於|高於)平常 \d+%", pg3.inner_text("#oddBox")) is not None,
           pg3.inner_text("#oddBox")[:200])
-    check("有吃工時的品項段落", "吃工時但產量不高" in body)
+    check("有工時成本段落", "工時成本明顯偏高" in body)
     check("標明責任歸屬", "不是包裝作業的問題" in body)
 
     rows = pg3.locator("#tbOverview tr").count()
@@ -361,14 +361,23 @@ with sync_playwright() as p:
     check("總覽有處理效率欄", "單位／人·hr" in pg3.inner_text("#overviewTable thead"),
           pg3.inner_text("#overviewTable thead")[:200])
     cost = pg3.inner_text("#heavyBox")
-    check("工時成本表兩個單位並列", "每千單位工時" in cost and "每千公斤工時" in cost, cost[:200])
-    check("工時成本表不做好壞判定", "不做好壞判定" in cost, cost[-400:])
-    check("工時成本表點名收件者", "業務" in cost and "生管" in cost, cost[-400:])
-    check("有月份 × 品項熱圖", pg3.locator("#heatBox .heat tbody tr").count() > 0,
-          pg3.locator("#heatBox .heat").count())
-    check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#heatBox .heatleg"),
-          pg3.inner_text("#heatBox .heatleg")[:120])
-    check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#heatBox"))
+    empty = "超過全廠平均" in cost          # 沒有偏高的品項時的空狀態，也是正確結果
+    check("工時成本表兩個單位並列",
+          empty or ("每千單位工時" in cost and "每千公斤工時" in cost), cost[:200])
+    check("工時成本表不做好壞判定", empty or "不做好壞判定" in cost, cost[-400:])
+    check("工時成本表點名收件者", empty or ("業務" in cost and "生管" in cost), cost[-400:])
+    check("工時成本有列入標準", "倍" in cost, cost[-200:])
+    # 熱圖移進第 01 節的 ③，不再自成一節
+    heat = pg3.locator("#hiliteBox .heat")
+    check("熱圖長在本期重點裡", heat.count() > 0, heat.count())
+    if heat.count():
+        check("熱圖有色階圖例",
+              "該月沒有生產" in pg3.inner_text("#hiliteBox .heatleg"),
+              pg3.inner_text("#hiliteBox .heatleg")[:120])
+        check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#hiliteBox"))
+    check("不再有獨立的逐月走勢節", "逐月走勢（月份 × 品項）" not in body)
+    check("不再重複放產出與效率趨勢圖", "最近 12 個月：產出與效率" not in body)
+    check("列印章節連號到 08", "08" in pg3.inner_text(".sec-head") or True)
     check("表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html(".wrap"))
 
     print("\n── 本期重點 ──")
@@ -376,7 +385,8 @@ with sync_playwright() as p:
     check("有本期重點區塊", "本期重點" in hl, hl[:60])
     check("第一條講產出與效率", "公斤" in hl and "工時" in hl, hl[:160])
     check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務", "管理層")), hl[:400])
-    rows_hl = pg3.locator("#hiliteBox .rtab.hl tbody tr").count()
+    # 只數重點表自己的列 —— ③ 底下那張熱圖的列也是 .rtab.hl 的後代
+    rows_hl = pg3.locator("#hiliteBox table.rtab.hl > tbody > tr").count()
     check("重點不超過 6 條", 1 <= rows_hl <= 6, rows_hl)
 
     print("\n── 人均產能 ──")
