@@ -154,19 +154,24 @@ with sync_playwright() as p:
     opts = pg.eval_on_selector_all("#periodSel option", "es => es.map(e => e.value)")
     check("未完成的月份另成一種模式", "p:2026-09" in opts, opts)
     check("完整月不會被標成本月至今", "m:2026-08" in opts, opts)
-    kpi = pg.inner_text("#periodKpi")
-    check("概況帶單位", "單位／人·hr" in kpi and "公斤" in kpi, kpi[:200])
-    check("KPI 有處理效率", "處理效率" in kpi, kpi[:200])
-    check("有本期重點", pg.locator("#hiliteBox .rtab.hl tr").count() > 0)
+    kpi = pg.inner_text("#sumKpi")
+    check("總結帶三個 KPI", pg.locator("#sumKpi .p1kpi > div").count() == 3,
+          pg.locator("#sumKpi .p1kpi > div").count())
+    check("KPI 有效率指數", "全廠效率指數" in kpi, kpi[:200])
+    check("KPI 有多花的工時", "多花的工時" in kpi, kpi[:200])
+    check("KPI 寫出目標", "目標 ≥" in kpi and "目標 ≤" in kpi, kpi[:240])
+    check("有效率指數走勢圖", pg.locator("#sumIdx svg").count() == 1)
+    check("有改善清單", pg.locator("#sumLoss svg").count() >= 1)
     # A4 可用寬度只有 695px，比手機斷點 760px 還窄 —— 沒排除 print 的話
     # 整份 PDF 的表格都會退回「一列一張卡片」的手機排版
     css = open("index.html", encoding="utf-8").read()
     check("手機排版不會在列印時觸發", "@media(max-width:760px){" not in css
           and "@media screen and (max-width:760px){" in css)
-    check("本期重點允許跨頁", ".hilite { break-inside:auto }" in css)
+    check("總結整節不分頁", "#secSummary { break-inside:avoid }" in css)
     # 標題說幾筆就要列幾筆 —— 列表短一截，連那個數字都會被懷疑
     check("重點清單不截斷", "slice(0, 3)" not in css and "over.slice(0, 5)" not in css)
-    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 2,
+    # PDF 只留 4 節；品項總覽、人力、工時成本、單一品項、排程試算都是互動查詢
+    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 5,
           pg.locator("section.noprint").count())
     check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
 
@@ -175,16 +180,12 @@ with sync_playwright() as p:
     pg.wait_for_timeout(800)
     check("本月至今標示在標題上", "至今" in pg.inner_text("#periodNow"),
           pg.inner_text("#periodNow"))
-    note = pg.inner_text("#periodNote")
-    check("寫出資料截至哪一天", "資料截至" in note, note[:160])
-    check("說明為何不比絕對量", "不與上期比較" in note, note[:200])
-    arrows = pg.eval_on_selector_all("#periodKpi .rep-kpi > div",
-        "es => es.slice(0,3).filter(e => e.querySelector('.d.up, .d.dn')).length")
-    check("本月至今：包裝量／重量／工時都不給箭頭", arrows == 0, arrows)
-    rates = pg.eval_on_selector_all("#periodKpi .rep-kpi > div",
-        "es => es.slice(3,5).filter(e => e.querySelector('.d.up, .d.dn')).length")
-    check("率仍然比較（不受天數影響）", rates >= 1, rates)
-    check("畫面上有醒目警語", pg.locator("#hiliteBox .warnbar").count() == 1)
+    note = pg.inner_text("#sumNote")
+    check("寫出資料截至哪一天", "資料截至" in note, note[:200])
+    check("說明為何不比絕對量", "不與上期比較" in note, note[:260])
+    # 效率指數與多花工時率都是比率，不受天數影響，本月至今照常顯示
+    check("本月至今仍算得出比率", "%" in pg.inner_text("#sumKpi"),
+          pg.inner_text("#sumKpi")[:160])
 
     pg.select_option("#periodSel", "all:")
     pg.wait_for_timeout(700)
@@ -216,9 +217,15 @@ with sync_playwright() as p:
     # ── 燈號：看離群「率」，不是「有沒有離群批次」──
     print("\n── 燈號與正常範圍 ──")
     lg = pg.inner_text("#lampLegend")
-    check("燈號說明寫明是比率", "離群批次佔" in lg and "%" in lg, lg[:160])
-    check("燈號只看選定的期間", "只看選定的那個期間" in lg, lg[:400])
-    check("說明短批次為何不列入", "站不住腳" in lg, lg[:600])
+    # 燈號只有一把尺：多花的工時。與第 01 節改善清單同源，兩邊不會對不起來。
+    check("燈號只有一把尺", "只有一把尺" in lg and "多花的工時" in lg, lg[:300])
+    check("燈號寫出兩個門檻", "5 小時" in lg and "2 小時" in lg, lg[:200])
+    check("說明為何慢很多卻不亮燈", "不值得" in lg, lg[:600])
+    # 亮燈的品項必須正好是第 01 節點名的品項
+    same = pg.evaluate("""(() => { const S = periodStats();
+      const a = S.list.filter(g => g.lamp.k==='alert'||g.lamp.k==='watch').map(g=>g.s).sort();
+      const b = S.named.map(g=>g.s).sort(); return JSON.stringify(a)===JSON.stringify(b); })()""")
+    check("亮燈品項 = 第 01 節點名品項", same, same)
     check("說明水準下移升格成議題", "升格成" in lg, lg[:600])
     # td.dv 不能被上方工具列的 .bar 撞名成 flex，否則橫條會被壓成 0 寬
     dvw = pg.eval_on_selector("#tbOverview td.dv .dvb", "e => e.clientWidth")
@@ -320,14 +327,14 @@ with sync_playwright() as p:
     body = pg3.inner_text(".wrap")
     check("標題是所選期間", "2026 年 8 月" in pg3.inner_text("#periodNow"),
           pg3.inner_text("#periodNow"))
-    check("有本期概況", "本期概況" in body)
+    check("有本期總結", "本期總結" in body)
     check("有品項狀態總覽", "品項狀態總覽" in body)
     check("有需要說明的批次", "需要說明的批次" in body)
     import re as _re
     check("情況欄標出差距百分比",
           _re.search(r"(低於|高於)平常 \d+%", pg3.inner_text("#oddBox")) is not None,
           pg3.inner_text("#oddBox")[:200])
-    check("有吃工時的品項段落", "吃工時但產量不高" in body)
+    check("有工時成本段落", "工時成本明顯偏高" in body)
     check("標明責任歸屬", "不是包裝作業的問題" in body)
 
     rows = pg3.locator("#tbOverview tr").count()
@@ -348,8 +355,8 @@ with sync_playwright() as p:
           pg3.inner_text("#chkBox")[:120])
 
     check("表格帶品名", body.count("草莓蒟蒻餡") >= 1 and "花生" in body, body[:200])
-    check("本期重點的品項是條列", pg3.locator("#hiliteBox .hlist li").count() > 0,
-          pg3.locator("#hiliteBox .hlist li").count())
+    check("改善清單有列出品項", pg3.locator("#sumLoss .c-code").count() > 0,
+          pg3.locator("#sumLoss .c-code").count())
     check("帶同一份名詞定義", "數字怎麼算的" in body and "合理目標" in body)
 
     print("\n── 圖表 ──")
@@ -361,23 +368,32 @@ with sync_playwright() as p:
     check("總覽有處理效率欄", "單位／人·hr" in pg3.inner_text("#overviewTable thead"),
           pg3.inner_text("#overviewTable thead")[:200])
     cost = pg3.inner_text("#heavyBox")
-    check("工時成本表兩個單位並列", "每千單位工時" in cost and "每千公斤工時" in cost, cost[:200])
-    check("工時成本表不做好壞判定", "不做好壞判定" in cost, cost[-400:])
-    check("工時成本表點名收件者", "業務" in cost and "生管" in cost, cost[-400:])
-    check("有月份 × 品項熱圖", pg3.locator("#heatBox .heat tbody tr").count() > 0,
-          pg3.locator("#heatBox .heat").count())
-    check("熱圖有色階圖例", "該月沒有生產" in pg3.inner_text("#heatBox .heatleg"),
-          pg3.inner_text("#heatBox .heatleg")[:120])
-    check("熱圖說明要橫著讀", "橫著讀" in pg3.inner_text("#heatBox"))
+    empty = "超過全廠平均" in cost          # 沒有偏高的品項時的空狀態，也是正確結果
+    check("工時成本表兩個單位並列",
+          empty or ("每千單位工時" in cost and "每千公斤工時" in cost), cost[:200])
+    check("工時成本表不做好壞判定", empty or "不做好壞判定" in cost, cost[-400:])
+    check("工時成本表點名收件者", empty or ("業務" in cost and "生管" in cost), cost[-400:])
+    check("工時成本有列入標準", "倍" in cost, cost[-200:])
+    check("不再有獨立的逐月走勢節", "逐月走勢（月份 × 品項）" not in body)
+    check("不再重複放產出與效率趨勢圖", "最近 12 個月：產出與效率" not in body)
     check("表頭寫明品號 / 品名", "品號 / 品名" in pg3.inner_html(".wrap"))
 
-    print("\n── 本期重點 ──")
-    hl = pg3.inner_text("#hiliteBox")
-    check("有本期重點區塊", "本期重點" in hl, hl[:60])
-    check("第一條講產出與效率", "公斤" in hl and "工時" in hl, hl[:160])
-    check("條目標出負責單位", any(w in hl for w in ("製造", "生管", "業務", "管理層")), hl[:400])
-    rows_hl = pg3.locator("#hiliteBox .rtab.hl tbody tr").count()
-    check("重點不超過 6 條", 1 <= rows_hl <= 6, rows_hl)
+    print("\n── 本期總結 ──")
+    hl = pg3.inner_text("#secSummary")
+    check("有本期總結區塊", "本期總結" in hl, hl[:60])
+    check("寫出本期做了多少", "公斤" in hl and "工時" in hl and "批" in hl, hl[:200])
+    # 一頁放得下才叫一頁：清單與追蹤都有上限，完整名冊在第 02 節
+    nloss = pg3.locator("#sumLoss .c-code").count()
+    check("改善清單不超過 8 支", 1 <= nloss <= 8, nloss)
+    nfu = pg3.locator("#sumFollow tbody tr").count()
+    check("上期追蹤不超過 5 支", nfu <= 5, nfu)
+    check("追蹤把未改善的排前面",
+          pg3.locator("#sumFollow tbody tr").count() == 0
+          or "worse" not in pg3.eval_on_selector_all(
+              "#sumFollow tbody tr", "es=>es.map(e=>e.className)")[-1]
+          or pg3.eval_on_selector_all(
+              "#sumFollow tbody tr", "es=>es.map(e=>e.className)")[0] == "worse",
+          pg3.eval_on_selector_all("#sumFollow tbody tr", "es=>es.map(e=>e.className)"))
 
     print("\n── 人均產能 ──")
     lb = pg3.inner_text("#labBox")
@@ -397,8 +413,14 @@ with sync_playwright() as p:
           pg3.locator("#oddBox .rtab tbody tr").count())
     check("沒有跑出多餘的引號或加號", "' + '" not in body and "+ '" not in body,
           [l for l in body.split("\n") if "+ '" in l][:2])
-    kpitxt = pg3.inner_text("#periodKpi")
+    kpitxt = pg3.inner_text("#sumKpi")
     check("KPI 的比較文字不會斷行", "對比上\n月" not in kpitxt, kpitxt[:120])
+    check("每支加起來等於全廠總數", "全廠加總" in pg3.inner_text("#sumNote"),
+          pg3.inner_text("#sumNote")[:160])
+    check("寫出基準期間", "滾動" in pg3.inner_text("#sumNote"),
+          pg3.inner_text("#sumNote")[:240])
+    check("講明目標不會自己調整", "不會自己跟著實績調整" in pg3.inner_text("#sumNote"),
+          pg3.inner_text("#sumNote")[-260:])
     pg3.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
                         "fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/report.png",
                    full_page=True)
