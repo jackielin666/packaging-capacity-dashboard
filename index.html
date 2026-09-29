@@ -126,9 +126,9 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .rep-page h3 .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);
   margin-right:8px}
 .rep-page p{margin:6px 0;font-size:12.5px;color:var(--ink-2)}
-.rep-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+.rep-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
   background:var(--rule);border:1px solid var(--rule)}
-@media screen and (min-width:900px){.rep-kpi{grid-template-columns:repeat(6,1fr)}}
+@media screen and (min-width:900px){.rep-kpi{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
 @media screen and (max-width:560px){.rep-kpi{grid-template-columns:repeat(2,1fr)}}
 /* 列印時 A4 放得下六格，但別讓最後一格落單 */
 @media print{.rep-kpi{grid-template-columns:repeat(6,1fr)}}
@@ -193,24 +193,24 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 .p1kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:16px}
 .p1kpi>div{border:1px solid var(--rule-2);border-radius:5px;padding:9px 12px;
   background:var(--sunk)}
-.p1kpi .k{font-size:12px;color:var(--ink-2);font-weight:600;letter-spacing:.03em}
-.p1kpi .v{font-size:32px;font-weight:700;line-height:1.15;
+.p1kpi .k{font-size:14px;color:var(--ink-2);font-weight:600;letter-spacing:.03em}
+.p1kpi .v{font-size:40px;font-weight:700;line-height:1.15;
   font-family:"IBM Plex Mono",monospace}
-.p1kpi .v small{font-size:15px;font-weight:600;margin-left:3px}
-.p1kpi .t{font-size:12px;margin-top:1px}
+.p1kpi .v small{font-size:17px;font-weight:600;margin-left:3px}
+.p1kpi .t{font-size:14px;margin-top:1px}
 .p1kpi .t b,.p1kpi .sub b{font-weight:600}
-.p1kpi .sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.p1kpi .sub{font-size:13px;color:var(--ink-3);margin-top:2px}
 .p1kpi .ok{color:var(--accent)} .p1kpi .bad{color:var(--signal)}
 svg.spk{display:block;width:100%;height:26px;margin-top:4px}
 .p1kpi .nospk{height:30px}
 /* 本期做了多少。百分比要有量當背景，否則不知道 19.9% 是發生在多大的盤子上 */
-.p1out{font-size:12px;color:var(--ink-2);background:var(--sunk);
+.p1out{font-size:13.5px;color:var(--ink-2);background:var(--sunk);
   border:1px solid var(--rule);border-radius:4px;padding:5px 11px;margin-bottom:13px}
 .p1out b{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:600}
 .p1fig{margin-bottom:15px}
-.p1fig svg{width:100%;height:auto;display:block}
-.p1t{font-size:14px;font-weight:600;margin:0 0 4px;font-family:"Noto Serif TC",serif}
-.p1t span{font-weight:400;font-size:12px;color:var(--ink-3);margin-left:8px}
+.p1fig svg{width:100%;height:auto;display:block;max-width:900px}
+.p1t{font-size:16px;font-weight:600;margin:0 0 6px;font-family:"Noto Serif TC",serif}
+.p1t span{font-weight:400;font-size:13px;color:var(--ink-3);margin-left:8px}
 /* 圖上的文字一律等寬，數字才會上下對齊成一條線 */
 #sumIdx text,#sumLoss text{font-family:"IBM Plex Mono",monospace}
 .c-ax{font-size:9.5px;fill:var(--ink-4)}
@@ -232,6 +232,7 @@ svg.spk{display:block;width:100%;height:26px;margin-top:4px}
 .rtab.fu tr.better td.ic{color:var(--cool)} .rtab.fu tr.gone td.ic{color:var(--ink-4)}
 .rtab.fu td.ar{width:16px;color:var(--ink-4);text-align:center}
 .rtab.fu td.st{width:88px}
+.rtab.fu{max-width:900px}
 /* 追蹤表一支一列就好 —— 品名另起一行會讓每列變兩倍高，六列就吃掉半頁 */
 .rtab.fu .nm{display:inline;margin-left:7px;font-size:11.5px;color:var(--ink-3)}
 .rtab.fu td b{font-size:12px}
@@ -607,10 +608,15 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   .p1kpi { gap:8px; margin-bottom:10px }
   .p1kpi>div { padding:6px 9px }
   .p1kpi .v { font-size:26px }
+  .p1kpi .v small { font-size:14px }
+  .p1kpi .k, .p1kpi .t { font-size:11.5px }
+  .p1kpi .sub { font-size:10.5px }
+  .p1fig svg { max-width:none }
   .p1kpi .nospk { height:26px }
   .p1fig { margin-bottom:8px }
   .p1out { font-size:10px; padding:3px 8px; margin-bottom:8px }
   .p1t { font-size:12px; margin-bottom:2px }
+  .p1t span { font-size:10.5px }
   .rtab.fu td, .rtab.fu th { padding:2.5px 6px }
   #sumNote { font-size:9px; line-height:1.55 }
   h2, h3 { break-after:avoid }
@@ -740,7 +746,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   <p class="sec-sub"><b>全部品項的查詢頁，不列入 PDF。燈號與第 01 節改善清單是同一把尺（多花的工時）</b>，
     亮燈的品項就是第 01 節點名的那幾支 ——
     兩邊用同一個「多花的工時」，不會出現「上面點名、這裡卻是綠燈」。<br>
-    數量欄位是本期的；<b>燈號與平常水準一律以全期資料判定</b> ——
+    數量欄位是本期的；<b>平常水準取最近 12 個月的批次</b>，每月滾動 ——
     一個月的樣本不足以定義什麼叫正常，拿當月跟當月自己比永遠比不出問題。</p>
   <div class="body">
     <div class="bar">
@@ -1652,7 +1658,7 @@ const LAMP = { alert: '異常', watch: '注意', ok: '正常', thin: '批次太�
 function defsHtml() {
   const t = E.thresholds;
   const rows = [
-    ['平常水準', '該品項每批產能的<b>中位數</b>',
+    ['平常水準', '該品項<b>最近 12 個月</b>每批產能的<b>中位數</b>，每月滾動',
      '一半的批次做得到。<b>不是平均數</b>', '所有「vs 平常」、燈號、離群門檻'],
     ['合理目標', '該品項每批產能的 <b>P75</b>（第 75 百分位）',
      '已經有 1/4 的批次做到，所以是做得到的目標', '可省工時、排程試算'],
@@ -1748,11 +1754,11 @@ function renderOverview(S) {
   // 預設依燈號＋偏離幅度排序 —— 要處理的排最上面，這樣表格本身就是議程
   const RANK = { alert: 0, watch: 1, ok: 2, thin: 3 };
   const rows = [...lastStats.list].sort((a, b) =>
-    tab === 'freq' ? (RANK[a.lamp.k] - RANK[b.lamp.k]) || ((a.vs ?? 0) - (b.vs ?? 0))
+    tab === 'freq' ? (RANK[a.lamp.k] - RANK[b.lamp.k]) || ((b.lossH || 0) - (a.lossH || 0))
                    : b.b - a.b);
   const list = showAll ? rows : rows.slice(0, TOP_N);
   $('tabNote').textContent = (tab === 'freq'
-    ? '異常的排最上面，其次依偏離幅度'
+    ? '異常的排最上面，同燈號依多花的工時排序（與第 01 節同一順序）'
     : '依本期包裝量排序 —— 產量主力排前面')
     + `　·　本期共 ${rows.length} 支有生產`;
   $('toggleAll').textContent = showAll ? `只看前 ${TOP_N} 支` : `顯示全部 ${rows.length} 支`;
@@ -1779,9 +1785,8 @@ function renderOverview(S) {
         pct == null ? '—' : (pct > 0 ? '+' : '') + pct + '%'}</b></td>
       <td class="st"><div class="lamp ${g.lamp.k}"><b>${LAMP[g.lamp.k]}</b>
         <span class="why">${g.lamp.why}</span></div>${
-        (hiliteRef[g.s] || []).length
-          ? `<div class="ref">本期重點 ${(hiliteRef[g.s]).map(i => '①②③④⑤⑥'[i]).join('')}</div>`
-          : ''}</td></tr>`;
+        hiliteRef[g.s]
+          ? `<div class="ref">第 01 節改善清單 第 ${hiliteRef[g.s]} 名</div>` : ''}</td></tr>`;
   }).join('');
 
   const t = E.thresholds, c = {};
@@ -2280,8 +2285,8 @@ function idxChartSvg(plant, curYm) {
     g += `<text x="${X(i).toFixed(1)}" y="${(T + ph + 16).toFixed(1)}" text-anchor="middle"
            class="c-mon${on ? ' on' : ''}">${+keys[i].slice(5)}月</text>`;
     if (t == null) {
-      g += `<text x="${X(i).toFixed(1)}" y="${(T + ph / 2).toFixed(1)}" text-anchor="middle"
-             class="c-none">尚無</text>`;
+      g += `<text x="${X(i).toFixed(1)}" y="${(T + ph - 5).toFixed(1)}" text-anchor="middle"
+             class="c-none">尚無資料</text>`;
       return;
     }
     const col = t >= IDX_TARGET ? 'var(--accent)' : 'var(--signal)';
@@ -2427,11 +2432,15 @@ function miniPlantSvg(plant, curYm) {
    看的人不必逐列讀數字，直接看哪幾天的點掉到線下、以及有沒有集中在同一支產品。
    橫軸是真實日期，所以單月、近三月、全期都畫得出來。 */
 
-function oddDotSvg(rows, skuOf) {
+/* keep：第 01 節點名的品項。只有它們的離群批次標紅、標品號 ——
+   其他品項的離群批次仍畫在圖上（灰色空心），但不點名，
+   否則圖上紅點與下面的表、與第 01 節的清單又會對不起來。 */
+function oddDotSvg(rows, skuOf, keep) {
   const pts = rows.map(x => {
     const s = skuOf.get(x.s);
     if (!s || !s.med || baseN(s) < MIN_REPORT_BATCHES) return null;
-    return { ...x, rel: (x.b / x.h) / s.med, usual: s.med };
+    return { ...x, rel: (x.b / x.h) / s.med, usual: s.med,
+             named: !keep || keep.has(x.s) };
   }).filter(Boolean);
   if (pts.length < 3) return '';
   /* 圖例必須加總回本期的批數。少了這一項，圖例上的批數會比第 01 節的
@@ -2487,7 +2496,8 @@ function oddDotSvg(rows, skuOf) {
     const out = p.rel < lo || p.rel > hi;
     const sh = p.h < E.thresholds.SHORT_BATCH_H;
     const over = p.rel > REL_TOP;
-    const col = out ? 'var(--signal)' : 'var(--accent)';
+    // 未點名品項的離群批次：灰色，不搶眼 —— 它們整月多花不到門檻，不是這次要談的
+    const col = !out ? 'var(--accent)' : p.named ? 'var(--signal)' : 'var(--ink-4)';
     g += `<circle cx="${X(p.d)}" cy="${Y(p.rel)}" r="${out ? (sh ? 4 : 5.2) : 3.2}"
       fill="${(over || sh) ? 'none' : col}" stroke="${col}"
       stroke-width="${(over || sh) ? 1.6 : 1.2}" opacity="${out ? 1 : .6}">
@@ -2496,31 +2506,36 @@ function oddDotSvg(rows, skuOf) {
   });
   /* 離群的點直接標品號 —— 圖上看到一顆紅點卻要翻下面的表才知道是哪一支，
      等於少了一步。標籤上下交錯放，避免同一天的兩顆疊在一起。 */
-  const labelled = pts.filter(p => (p.rel < lo || p.rel > hi)
+  const labelled = pts.filter(p => (p.rel < lo || p.rel > hi) && p.named
     && p.h >= E.thresholds.SHORT_BATCH_H)
     .sort((a, b) => X(a.d) - X(b.d));
-  let lastX = -1e9, up = true;
+  // 靠得太近的兩個標籤一個放點上方、一個放點下方，才不會疊成「C302A2020」
+  let lastX = -1e9, below = true;
   labelled.forEach(p => {
     const x = X(p.d), y = Y(p.rel);
-    if (x - lastX < 46) up = !up; else up = true;
+    below = (x - lastX < 60) ? !below : true;
     lastX = x;
-    g += label(x, y + (up ? 17 : 28), p.s, 'var(--signal)', 'middle');
+    g += label(x, below ? y + 18 : y - 10, p.s, 'var(--signal)', 'middle');
   });
   const outs = pts.filter(p => p.rel < lo || p.rel > hi);
-  const outLong = outs.filter(p => p.h >= E.thresholds.SHORT_BATCH_H).length;
-  const outShort = outs.length - outLong;
+  const outNamed = outs.filter(p => p.named);
+  const outLong = outNamed.filter(p => p.h >= E.thresholds.SHORT_BATCH_H).length;
+  const outShort = outNamed.length - outLong;
+  const outOther = outs.length - outNamed.length;
   return `<div class="rep-fig">${g}</svg></div>
     <div class="rep-figleg">
       <span><i class="dot ok"></i>正常 ${pts.length - outs.length} 批</span>
-      <span><i class="dot bad"></i>離群 ${outLong} 批</span>
+      <span><i class="dot bad"></i>點名品項離群 ${outLong} 批</span>
       ${outShort ? `<span><i class="dot hollow"></i>離群但工時未滿 1 小時 ${outShort} 批</span>` : ''}
+      ${outOther ? `<span style="color:var(--ink-3)"><i class="dot" style="background:var(--ink-4)"></i>`
+        + `其他品項離群 ${outOther} 批（未點名）</span>` : ''}
       ${thinN ? `<span style="color:var(--ink-3)">樣本不足未入圖 ${thinN} 批</span>` : ''}
       <span style="flex-basis:100%;color:var(--ink-3);margin-top:3px">
         以上合計 <b>${rows.length} 批</b>，就是本期的全部批次。
         Y 軸＝這批 ÷ 該品項自己的平常水準，所以不同包裝型式可以畫在同一張圖上，
         1.0 就是跟平常一樣。<b>掉出範圍的點直接標了品號</b>。
         空心圈是工時過短或超出 ${REL_TOP} 倍的批次，僅供參考。${
-        thinN ? `「樣本不足」＝該品項全期不到 ${MIN_REPORT_BATCHES} 批，
+        thinN ? `「樣本不足」＝該品項最近 12 個月不到 ${MIN_REPORT_BATCHES} 批，
           撐不起離群門檻，所以不畫也不判定。` : ''}</span>
     </div>`;
 }
@@ -2887,8 +2902,22 @@ function renderSummary(S) {
   const byP = {};
   (M.plant || []).forEach(x => { byP[x.m] = x.rel; });
 
-  const here = byM[period.ym] || { loss: 0, lossPct: 0, lossPH: 0 };
-  const idx = byP[period.ym] != null ? Math.round(byP[period.ym] * 100) : null;
+  /* 期間可能是一個月、三個月或全期。KPI 要算整段期間，不能只讀最後一個月 ——
+     之前選「近三個月」時，三個磚上顯示的其實是 8 月單月的數字。 */
+  const pms = periodMonths();
+  const mm = pms.map(m => byM[m]).filter(Boolean);
+  const sumH = mm.reduce((a, x) => a + x.h, 0);
+  const sumL = mm.reduce((a, x) => a + x.loss, 0);
+  const here = {
+    loss: +sumL.toFixed(1),
+    lossPct: sumH ? +(100 * sumL / sumH).toFixed(1) : 0,
+    lossPH: mm.reduce((a, x) => a + (x.lossPH || 0), 0),
+    // 期間內有月份沒有人數，人時就只涵蓋一部分，要講出來
+    phPartial: mm.some(x => x.loss > 0 && !x.lossPH) && mm.some(x => x.lossPH > 0),
+  };
+  const iv = pms.map(m => byP[m]).filter(v => v != null);
+  const idx = iv.length ? Math.round(100 * iv.reduce((a, v) => a + v, 0) / iv.length) : null;
+  const multi = pms.length > 1;
   const idxOk = idx != null && idx >= IDX_TARGET;
   const lossOk = here.lossPct <= LOSS_TARGET_PCT;
 
@@ -2920,7 +2949,7 @@ function renderSummary(S) {
     <div class="t">${line}</div><div class="sub">${sub}</div>${spark || '<div class="nospk"></div>'}</div>`;
 
   $('sumKpi').innerHTML = `<div class="p1kpi">
-    ${tile('全廠效率指數',
+    ${tile('全廠效率指數' + (multi ? `（${pms.length} 個月平均）` : ''),
       `<span class="${idxOk ? 'ok' : 'bad'}">${idx == null ? '—' : idx}</span>`, '',
       idx == null ? '本期無法計算'
         : `目標 ≥ ${IDX_TARGET}　<b class="${idxOk ? 'ok' : 'bad'}">${
@@ -2928,11 +2957,13 @@ function renderSummary(S) {
       '100 ＝ 各品項都跟自己常態一樣',
       kpiSpark(keys.map(k => byP[k] != null ? Math.round(byP[k] * 100) : null),
                IDX_TARGET, false))}
-    ${tile('多花的工時', `<span class="bad">${here.lossPct}</span>`, '%',
+    ${tile('多花的工時' + (multi ? `（${pms.length} 個月合計）` : ''),
+      `<span class="${lossOk ? 'ok' : 'bad'}">${here.lossPct}</span>`, '%',
       `目標 ≤ ${LOSS_TARGET_PCT}%　<b class="${lossOk ? 'ok' : 'bad'}">${
         lossOk ? '達標' : `超出 ${(here.lossPct - LOSS_TARGET_PCT).toFixed(1)} 點`}</b>`,
       `${f1(here.loss)} 小時` + (here.lossPH
         ? `　＝ ${fmt(here.lossPH)} 人時 ≈ ${Math.round(here.lossPH / 8)} 人日`
+          + (here.phPartial ? '（人時只含有人數的月份）' : '')
         : `（人時待人數補齊）`),
       kpiSpark(keys.map(k => byM[k] ? byM[k].lossPct : null), LOSS_TARGET_PCT, true))}
     ${tile('本期要改善的品項', named.length, ' 支',
@@ -3009,7 +3040,8 @@ function renderOdd(S) {
   const { cur, skuOf } = S;
   const keep = new Set(S.named.map(g => g.s));
   const odd = S.odd.filter(x => keep.has(x.s));
-  const dropped = S.odd.length - odd.length;
+  // 與圖例同一個口徑：未點名品項的離群批次，長短批次都算
+  const dropped = S.odd.concat(S.oddShort).filter(x => !keep.has(x.s)).length;
   // 全部列出，不截斷 —— 被問「哪幾批」要當場答得出來。
   const t2 = odd.slice().sort((a, b) => a.gap - b.gap).reverse().map(x => `<tr>
     <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td><td class="num">${f1(x.h)}</td>
@@ -3027,7 +3059,7 @@ function renderOdd(S) {
     <td class="num ${x.kind}">${fmt(x.rate)}</td><td class="num">${fmt(x.usual)}</td>
     <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td></tr>`).join('');
 
-  $('oddBox').innerHTML = oddDotSvg(cur.rows, skuOf)
+  $('oddBox').innerHTML = oddDotSvg(cur.rows, skuOf, keep)
     + (odd.length ? '' : `<div class="rep-empty">第 01 節點名的品項，本期沒有離群批次
         —— 它們是每一批都慢一點，不是某幾批特別慢。</div>`)
     + (odd.length ? `<table class="rtab"><thead><tr>
@@ -3038,7 +3070,7 @@ function renderOdd(S) {
     </tr></thead><tbody>${t2}</tbody></table>
     <div class="rep-note">判定門檻：產能低於該品項平常水準的
       <b>${E.thresholds.OUT_LO} 倍</b>或高於 ${E.thresholds.OUT_HI} 倍，
-      且該品項全期至少 ${MIN_REPORT_BATCHES} 批、<b>該批工時至少 1 小時</b>。<br>
+      且該品項最近 12 個月至少 ${MIN_REPORT_BATCHES} 批、<b>該批工時至少 1 小時</b>。<br>
       <b>只列第 01 節點名的 ${S.named.length} 支品項的批次</b>${
         dropped ? `（另有 ${dropped} 批離群批次屬於未點名的品項，
           它們整月多花不到 ${LOSS_MIN_H} 小時，不列入）` : ''}。<br>
