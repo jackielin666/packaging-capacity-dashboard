@@ -170,7 +170,8 @@ with sync_playwright() as p:
     check("總結整節不分頁", "#secSummary { break-inside:avoid }" in css)
     # 標題說幾筆就要列幾筆 —— 列表短一截，連那個數字都會被懷疑
     check("重點清單不截斷", "slice(0, 3)" not in css and "over.slice(0, 5)" not in css)
-    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 2,
+    # PDF 只留 4 節；品項總覽、人力、工時成本、單一品項、排程試算都是互動查詢
+    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 5,
           pg.locator("section.noprint").count())
     check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
 
@@ -216,9 +217,15 @@ with sync_playwright() as p:
     # ── 燈號：看離群「率」，不是「有沒有離群批次」──
     print("\n── 燈號與正常範圍 ──")
     lg = pg.inner_text("#lampLegend")
-    check("燈號說明寫明是比率", "離群批次佔" in lg and "%" in lg, lg[:160])
-    check("燈號只看選定的期間", "只看選定的那個期間" in lg, lg[:400])
-    check("說明短批次為何不列入", "站不住腳" in lg, lg[:600])
+    # 燈號只有一把尺：多花的工時。與第 01 節改善清單同源，兩邊不會對不起來。
+    check("燈號只有一把尺", "只有一把尺" in lg and "多花的工時" in lg, lg[:300])
+    check("燈號寫出兩個門檻", "5 小時" in lg and "2 小時" in lg, lg[:200])
+    check("說明為何慢很多卻不亮燈", "不值得" in lg, lg[:600])
+    # 亮燈的品項必須正好是第 01 節點名的品項
+    same = pg.evaluate("""(() => { const S = periodStats();
+      const a = S.list.filter(g => g.lamp.k==='alert'||g.lamp.k==='watch').map(g=>g.s).sort();
+      const b = S.named.map(g=>g.s).sort(); return JSON.stringify(a)===JSON.stringify(b); })()""")
+    check("亮燈品項 = 第 01 節點名品項", same, same)
     check("說明水準下移升格成議題", "升格成" in lg, lg[:600])
     # td.dv 不能被上方工具列的 .bar 撞名成 flex，否則橫條會被壓成 0 寬
     dvw = pg.eval_on_selector("#tbOverview td.dv .dvb", "e => e.clientWidth")

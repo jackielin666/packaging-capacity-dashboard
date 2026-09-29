@@ -707,7 +707,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
     <div class="p1out" id="sumOut"></div>
     <div class="p1fig"><div class="p1t">全廠效率指數走勢<span>最近 12 個月　·　100 ＝ 各品項都跟自己常態一樣</span></div>
       <div id="sumIdx"></div></div>
-    <div class="p1fig"><div class="p1t">本期改善清單<span>依「多花的工時」排序　·　明細見第 02、03 節</span></div>
+    <div class="p1fig"><div class="p1t">本期改善清單<span>依「多花的工時」排序　·　要查哪幾批見第 02 節</span></div>
       <div id="sumLoss"></div></div>
     <div class="p1fig"><div class="p1t">上期追蹤<span>上一期點名的品項，本期怎麼樣了</span></div>
       <div id="sumFollow"></div></div>
@@ -716,8 +716,29 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 </section>
 
 <section>
-  <div class="sec-head"><div class="sec-num">02</div><h2>品項狀態總覽</h2></div>
-  <p class="sec-sub"><b>這是全部品項的完整名冊，第 01 節的改善清單就是從這裡挑出來的</b> ——
+  <div class="sec-head"><div class="sec-num">02</div><h2>要查的批次</h2></div>
+  <p class="sec-sub">第 01 節說<b>哪一支</b>要改，這一節說<b>去查哪一天</b>。只列第 01 節點名品項的批次，製造單位拿這張表去翻當天的生產紀錄。</p>
+  <div class="body"><div id="oddBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">03</div><h2>資料完整性</h2></div>
+  <p class="sec-sub">要先知道資料齊不齊，才知道上面的數字能信到什麼程度。
+    一份沒說清楚涵蓋範圍的報表，比沒有報表更容易誤導。</p>
+  <div class="body"><div id="chkBox"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">04</div><h2>數字怎麼算的</h2></div>
+  <p class="sec-sub">看不懂一個數字就無法相信它。這裡是全部名詞的定義，儀表板與 PDF 共用同一份。</p>
+  <div class="body"><div id="defsBox"></div></div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><div class="sec-num">05</div><h2>品項狀態總覽</h2>
+    <span class="tool">互動工具・不列入 PDF</span></div>
+  <p class="sec-sub"><b>全部品項的查詢頁，不列入 PDF。燈號與第 01 節改善清單是同一把尺（多花的工時）</b>，
+    亮燈的品項就是第 01 節點名的那幾支 ——
     兩邊用同一個「多花的工時」，不會出現「上面點名、這裡卻是綠燈」。<br>
     數量欄位是本期的；<b>燈號與平常水準一律以全期資料判定</b> ——
     一個月的樣本不足以定義什麼叫正常，拿當月跟當月自己比永遠比不出問題。</p>
@@ -752,39 +773,20 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   </div>
 </section>
 
-<section>
-  <div class="sec-head"><div class="sec-num">03</div><h2>需要特別關注的批次</h2></div>
-  <p class="sec-sub">每一批一個點，縱軸是「這批 ÷ 該品項自己的平常水準」，所以不同瓶型可以畫在同一張圖上。
-    掉出淺綠色範圍的那幾批，請製造單位就當天狀況說明。</p>
-  <div class="body"><div id="oddBox"></div></div>
-</section>
-
-<section>
-  <div class="sec-head"><div class="sec-num">04</div><h2>人力與工時分配</h2></div>
-  <p class="sec-sub">逐支品項的處理效率在上面第 02 節。這一節只留表格看不出來的那件事 ——
+<section class="noprint">
+  <div class="sec-head"><div class="sec-num">06</div><h2>人力與工時分配</h2>
+    <span class="tool">互動工具・不列入 PDF</span></div>
+  <p class="sec-sub">逐支品項的處理效率在第 05 節品項狀態總覽。這一節只留表格看不出來的那件事 ——
     同一個「這批慢」，原因可能完全不同，要找的人也不同。</p>
   <div class="body"><div id="labBox"></div></div>
 </section>
 
-<section>
-  <div class="sec-head"><div class="sec-num">05</div><h2>工時成本明顯偏高的品項</h2>
-    <span class="owner">給業務・生管</span></div>
+<section class="noprint">
+  <div class="sec-head"><div class="sec-num">07</div><h2>工時成本明顯偏高的品項</h2>
+    <span class="owner">給業務・生管</span><span class="tool">互動工具・不列入 PDF</span></div>
   <p class="sec-sub"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
     接單與排程時，這類品項的工時成本要先估進去。</p>
   <div class="body"><div id="heavyBox"></div></div>
-</section>
-
-<section>
-  <div class="sec-head"><div class="sec-num">06</div><h2>資料完整性</h2></div>
-  <p class="sec-sub">要先知道資料齊不齊，才知道上面的數字能信到什麼程度。
-    一份沒說清楚涵蓋範圍的報表，比沒有報表更容易誤導。</p>
-  <div class="body"><div id="chkBox"></div></div>
-</section>
-
-<section>
-  <div class="sec-head"><div class="sec-num">07</div><h2>數字怎麼算的</h2></div>
-  <p class="sec-sub">看不懂一個數字就無法相信它。這裡是全部名詞的定義，儀表板與 PDF 共用同一份。</p>
-  <div class="body"><div id="defsBox"></div></div>
 </section>
 
 <section class="noprint">
@@ -1787,20 +1789,15 @@ function renderOverview(S) {
   const dot = cls => `<span class="lamp ${cls}" style="display:inline-flex"></span>`;
   const lim = Math.round(t.ARROW * 100);
   $('lampLegend').innerHTML =
-    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）本期離群批次佔
-     <b>${t.OUT_RATE_ALERT}%</b> 以上　·　
-     ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）本期有離群批次，
-     或比平常慢 10% 以上，或整期多花 ${LOSS_MIN_H} 小時以上　·　
+    `${dot('alert')} <b>異常</b>（${c.alert || 0} 支）本期多花 <b>${LOSS_ALERT_H} 小時</b>以上　·　
+     ${dot('watch')} <b>注意</b>（${c.watch || 0} 支）本期多花 <b>${LOSS_MIN_H} 小時</b>以上　·　
      ${dot('ok')} <b>正常</b>（${c.ok || 0} 支）　·　
-     ${dot('thin')} <b>樣本不足</b>（${c.thin || 0} 支）全期不到 ${t.MIN_BATCHES} 批，不做判定
+     ${dot('thin')} <b>樣本不足</b>（${c.thin || 0} 支）基準期間不到 ${t.MIN_BATCHES} 批，不做判定
      <br><span style="color:var(--ink-3)">
-     <b>燈號只看選定的那個期間</b> —— 會議是月度的，判定也該是月度的。
-     該期做滿 ${t.PERIOD_MIN_N} 批才用比率判定；接單式生產下多數品項一個月只做 1–2 批，
-     對它們「有沒有離群」就是全部的資訊。<br>
-     離群只算<b>工時 1 小時以上</b>的批次 —— 20 分鐘的批次時間差 5 分鐘產能就差 25%，
-     拿它當判定依據，被質疑時站不住腳。<br>
-     「水準整體下移」沒有被丟掉，它升格成第 01 節的<b>全廠效率指數</b> ——
-     那種異常單批都還在正常範圍內，看燈號看不出來。</span>`;
+     <b>燈號只有一把尺：多花的工時</b>，與第 01 節改善清單完全相同，亮燈的就是被點名的。
+     比平常慢幾 %、幾批偏低寫在原因欄，但不決定燈號 ——
+     一支慢 49% 但整月只做 20 分鐘的品項，不值得在會議上花時間。<br>
+     「水準整體下移」沒有被丟掉，它升格成第 01 節的<b>全廠效率指數</b>。</span>`;
 }
 $('tabFreq').onclick = () => { tab = 'freq'; syncTabs(); };
 $('tabVol').onclick = () => { tab = 'vol'; syncTabs(); };
@@ -2094,7 +2091,8 @@ const Q_LOW = 0.85;        // 低於自己中位數的 85% 才算偏低
    2 小時 ≈ 一個人半個班，低於這個數字討論的成本比省下來的還高。
    換成百分比的話，8 月落在 -10% 以下的有 27 支、-20% 有 15 支 —— 都太多，
    而且百分比會把「慢很多但只做半小時」排在「慢一點但做了整週」前面。 */
-const LOSS_MIN_H = 2;
+const LOSS_MIN_H   = 2;    // 注意：本期多花 ≥ 2 小時
+const LOSS_ALERT_H = 5;    // 異常：本期多花 ≥ 5 小時
 
 /* ── 目標 ──
    這兩個數字是廠長核定的管理決策，**不會自己跟著實績跑**。
@@ -2423,7 +2421,6 @@ function miniPlantSvg(plant, curYm) {
       100 就是跟平常一樣，90 就是全廠一起慢了一成。沒有點的月份代表當月沒有資料。</div></div>`;
 }
 
-
 /* ── 批次落點圖 ──
    一張圖代替一頁表格。每一批一個點，Y 軸是「這批 ÷ 這支產品自己的平常水準」，
    所以不同瓶型可以畫在同一張圖上 —— 1.0 就是跟平常一樣，0.7 是離群門檻。
@@ -2533,7 +2530,7 @@ const MIN_REPORT_BATCHES = 10;   // 基準期間內不到這麼多批就不判�
 const baseN = s => (s && (s.baseN != null ? s.baseN : s.n)) || 0;
 /** 可以放進改善清單的品項：多花夠多，而且基準本身站得住腳。 */
 const namable = g => g.lossH >= LOSS_MIN_H
-  && baseN(g.sku) >= E.thresholds.MIN_BATCHES;
+  && baseN(g.sku) >= E.thresholds.MIN_BATCHES;   // 與燈號同一條規則
 const REL_TOP = 1.8;        // Y 軸上限；再高的點釘在頂端並標成空心，避免壓扁主要區間
 
 const delta = (now, prev) => {
@@ -2807,6 +2804,8 @@ function periodStats() {
     g.lossH = e.h; g.lossPH = Math.round(e.ph); g.badN = e.bad;
   });
   list.forEach(g => { g.lamp = lampFor(g); });
+  // 本期點名的品項。第 01 節列它們，第 02 節只列它們的批次 —— 一份名單兩處共用。
+  const named = list.filter(namable).sort((a, b) => b.lossH - a.lossH);
 
   /* 離群批次。
      未滿 1 小時的批次另外分流：20 分鐘的批次，時間記錄差 5 分鐘產能就差 25%，
@@ -2833,38 +2832,31 @@ function periodStats() {
   const cost = list.filter(g => g.h > 0 && g.b > 0 && g.kg > 0)
     .sort((a, b) => b.h - a.h).slice(0, 10);
 
-  return { skuOf, cur, prev, list, odd, oddShort, allOdd, cost,
+  return { skuOf, cur, prev, list, named, odd, oddShort, allOdd, cost,
     prevLabel: pv ? (pv.ms.length === 1 ? ymLabel(pv.ms[0])
       : `${ymLabel(pv.ms[0])} – ${ymLabel(pv.ms[pv.ms.length - 1])}`) : null };
 }
 
-/* ── 燈號：只看選定的那個期間 ──
-   會議是月度的，判定也該是月度的。「連續三個月變慢」在會議上講不清楚，
-   而且它回答的是另一個問題（水準有沒有下移），那個升格成議題。
+/* ── 燈號：只有一把尺，就是「多花的工時」──
+   以前是三條規則擇一（離群率、比平常慢 10%、多花的工時），結果同一份報表裡
+   出現兩套名單：第 01 節列 9 支，這裡亮燈 23 支，而且排序不同。
+   會議上被問「D0131 慢了 49% 為什麼不在改善清單」，正確答案是
+   「它整月只做 0.33 小時，多花 0.2 小時」—— 但那要當場解釋兩套規則，講不贏。
 
-   接單式生產下，一個月只做 1–2 批的品項佔多數 —— 對它們，
-   「有沒有離群」就是全部的資訊，比例沒有意義。 */
+   改成單一基準後，「為什麼這支沒上榜」永遠只有一個答案：多花不到 2 小時。
+   離群率、比平常慢幾 % 仍然寫在原因欄，但不再決定燈號。 */
 function lampFor(g) {
   const t = E.thresholds, s = g.sku;
   if (!s || !s.sku || baseN(s) < t.MIN_BATCHES) {
-    return { k: 'thin', why: `全期僅 ${(s && s.n) || 0} 批，樣本不足以定義正常` };
+    return { k: 'thin', why: `基準期間僅 ${baseN(s)} 批，樣本不足以定義平常水準` };
   }
-  const outs = g.outN || 0;
-  if (g.n >= t.PERIOD_MIN_N) {
-    const pct = Math.round(100 * outs / g.n);
-    if (pct >= t.OUT_RATE_ALERT) return { k: 'alert', why: `${outs}/${g.n} 批離群（${pct}%）` };
-    if (outs > 0) return { k: 'watch', why: `${outs}/${g.n} 批離群（${pct}%）` };
-  } else if (outs > 0) {
-    return { k: 'watch', why: `${g.n} 批裡有 ${outs} 批離群` };
-  }
-  /* 沒有離群批次，但整期加起來多花了不少工時 —— 每一批都只慢一點，
-     量大就積成實在的時數。這種在單批的門檻下完全看不出來，
-     卻正是「本期重點」會點名的那一種，所以燈號必須跟著亮，兩邊才對得起來。 */
-  if (g.lossH >= LOSS_MIN_H) {
-    return { k: 'watch', why: `比平常慢 ${-g.vs}%，本期多花 ${f1(g.lossH)} 小時` };
-  }
-  if (g.vs !== null && g.vs <= -10) return { k: 'watch', why: `本期比平常慢 ${-g.vs}%` };
-  return { k: 'ok', why: '本期沒有離群批次' };
+  const L = g.lossH || 0;
+  const detail = (g.vs !== null && g.vs < 0 ? `比平常慢 ${-g.vs}%` : '')
+    + (g.badN ? `${g.vs !== null && g.vs < 0 ? '，' : ''}${g.badN}/${g.n} 批偏低` : '');
+  if (L >= LOSS_ALERT_H) return { k: 'alert', why: `多花 ${f1(L)} 小時（${detail}）` };
+  if (L >= LOSS_MIN_H) return { k: 'watch', why: `多花 ${f1(L)} 小時（${detail}）` };
+  if (L > 0) return { k: 'ok', why: `多花 ${f1(L)} 小時，未達 ${LOSS_MIN_H} 小時門檻` };
+  return { k: 'ok', why: '本期沒有低於平常水準的批次' };
 }
 
 /* ═══════════ 01 本期總結 ═══════════
@@ -2876,7 +2868,7 @@ function lampFor(g) {
    為什麼沒有文字結論：手上的欄位是品號、時間、數量、人數，
    回答得了「哪一支、差多少」，回答不了「為什麼」。原因由製造單位在會議上講。 */
 
-/* 一頁放得下才叫一頁。清單有上限，完整名冊在第 02 節 ——
+/* 一頁放得下才叫一頁。清單有上限，完整名冊在儀表板第 05 節 ——
    會議一次也處理不了十幾件，列滿反而失焦。 */
 const TOP_SHOWN = 8;     // 改善清單最多列幾支
 const FU_SHOWN  = 5;     // 上期追蹤最多列幾支（未改善的優先）
@@ -2901,7 +2893,7 @@ function renderSummary(S) {
   const lossOk = here.lossPct <= LOSS_TARGET_PCT;
 
   // 點名的品項：多花夠多，而且基準站得住腳
-  const named = list.filter(namable).sort((a, b) => b.lossH - a.lossH);
+  const named = S.named;
   const top = named.slice(0, TOP_SHOWN);
   const totLoss = list.reduce((a, g) => a + g.lossH, 0);
   const topShare = totLoss
@@ -2966,7 +2958,7 @@ function renderSummary(S) {
         <span style="flex-basis:100%;color:var(--ink-3);margin-top:2px">
         列入標準：多花 ≥ ${LOSS_MIN_H} 小時，且基準期間內至少
         ${E.thresholds.MIN_BATCHES} 批。${named.length > TOP_SHOWN
-          ? `本期共 ${named.length} 支，這裡列前 ${TOP_SHOWN} 支，完整名冊見第 02 節。` : ''}
+          ? `本期共 ${named.length} 支，這裡列前 ${TOP_SHOWN} 支，其餘在儀表板第 05 節。` : ''}
         「偏低批數」＝本期有幾批低於自己的平常水準：<b>接近全部代表整體都慢，
         只有一兩批代表是落差</b>，兩者要處理的事不一樣。</span>
       </div>`
@@ -3007,10 +2999,18 @@ function renderSummary(S) {
 
 /* ═══════════ 04 需要說明的批次 ═══════════ */
 
+/* ═══════════ 02 要查的批次 ═══════════
+   第 01 節說「哪一支要改」，這一節說「去查哪一天」。顆粒度不同，用途也不同 ——
+   製造單位拿這張表去翻當天的生產紀錄。
+
+   只列第 01 節點名那幾支的批次。以前列全廠所有離群批次，會混進沒上榜的品項，
+   讀的人立刻問「這支為什麼不在改善清單上」，又是同一個病。 */
 function renderOdd(S) {
-  const { odd, cur, skuOf } = S;
+  const { cur, skuOf } = S;
+  const keep = new Set(S.named.map(g => g.s));
+  const odd = S.odd.filter(x => keep.has(x.s));
+  const dropped = S.odd.length - odd.length;
   // 全部列出，不截斷 —— 被問「哪幾批」要當場答得出來。
-  // 門檻收到 0.5 之後一個月大約 7 批，不會失控。
   const t2 = odd.slice().sort((a, b) => a.gap - b.gap).reverse().map(x => `<tr>
     <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td><td class="num">${f1(x.h)}</td>
     <td class="num">${x.n || '—'}</td>
@@ -3020,13 +3020,16 @@ function renderOdd(S) {
     </tr>`).join('');
 
   const plantRel = plantRelFor(periodMonths());
-  const shortRows = S.oddShort.slice().sort((a, b) => b.gap - a.gap).map(x => `<tr>
+  const shortRows = S.oddShort.filter(x => keep.has(x.s))
+    .slice().sort((a, b) => b.gap - a.gap).map(x => `<tr>
     <td>${x.d}</td><td><b>${x.s}</b>${skuName(x.s)}</td>
     <td class="num">${x.h.toFixed(2)}</td><td class="num">${fmt(x.b)}</td>
     <td class="num ${x.kind}">${fmt(x.rate)}</td><td class="num">${fmt(x.usual)}</td>
     <td class="${x.kind}">${x.kind === 'lo' ? '低於平常 ' : '高於平常 '}${x.gap}%</td></tr>`).join('');
 
   $('oddBox').innerHTML = oddDotSvg(cur.rows, skuOf)
+    + (odd.length ? '' : `<div class="rep-empty">第 01 節點名的品項，本期沒有離群批次
+        —— 它們是每一批都慢一點，不是某幾批特別慢。</div>`)
     + (odd.length ? `<table class="rtab"><thead><tr>
       <th>日期</th><th>品號 / 品名</th><th class="num">工時</th><th class="num">人數</th>
       <th class="num">單位數</th>
@@ -3036,6 +3039,9 @@ function renderOdd(S) {
     <div class="rep-note">判定門檻：產能低於該品項平常水準的
       <b>${E.thresholds.OUT_LO} 倍</b>或高於 ${E.thresholds.OUT_HI} 倍，
       且該品項全期至少 ${MIN_REPORT_BATCHES} 批、<b>該批工時至少 1 小時</b>。<br>
+      <b>只列第 01 節點名的 ${S.named.length} 支品項的批次</b>${
+        dropped ? `（另有 ${dropped} 批離群批次屬於未點名的品項，
+          它們整月多花不到 ${LOSS_MIN_H} 小時，不列入）` : ''}。<br>
       <b>背景值：本期全廠整體是常態的 ${Math.round(plantRel * 100)}%。</b>
       全廠一起慢的時候，單一品項要慢得更多才算它的問題 —— 請帶著這個數字看上表。</div>`
     : '<div class="rep-empty">本期沒有需要特別關注的批次（工時 1 小時以上）。</div>')
@@ -3064,7 +3070,7 @@ function renderLabour(S, lab, labS, quads) {
           只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`;
     return;
   }
-  /* 逐支品項的人均數字已經在第 02 節的「處理效率」欄，不再重複一張表。
+  /* 逐支品項的人均數字已經在第 05 節的「處理效率」欄，不再重複一張表。
      這一節只留下表格看不出來的那件事：同一個「這批慢」，原因可能完全不同。 */
   const rows = quads.filter(q => q.kind === 'over' || q.kind === 'short' || q.kind === 'both')
     .sort((a, b) => a.d < b.d ? -1 : 1).map(q => `<tr>
@@ -3159,7 +3165,7 @@ function renderHeavy(S) {
       高於全廠平均 1.5 倍標色，只是提醒估工時要抓高一點，不是異常。<br>
       <b>列入標準：每千公斤工時超過全廠平均的 ${HEAVY_X} 倍</b>
       （全廠 ${avgKg.toFixed(2)} 小時，門檻 ${(avgKg * HEAVY_X).toFixed(2)} 小時）。
-      其餘品項的工時成本在第 02 節都看得到。</div>`;
+      其餘品項的工時成本在第 05 節都看得到。</div>`;
 }
 
 /* ═══════════ 整頁重畫 ═══════════ */
