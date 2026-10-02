@@ -131,7 +131,7 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
 @media screen and (min-width:900px){.rep-kpi{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
 @media screen and (max-width:560px){.rep-kpi{grid-template-columns:repeat(2,1fr)}}
 /* 列印時 A4 放得下六格，但別讓最後一格落單 */
-@media print{.rep-kpi{grid-template-columns:repeat(6,1fr)}}
+@media print{.rep-kpi{grid-template-columns:repeat(auto-fit,minmax(90px,1fr))}}
 .rep-kpi div{background:var(--sunk);padding:10px 12px}
 .rep-kpi{padding:0}
 .rep-kpi > div{padding:13px 14px 15px;background:var(--surface)}
@@ -577,11 +577,42 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
 /* ── 列印 ──
    「產生 PDF」就是把這一頁印出來，所以畫面上看到的和寄出去的永遠是同一份，
-   不會有兩套內容各自走鐘。互動工具（單一品項鑽取、排程試算）不印 ——
-   印成紙沒有意義，寄給業務、生管的 PDF 也不該夾帶他們用不到的區塊。 */
+   不會有兩套內容各自走鐘。01–04 是會議正文；05–09 從新的一頁開始當附錄，
+   整頁內容全部印出 —— 只拿掉紙上按不動的按鈕、選單與滑桿。 */
+.printonly{display:none}
 @media print {
   /* 控制項在紙上按不動，只是佔位置 */
   .topbar, .pbar, .src, .noprint, .modal, .seg, #toggleAll, .tip { display:none!important }
+  /* 05–09 的查詢控制項：紙上只留結果，選了哪一支由標題或 .printonly 說明 */
+  .appx .bar label, .appx .bar select, .appx .bar input, #searchNote,
+  #qtySlider { display:none!important }
+  .printonly { display:inline!important; font-weight:600 }
+  .appx .tool { display:none }
+  .sec-head, .sec-sub { break-after:avoid }
+  section.appx:last-of-type { break-inside:avoid }
+  /* 表格、圖不能被裁切 —— 螢幕上的橫向捲動在紙上就是被切掉 */
+  .tw, .chart { overflow:visible!important; border:0 }
+  .tw table { width:100% }
+  /* 品項總覽全部品項都要印：狀態欄放寬成一行，走勢圖縮小，每列從 100px 壓到約 40px */
+  #overviewTable col:nth-child(1) { width:21%!important }
+  #overviewTable col:nth-child(2) { width:11%!important }
+  #overviewTable col:nth-child(3) { width:7%!important }
+  #overviewTable col:nth-child(4) { width:8%!important }
+  #overviewTable col:nth-child(5) { width:13%!important }
+  #overviewTable col:nth-child(6) { width:9%!important }
+  #overviewTable col:nth-child(7) { width:31%!important }
+  #overviewTable td, #overviewTable th { padding:2px 4px; font-size:9.5px; line-height:1.35 }
+  #overviewTable th i, #overviewTable td i { font-size:8.5px }
+  #overviewTable .spark { max-width:84px }
+  #overviewTable .lamp { font-size:9.5px; gap:4px }
+  #overviewTable .lamp .why { font-size:9px; line-height:1.35 }
+  #overviewTable td.st .ref { font-size:8.5px; margin-top:1px }
+  .fig, .chart, .calc, .skukpi, .notes > * { break-inside:avoid }
+  .fig { margin-bottom:10px }
+  .calc { padding:10px 12px }
+  .calc .out div { padding:8px 10px }
+  .skukpi div { padding:6px 8px 8px }
+  .skukpi .v { font-size:15px }
   .printhead { display:block!important }
   body { background:#fff; font-size:11px }
   .wrap { max-width:none; padding:0 }
@@ -603,8 +634,14 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   .hilite { margin:4px 0 0 }
   .rtab td, .rtab th { padding:4px 6px }
   .rep-figleg { font-size:9px; margin-bottom:5px }
-  /* 第 01 節是一頁報表的正文，整節不分頁 */
-  #secSummary { break-inside:avoid }
+  /* 第 01 節是一頁報表的正文：縮到抬頭＋整節剛好一頁。
+     不再整節禁止分頁 —— 內容一多，整節被推到第 2 頁、第 1 頁只剩抬頭，
+     看起來就像 PDF 少了東西。改成各圖塊不切斷，萬一超過一頁就自然接下一頁。 */
+  #secSummary { zoom:.95 }
+  #secSummary .p1kpi, #secSummary .p1fig, #sumNote { break-inside:avoid }
+  .printhead { margin-bottom:6px }
+  .printhead h1 { font-size:16px }
+  .printhead .stamp { padding-bottom:4px }
   .p1kpi { gap:8px; margin-bottom:10px }
   .p1kpi>div { padding:6px 9px }
   .p1kpi .v { font-size:26px }
@@ -740,10 +777,10 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   <div class="body"><div id="defsBox"></div></div>
 </section>
 
-<section class="noprint">
+<section class="appx">
   <div class="sec-head"><div class="sec-num">05</div><h2>品項狀態總覽</h2>
-    <span class="tool">互動工具・不列入 PDF</span></div>
-  <p class="sec-sub"><b>全部品項的查詢頁，不列入 PDF。燈號與第 01 節改善清單是同一把尺（多花的工時）</b>，
+    <span class="tool">可互動查詢</span></div>
+  <p class="sec-sub"><b>全部品項的狀態。燈號與第 01 節改善清單是同一把尺（多花的工時）</b>，
     亮燈的品項就是第 01 節點名的那幾支 ——
     兩邊用同一個「多花的工時」，不會出現「上面點名、這裡卻是綠燈」。<br>
     數量欄位是本期的；<b>平常水準取最近 12 個月的批次</b>，每月滾動 ——
@@ -779,25 +816,25 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   </div>
 </section>
 
-<section class="noprint">
+<section class="appx">
   <div class="sec-head"><div class="sec-num">06</div><h2>人力與工時分配</h2>
-    <span class="tool">互動工具・不列入 PDF</span></div>
+    <span class="tool">可互動查詢</span></div>
   <p class="sec-sub">逐支品項的處理效率在第 05 節品項狀態總覽。這一節只留表格看不出來的那件事 ——
     同一個「這批慢」，原因可能完全不同，要找的人也不同。</p>
   <div class="body"><div id="labBox"></div></div>
 </section>
 
-<section class="noprint">
+<section class="appx">
   <div class="sec-head"><div class="sec-num">07</div><h2>工時成本明顯偏高的品項</h2>
-    <span class="owner">給業務・生管</span><span class="tool">互動工具・不列入 PDF</span></div>
+    <span class="owner">給業務・生管</span><span class="tool">可互動查詢</span></div>
   <p class="sec-sub"><b>這不是包裝作業的問題</b> —— 瓶型與接單方式決定了它就是慢。
     接單與排程時，這類品項的工時成本要先估進去。</p>
   <div class="body"><div id="heavyBox"></div></div>
 </section>
 
-<section class="noprint">
+<section class="appx">
   <div class="sec-head"><div class="sec-num">08</div><h2>單一品項分析</h2>
-    <span class="tool">互動工具・不列入 PDF</span></div>
+    <span class="tool">可互動查詢</span></div>
   <p class="sec-sub">從上面點一支進來，或直接選；搜尋框品號、品名都找得到。網址會帶 <span class="mono">?sku=</span>，可以單獨把某一支的連結貼給該線負責人。</p>
   <div class="body">
     <div class="bar">
@@ -828,14 +865,15 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   </div>
 </section>
 
-<section class="noprint">
+<section class="appx">
   <div class="sec-head"><div class="sec-num">09</div><h2>排程試算</h2>
-    <span class="tool">互動工具・不列入 PDF</span></div>
+    <span class="tool">可互動查詢</span></div>
   <p class="sec-sub">拖動下面的量，即時算出所需工時。用<b>這支產品自己的實績</b>換算，不用全廠平均。</p>
   <div class="body">
     <div class="calc">
       <div class="bar" style="margin-bottom:10px">
         <label>品項</label><select id="selCalc"></select>
+        <span class="printonly" id="calcSkuP"></span>
         <span style="flex:1"></span>
         <span class="qty" id="qtyLabel"></span>
       </div>
@@ -1940,6 +1978,8 @@ function calc() {
   const sku = $('selCalc').value, s = state.R.skus.find(x => x.sku === sku);
   if (!s) return;
   const qty = +$('qtySlider').value;
+  const nm = nameOf(sku);
+  $('calcSkuP').textContent = `${sku}${nm ? '　' + nm : ''}　計畫包裝量`;
   $('qtyLabel').innerHTML = `${fmt(qty)}<span>瓶</span>`;
   const rows = [
     ['常態水準', s.med, '一半的批次做得到'],
@@ -2686,6 +2726,26 @@ $('periodSel').onchange = () => {
 /** 不完整的月份不比較絕對量 —— 天數不同，比了就是誤導 */
 const partial = () => period.kind === 'partial';
 $('pdfBtn').onclick = () => window.print();
+/* PDF 要是整頁的完整內容：品項總覽在螢幕上只列前幾支，列印時展開成全部，印完再還原。
+   用 beforeprint／afterprint 而不是只綁在按鈕上 —— 老闆直接按 Ctrl+P 也一樣完整。 */
+let showAllBeforePrint = null;
+addEventListener('beforeprint', () => {
+  if (showAllBeforePrint !== null) return;
+  showAllBeforePrint = showAll;
+  if (!showAll) { showAll = true; renderOverview(); }
+  // 收合的明細（例如第 02 節「另有 N 批未滿 1 小時」）在紙上點不開，列印時一律展開
+  document.querySelectorAll('details:not([open])').forEach(d => {
+    d.open = true; d.dataset.printOpened = '1';
+  });
+});
+addEventListener('afterprint', () => {
+  if (showAllBeforePrint === null) return;
+  const was = showAllBeforePrint; showAllBeforePrint = null;
+  if (!was) { showAll = false; renderOverview(); }
+  document.querySelectorAll('details[data-print-opened]').forEach(d => {
+    d.open = false; delete d.dataset.printOpened;
+  });
+});
 
 /* ═══════════ 期間內的彙總 ═══════════ */
 
