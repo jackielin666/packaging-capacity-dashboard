@@ -13,7 +13,7 @@
 -- 實際套用分兩段，讓切換期間新舊頁面都能存：
 --   1. 先加 mfg_date 與範圍檢查，必填改為「mfg_date 或 exp_date 其一」
 --   2. 新頁面部署完成後，必填改為只認 mfg_date，並移除 exp_date
--- 本檔是兩段完成後的最終狀態。
+-- 本檔是兩段完成後的實際狀態。
 
 alter table packing.batches add column if not exists mfg_date date;
 
@@ -29,8 +29,6 @@ comment on column packing.batches.mfg_date is
 create index if not exists batches_sku_mfg_idx
   on packing.batches (sku_code, mfg_date) where mfg_date is not null;
 
-drop trigger if exists batches_require_exp_date on packing.batches;
-drop function if exists packing.require_exp_date();
 
 create or replace function packing.require_mfg_date() returns trigger
 language plpgsql
@@ -54,5 +52,20 @@ alter table packing.batches drop constraint if exists batches_mfg_date_required;
 alter table packing.batches add constraint batches_mfg_date_required
   check (prod_date < date '2026-10-01' or mfg_date is not null);
 
--- 有效日期退場（範圍檢查與索引隨欄位一起刪除）
-alter table packing.batches drop column if exists exp_date;
+-- 有效日期退場。
+-- 實際套用時，DROP TRIGGER / DROP FUNCTION / DROP COLUMN 從管理工具送出都逾時，
+-- 所以舊觸發器改成空殼（直接 return new），exp_date 欄位暫時留著不用：
+-- 新頁面不讀不寫它，必填只認 mfg_date，留著沒有作用。
+-- 之後在 Supabase SQL Editor 執行下面三行即可完全移除：
+--
+--   drop trigger if exists batches_require_exp_date on packing.batches;
+--   drop function if exists packing.require_exp_date();
+--   alter table packing.batches drop column if exists exp_date;
+create or replace function packing.require_exp_date() returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $$
+begin
+  -- 已停用：必填改由 require_mfg_date() 判斷。
+  return new;
+end $$;
