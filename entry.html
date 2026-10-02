@@ -603,8 +603,8 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <tr><td>人數</td><td>那一批實際作業的人數。<b>沒有這一欄就算不出人均產能</b>，
           請務必填。</td></tr>
         <tr><td>有效日期</td><td>照紙本抄八碼，例如 <b>20270729</b>。用來對應製成率檔案，
-          串出這支品項調理／充填／包裝的完整工時。2026 年 10 月起請務必填；
-          沒填不擋儲存，但系統檢查會提醒。</td></tr>
+          串出這支品項調理／充填／包裝的完整工時。<b>2026 年 10 月起必填</b>，
+          沒填不能儲存；更早的月份可以回頭補。</td></tr>
         <tr><td>產能</td><td>系統自動算（瓶數 ÷ 工時），不用填。</td></tr>
       </tbody></table>
 
@@ -719,7 +719,7 @@ function parseExp(v) {
   if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
   return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
 }
-/** 從這一天起的批次要填有效日期（用來對應製成率檔案）；更早的是歷史資料，能補就補 */
+/** 從這一天起的批次必填有效日期（用來對應製成率檔案）；更早的是歷史資料，能補就補 */
 var EXP_FROM = '2026-10-01';
 
 function toMin(t) {
@@ -1052,7 +1052,7 @@ function renderRow(r, editable) {
       + '<button class="hist" type="button">歷史</button>'
     : (r.sku ? '查無此品號' : '');
   tr.appendChild(cell('品名', 'name' + (!sku && r.sku ? ' miss' : ''), nm));
-  tr.appendChild(cell('有效日期', 'pair', inp('exp', '', '20270729', 'inputmode="numeric"')));
+  tr.appendChild(cell('有效日期', 'pair', inp('exp', '', '年月日8碼', 'inputmode="numeric"')));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
@@ -1137,7 +1137,8 @@ function rowIssues(r) {
  */
 function expIssue(r) {
   var ex = String(r.exp || '').trim();
-  if (!ex) return null;
+  // 紙本上一定有有效日期；10 月起必填，否則這一批對不到製成率，算不出完整工時
+  if (!ex) return state.date >= EXP_FROM ? '有效日期沒填（10 月起必填，照紙本抄八碼）' : null;
   var e2 = parseExp(ex), d0 = state.date;
   if (!e2) return '有效日期看不懂，直接打八碼例如 20270729';
   if (e2 <= d0) return '有效日期 ' + e2 + ' 沒有晚於生產日期 ' + d0 + '，請確認';
@@ -1343,22 +1344,10 @@ function buildChecks() {
     });
   }
 
-  // 提醒型：10 月起沒填有效日期。不擋儲存（業助可能晚一點才拿到），但要提醒 ——
-  // 沒有它，這一批就對不到製成率檔案，算不出調理／充填／包裝的完整工時。
-  var noExp = state.date >= EXP_FROM
-    ? good.filter(function (r) { return !String(r.exp || '').trim(); }) : [];
-  if (noExp.length) {
-    warns.push({
-      row: noExp[0],
-      title: noExp.length + ' 批沒有填有效日期',
-      detail: '有效日期用來對應製成率檔案，串出調理／充填／包裝的完整工時，能補就補。不影響儲存。'
-    });
-  }
-
   if (good.length) {
     passes.push('品號 ' + good.length + ' 筆全部在品項主檔內');
     if (!noHead.length) passes.push(good.length + ' 批都有填人數');
-    if (state.date >= EXP_FROM && !noExp.length) passes.push(good.length + ' 批都有填有效日期');
+    if (state.date >= EXP_FROM) passes.push(good.length + ' 批都有填有效日期');
   }
   if (good.length > 1 && !over.length) passes.push('同一支品項沒有時間重疊的情形');
 

@@ -537,6 +537,26 @@ with sync_playwright() as p:
     sent = [p for u, p in captured["patches"] if "id=eq.77" in u]
     check("送出的修改帶有效日期", bool(sent) and sent[0].get("exp_date") == "2027-06-01", sent)
 
+    print("\n── 10 月起有效日期必填 ──")
+    pg.unroute("**/*"); pg.route("**/*", make_router([]))
+    pg.fill("#datePick", "2026-10-05"); pg.dispatch_event("#datePick", "change")
+    pg.wait_for_timeout(1000)
+    r0 = pg.locator("#rows tr").first
+    ex = r0.locator('input[data-f="exp"]')
+    check("有效日期提示是格式，不是像已填好的範例值",
+          ex.get_attribute("placeholder") == "年月日8碼", ex.get_attribute("placeholder"))
+    for f, v in (("sku", "D0310"), ("start", "0800"), ("end", "0930"), ("bottles", "450"), ("head", "5")):
+        el = pg.locator("#rows tr").first.locator('input[data-f="%s"]' % f); el.fill(v); el.blur()
+    pg.wait_for_timeout(200)
+    check("10 月起沒填有效日期不能存", pg.is_disabled("#saveBtn"))
+    check("檢查清單說明必填", "有效日期沒填" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    ex = pg.locator("#rows tr").first.locator('input[data-f="exp"]')
+    check("沒填的有效日期標紅", "bad" in (ex.get_attribute("class") or ""))
+    ex.fill("20270729"); ex.blur(); pg.wait_for_timeout(200)
+    check("填了就可以存", not pg.is_disabled("#saveBtn"), pg.inner_text("#checksList")[:200])
+    check("通過項目列出都有填有效日期", "都有填有效日期" in pg.inner_text("#checksList"))
+
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
     check("沒有 JS 錯誤", not errs, errs[:3])
