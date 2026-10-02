@@ -120,15 +120,15 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   letter-spacing:.04em;margin-left:auto}
 
 .grid{width:100%;border-collapse:collapse;table-layout:fixed}
-.grid th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:400;
+.grid th{font-family:"Noto Sans TC",sans-serif;font-size:14px;letter-spacing:.02em;
+  text-transform:none;color:var(--ink);text-align:left;font-weight:700;
   padding:8px 12px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule-3);
   background:var(--sunk)}
 .grid th:first-child{padding-left:20px}
 .grid th.num{text-align:right}
-.grid th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
+.grid th i{display:block;font-style:normal;font-size:11px;letter-spacing:.02em;
   color:var(--ink-4);font-weight:400;margin-top:1px;text-transform:none}
-.grid th:nth-child(7){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
+.grid th:nth-child(8){background:var(--paper)}   /* 與下方工時欄的底色接起來 */
 .grid td{padding:9px 8px;border-bottom:1px solid #F0F2ED;vertical-align:top}
 .grid td:first-child{padding-left:16px}
 .grid td.calc,.grid td.flag{padding-top:17px}
@@ -468,7 +468,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <div class="head">
         <div>
           <h2>本日批次</h2>
-          <div class="sub">時間直接打 <b>0800</b>，離開欄位自動變 08:00；有效日期直接打 <b>20270729</b>，自動變 2027-07-29。工時、產能由系統計算。</div>
+          <div class="sub">時間直接打 <b>0800</b>，離開欄位自動變 08:00；製造日期照紙本打八碼 <b>20261001</b>，自動變 2026-10-01（是<b>製造日期</b>，不是有效日期）。工時、產能由系統計算。</div>
         </div>
         <div class="keys">ENTER 下一格</div>
       </div>
@@ -482,7 +482,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         </colgroup>
         <thead>
           <tr>
-            <th>品號</th><th>品名</th><th>有效日期</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
+            <th>品號</th><th>品名</th><th>製造日期</th><th>起始</th><th>結束</th><th class="num">瓶數</th>
             <th class="num">人數</th><th class="num">工時<i>hr</i></th>
             <th class="num">產能<i>單位/hr</i></th><th></th>
           </tr>
@@ -586,7 +586,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <h3>一、每天要做什麼</h3>
       <ol>
         <li><b>選日期</b> —— 左上角的日曆。可以補登前幾天，不一定要當天登打。</li>
-        <li><b>那天有生產</b>：逐批輸入品號、有效日期、起始、結束、瓶數、人數。</li>
+        <li><b>那天有生產</b>：逐批輸入品號、製造日期、起始、結束、瓶數、人數。</li>
         <li><b>那天沒有包裝作業</b>：直接勾「當日無包裝作業」，不必留空。<br>
           <span class="tip">留空和「沒生產」是兩件事 —— 留空會一直掛在待補清單上。</span></li>
         <li>確認下方檢查項目沒有紅色，按 <b>儲存</b>。</li>
@@ -602,9 +602,10 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
         <tr><td>瓶數</td><td>該批實際完成的數量。混包請分成兩列，不要相加。</td></tr>
         <tr><td>人數</td><td>那一批實際作業的人數。<b>沒有這一欄就算不出人均產能</b>，
           請務必填。</td></tr>
-        <tr><td>有效日期</td><td>照紙本抄八碼，例如 <b>20270729</b>。用來對應製成率檔案，
-          串出這支品項調理／充填／包裝的完整工時。<b>2026 年 10 月起必填</b>，
-          沒填不能儲存；更早的月份可以回頭補。</td></tr>
+        <tr><td>製造日期</td><td>這批半成品的<b>製造日期</b>，照紙本抄八碼，例如 <b>20261001</b>。
+          用「品號＋製造日期」對應產品製成率檔案，串出這支品項調理／充填／包裝的完整工時。
+          <b>2026 年 10 月起必填</b>，沒填不能儲存。<br>
+          <b>注意不要打成有效日期</b>：製造日期不可能晚於包裝日期，打成有效日期（例如 2027 年）系統會擋下來。</td></tr>
         <tr><td>產能</td><td>系統自動算（瓶數 ÷ 工時），不用填。</td></tr>
       </tbody></table>
 
@@ -622,7 +623,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <h3>四、補登舊資料</h3>
       <ul>
         <li>把日期切到那一天，照常輸入即可 —— 三天後才收到回報單也沒關係。</li>
-        <li><b>上上個月以前</b>的資料只開放補「人數」、「有效日期」與「備註」，
+        <li><b>上上個月以前</b>的資料只開放補「人數」、「製造日期」與「備註」，
           品號、時間、瓶數不能再改。要更正請找主管。</li>
         <li>日曆上標「待補」的就是還沒處理的工作日。</li>
       </ul>
@@ -706,10 +707,10 @@ function parseTime(v) {
   return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
 }
 /**
- * 有效日期。紙本寫 20270729，現場最快的打法就是照抄八碼；
- * 也接受 2027/7/29、2027-07-29、2027.7.29。看不懂回 null。
+ * 製造日期。紙本寫 20261001，現場最快的打法就是照抄八碼；
+ * 也接受 2026/10/1、2026-10-01、2026.10.1。看不懂回 null。
  */
-function parseExp(v) {
+function parseMfg(v) {
   var s = String(v == null ? '' : v).trim().replace(/[./．／]/g, '-');
   if (!s) return null;
   var x = s.match(/^(\d{4})(\d{2})(\d{2})$/) || s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
@@ -719,8 +720,8 @@ function parseExp(v) {
   if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
   return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
 }
-/** 從這一天起的批次必填有效日期（用來對應製成率檔案）；更早的是歷史資料，能補就補 */
-var EXP_FROM = '2026-10-01';
+/** 從這一天起的批次必填製造日期（用來對應產品製成率檔案）；更早的是歷史資料，不必回頭補 */
+var MFG_FROM = '2026-10-01';
 
 function toMin(t) {
   if (!t) return null;
@@ -956,7 +957,7 @@ function loadDay(d) {
   banner(null);
 
   return Promise.all([
-    api('batches?select=id,sku_code,start_time,end_time,bottles,headcount,exp_date,hours,note,abnormal_ok'
+    api('batches?select=id,sku_code,start_time,end_time,bottles,headcount,mfg_date,hours,note,abnormal_ok'
         + '&prod_date=eq.' + d + '&order=start_time.asc,id.asc'),
     api('daily_status?select=prod_date,no_operation,note&prod_date=eq.' + d)
   ]).then(function (res) {
@@ -966,7 +967,7 @@ function loadDay(d) {
         start: String(b.start_time).slice(0, 5),
         end: String(b.end_time).slice(0, 5),
         bottles: b.bottles, head: b.headcount == null ? '' : b.headcount,
-        exp: b.exp_date || '',
+        mfg: b.mfg_date || '',
         note: b.note || '', ok: !!b.abnormal_ok, dirty: false, deleted: false,
         orig: { sku: b.sku_code, start: String(b.start_time).slice(0, 5),
                 end: String(b.end_time).slice(0, 5), bottles: String(b.bottles) }
@@ -981,7 +982,7 @@ function loadDay(d) {
 
 function addRow() {
   state.rows.push({ key: ++uid, id: null, sku: '', start: '', end: '',
-                    bottles: '', head: '', exp: '', note: '', ok: false,
+                    bottles: '', head: '', mfg: '', note: '', ok: false,
                     dirty: true, deleted: false });
 }
 
@@ -1006,7 +1007,7 @@ function renderDay() {
   // 「補登可以新增，但改舊資料要主管」是刻意的設計，寫清楚免得現場以為壞了
   if (!editable && state.role === 'operator') {
     banner('info', '<b>' + d.slice(0, 7) + ' 已經超過可修改的月份</b>　'
-      + '這一天你可以：<u>新增</u>漏掉的批次、在既有批次上<u>補人數與有效日期</u>。<br>'
+      + '這一天你可以：<u>新增</u>漏掉的批次、在既有批次上<u>補人數與製造日期</u>。<br>'
       + '品項、時間、瓶數要請主管修改 —— 歷史的量測值不該被無聲改掉。');
     $('addRow').disabled = false;
   }
@@ -1026,7 +1027,7 @@ function renderRow(r, editable) {
   var tr = document.createElement('tr');
   var locked = r.id && !editable;
   if (locked) tr.className = 'locked';
-  // 舊資料整筆鎖住，但人數與有效日期留著讓專員回頭補
+  // 舊資料整筆鎖住，但人數與製造日期留著讓專員回頭補
   var headOpen = locked && canFillHead(state.date);
 
   function cell(label, cls, inner) {
@@ -1036,7 +1037,7 @@ function renderRow(r, editable) {
   }
   function inp(field, cls, ph, extra) {
     var v = r[field] === null || r[field] === undefined ? '' : r[field];
-    var off = locked && !((field === 'head' || field === 'exp') && headOpen);
+    var off = locked && !((field === 'head' || field === 'mfg') && headOpen);
     return '<input class="' + (cls || '') + '" data-f="' + field + '" '
          + 'value="' + String(v).replace(/"/g, '&quot;') + '" placeholder="' + (ph || '') + '" '
          + (off ? 'disabled ' : '') + (extra || '') + '>';
@@ -1052,7 +1053,7 @@ function renderRow(r, editable) {
       + '<button class="hist" type="button">歷史</button>'
     : (r.sku ? '查無此品號' : '');
   tr.appendChild(cell('品名', 'name' + (!sku && r.sku ? ' miss' : ''), nm));
-  tr.appendChild(cell('有效日期', 'pair', inp('exp', '', '年月日8碼', 'inputmode="numeric"')));
+  tr.appendChild(cell('製造日期', 'pair', inp('mfg', '', '年月日8碼', 'inputmode="numeric"')));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
@@ -1076,9 +1077,9 @@ function renderRow(r, editable) {
         var t = parseTime(el.value);
         if (t) { el.value = t; r[f] = t; }
       }
-      if (f === 'exp') {
-        var e2 = parseExp(el.value);
-        if (e2) { el.value = e2; r.exp = e2; }
+      if (f === 'mfg') {
+        var m2 = parseMfg(el.value);
+        if (m2) { el.value = m2; r.mfg = m2; }
       }
       if (f === 'sku') { el.value = el.value.trim().toUpperCase(); r.sku = el.value; renderDay(); }
       recalc();
@@ -1115,7 +1116,7 @@ function removeRow(r) {
 // ══ 即時計算與異常提示 ═════════════════════════════════════
 function rowBlank(r) {
   return !r.sku && !r.start && !r.end && String(r.bottles) === '' && String(r.head) === ''
-      && !String(r.exp || '').trim();
+      && !String(r.mfg || '').trim();
 }
 /** 這一列還缺什麼。回傳空陣列代表可以存了。 */
 function rowIssues(r) {
@@ -1127,23 +1128,24 @@ function rowIssues(r) {
   else if (st && st === en) out.push('結束時間與起始相同，工時會算成 0');
   if (!(+r.bottles > 0)) out.push('瓶數沒填，或不是大於 0 的數字');
   if (headIssue(r)) out.push(headIssue(r));
-  var ei = expIssue(r);
-  if (ei) out.push(ei);
+  var mi = mfgIssue(r);
+  if (mi) out.push(mi);
   return out;
 }
 /**
- * 有效日期可以空白，但填了就要對 —— 打錯的有效日期會對到別批的製成率，比沒填更糟。
- * 規則與資料庫的 batches_exp_date_range 相同：晚於生產日期、且不超過 10 年。
+ * 製造日期。10 月起必填；填了就要對 —— 打錯的日期會對到別批的製成率，比沒填更糟。
+ * 最常見的錯是把紙本上的「有效日期」抄進來：有效日期一定在未來，
+ * 所以「晚於包裝日期」就代表打錯了。早於包裝日期一年以上也不合理（多半是年份打錯）。
+ * 規則與資料庫的 batches_mfg_date_range 相同。
  */
-function expIssue(r) {
-  var ex = String(r.exp || '').trim();
-  // 紙本上一定有有效日期；10 月起必填，否則這一批對不到製成率，算不出完整工時
-  if (!ex) return state.date >= EXP_FROM ? '有效日期沒填（10 月起必填，照紙本抄八碼）' : null;
-  var e2 = parseExp(ex), d0 = state.date;
-  if (!e2) return '有效日期看不懂，直接打八碼例如 20270729';
-  if (e2 <= d0) return '有效日期 ' + e2 + ' 沒有晚於生產日期 ' + d0 + '，請確認';
-  var lim = (+d0.slice(0, 4) + 10) + d0.slice(4);
-  if (e2 > lim) return '有效日期 ' + e2 + ' 距生產日期超過 10 年，年份可能打錯';
+function mfgIssue(r) {
+  var v = String(r.mfg || '').trim();
+  if (!v) return state.date >= MFG_FROM ? '製造日期沒填（10 月起必填，照紙本抄八碼）' : null;
+  var m2 = parseMfg(v), d0 = state.date;
+  if (!m2) return '製造日期看不懂，直接打八碼例如 20261001';
+  if (m2 > d0) return '製造日期 ' + m2 + ' 晚於包裝日期 ' + d0 + '，可能打成有效日期了，請確認';
+  var lim = (+d0.slice(0, 4) - 1) + d0.slice(4);
+  if (m2 < lim) return '製造日期 ' + m2 + ' 比包裝日期早一年以上，年份可能打錯';
   return null;
 }
 /** 人數可以空白（歷史資料沒有），但填了就要是 1–99 的整數，與資料庫的限制相同 */
@@ -1214,7 +1216,7 @@ function recalc() {
         if (f === 'start')    wrong = !parseTime(r.start);
         if (f === 'end')      wrong = !parseTime(r.end) || (parseTime(r.start) === parseTime(r.end));
         if (f === 'bottles')  wrong = !(+r.bottles > 0);
-        if (f === 'exp')      wrong = !!expIssue(r);
+        if (f === 'mfg')      wrong = !!mfgIssue(r);
         if (f === 'head')     wrong = !!headIssue(r);
       }
       el.classList.toggle('bad', wrong);
@@ -1245,7 +1247,7 @@ function recalc() {
   $('saveBtn').disabled = anyBad || blockedRow || !canWrite || !(wantIns || wantEd);
   $('saveBtn').textContent = pending ? '儲存本日　' + pending + ' 筆' : '儲存本日';
   $('dirtyHint').textContent = blockedRow
-    ? '這一天只能補人數與有效日期；品項、時間、瓶數的修改要請主管處理。' : '';
+    ? '這一天只能補人數與製造日期；品項、時間、瓶數的修改要請主管處理。' : '';
 
   renderChecks();
 }
@@ -1347,7 +1349,7 @@ function buildChecks() {
   if (good.length) {
     passes.push('品號 ' + good.length + ' 筆全部在品項主檔內');
     if (!noHead.length) passes.push(good.length + ' 批都有填人數');
-    if (state.date >= EXP_FROM) passes.push(good.length + ' 批都有填有效日期');
+    if (state.date >= MFG_FROM) passes.push(good.length + ' 批都有填製造日期');
   }
   if (good.length > 1 && !over.length) passes.push('同一支品項沒有時間重疊的情形');
 
@@ -1424,7 +1426,7 @@ $('saveBtn').addEventListener('click', function () {
       start_time: parseTime(r.start), end_time: parseTime(r.end),
       bottles: +r.bottles,
       headcount: String(r.head).trim() === '' ? null : +r.head,
-      exp_date: parseExp(r.exp),
+      mfg_date: parseMfg(r.mfg),
       abnormal_ok: !!r.ok
     };
     if (r.id) upd.push({ r: r, p: payload }); else ins.push(payload);
@@ -1626,13 +1628,13 @@ $('rows').addEventListener('paste', function (e) {
     if (c[2] !== undefined) target.end     = parseTime(c[2]) || String(c[2]).trim();
     if (c[3] !== undefined) target.bottles = String(c[3]).replace(/[, ]/g, '').trim();
     if (c[4] !== undefined) target.head    = String(c[4]).replace(/[, ]/g, '').trim();
-    if (c[5] !== undefined) target.exp     = parseExp(c[5]) || String(c[5]).trim();
+    if (c[5] !== undefined) target.mfg     = parseMfg(c[5]) || String(c[5]).trim();
     target.dirty = true;
   });
 
   renderDay();
   banner('info', '<b>已貼上 ' + lines.length + ' 列</b>　'
-    + '請確認品項與時間都對，再按儲存。欄位順序：品項／起始／結束／瓶數／人數／有效日期。');
+    + '請確認品項與時間都對，再按儲存。欄位順序：品項／起始／結束／瓶數／人數／製造日期。');
 });
 
 // ══ 月度完整性檢核 ════════════════════════════════════════
@@ -1724,7 +1726,7 @@ $('chkGo').addEventListener('click', function () {
  * 開頭加 BOM，否則 Excel 開啟時中文會變亂碼 —— 這是現場最常回報的問題。
  */
 function toCsvText(rows) {
-  var cols = ['生產日期','品號','品名','有效日期','起始','結束','工時(hr)','瓶數','人數',
+  var cols = ['包裝日期','品號','品名','製造日期','起始','結束','工時(hr)','瓶數','人數',
               '產能(單位/hr)','已確認異常','備註'];
   var out  = [cols.join(',')];
 
@@ -1732,7 +1734,7 @@ function toCsvText(rows) {
     var sku = state.skus[b.sku_code] || {};
     var h = Number(b.hours);
     var cells = [
-      b.prod_date, b.sku_code, sku.name || '', b.exp_date || '',
+      b.prod_date, b.sku_code, sku.name || '', b.mfg_date || '',
       String(b.start_time).slice(0, 5), String(b.end_time).slice(0, 5),
       h.toFixed(2), b.bottles,
       b.headcount == null ? '' : b.headcount,
@@ -1774,7 +1776,7 @@ $('expBtn').addEventListener('click', function () {
   $('expBtn').disabled = true;
   $('expState').textContent = '準備中…';
 
-  api('batches?select=prod_date,sku_code,start_time,end_time,hours,bottles,headcount,exp_date,'
+  api('batches?select=prod_date,sku_code,start_time,end_time,hours,bottles,headcount,mfg_date,'
       + 'abnormal_ok,note&order=prod_date.asc,start_time.asc' + q + '&limit=20000')
     .then(function (rows) {
       if (!rows.length) { $('expState').textContent = '這個範圍沒有資料。'; return; }
@@ -1800,7 +1802,7 @@ function openHistory(code, row) {
   $('histBody').innerHTML = '';
   $('hist').hidden = false;
 
-  api('batches?select=prod_date,start_time,end_time,hours,bottles,headcount,exp_date,abnormal_ok'
+  api('batches?select=prod_date,start_time,end_time,hours,bottles,headcount,mfg_date,abnormal_ok'
       + '&sku_code=eq.' + encodeURIComponent(code)
       + '&order=prod_date.desc,start_time.desc&limit=60')
     .then(function (rows) { renderHistory(code, sku, rows, row); })
@@ -1863,7 +1865,7 @@ function renderHistory(code, sku, rows, row) {
       + '<span style="color:var(--cool)">●&nbsp;偏高</span></div>';
   }
 
-  h += '<table class="htab"><thead><tr><th>日期</th><th>有效日期</th><th>時間</th>'
+  h += '<table class="htab"><thead><tr><th>日期</th><th>製造日期</th><th>時間</th>'
      + '<th class="num">工時</th><th class="num">瓶數</th><th class="num">人數</th>'
      + '<th class="num">產能<i>單位/hr</i></th><th></th></tr></thead><tbody>';
 
@@ -1872,7 +1874,7 @@ function renderHistory(code, sku, rows, row) {
     var mk = (rate && lo && rate < lo) ? 'low' : (rate && hi && rate > hi) ? 'high' : '';
     var gap = (rate && typ) ? Math.round(Math.abs(100 * (rate / typ - 1))) : null;
     h += '<tr><td>' + b.prod_date + '</td>'
-       + '<td>' + (b.exp_date || '—') + '</td>'
+       + '<td>' + (b.mfg_date || '—') + '</td>'
        + '<td>' + String(b.start_time).slice(0, 5) + '–' + String(b.end_time).slice(0, 5) + '</td>'
        + '<td class="num">' + hh.toFixed(2) + '</td>'
        + '<td class="num">' + num(b.bottles) + '</td>'
