@@ -1,6 +1,9 @@
 import json, base64, re, datetime
 from playwright.sync_api import sync_playwright
 
+# 測試資料停在 2026 年 9 月，瀏覽器的「今天」固定在那時，測試才不會隨日曆過期
+TODAY = "2026-09-20T12:00:00+08:00"
+
 PAGE = "file:///home/user/packaging-capacity-dashboard/entry.html"
 
 def b64u(o):
@@ -99,6 +102,7 @@ def check(name, cond, extra=""):
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
     pg = b.new_page(viewport={"width":1280,"height":1000}, accept_downloads=True)
+    pg.clock.set_fixed_time(TODAY)
     logs = []
     pg.on("console", lambda m: logs.append(m.type + ": " + m.text))
     pg.on("pageerror", lambda e: logs.append("PAGEERROR: " + str(e)))
@@ -138,29 +142,49 @@ with sync_playwright() as p:
     check("品名自成一欄", nm.count() == 1)
     check("品名與容器都帶出來", "草莓蒟蒻餡" in nm.inner_text() and "PE袋" in nm.inner_text(),
           nm.inner_text())
-    check("品名欄排在起始時間之前",
+    # 欄位順序跟紙本表單一樣：品名 → 有效日期 → 起始
+    check("品名、有效日期、起始依紙本順序排列",
           pg.evaluate("""() => {
             const tds = document.querySelectorAll('#rows tr td');
             return tds[1].classList.contains('name')
-                && tds[2].querySelector('input[data-f=\"start\"]') !== null;
+                && tds[2].querySelector('input[data-f=\"exp\"]') !== null
+                && tds[3].querySelector('input[data-f=\"start\"]') !== null;
           }"""))
 
-    cells = pg.locator("#rows tr").first.locator("td")
-    check("工時 = 1.50", cells.nth(6).inner_text().strip() == "1.50",
-          cells.nth(6).inner_text())
-    check("產能欄只放數字，不放說明", cells.nth(7).inner_text().strip() == "300",
-          cells.nth(7).inner_text())
+    print("\n── 有效日期 ──")
+    ex = row.locator('input[data-f="exp"]')
+    ex.fill("20270729"); ex.blur()
+    check("20270729 → 2027-07-29", ex.input_value() == "2027-07-29", ex.input_value())
+    ex.fill("2027/7/9"); ex.blur()
+    check("2027/7/9 → 2027-07-09", ex.input_value() == "2027-07-09", ex.input_value())
+    ex.fill("20271332"); ex.blur()
+    check("不存在的日期標紅", "bad" in (ex.get_attribute("class") or ""), ex.get_attribute("class"))
+    check("不存在的日期擋下儲存", "有效日期看不懂" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    ex.fill("20260101"); ex.blur()
+    check("早於生產日期會擋", "沒有晚於生產日期" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    ex.fill("20720729"); ex.blur()
+    check("年份打錯（超過 10 年）會擋", "超過 10 年" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    ex.fill("20270729"); ex.blur()
+    check("改對之後就不擋", "有效日期" not in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+
+    r0 = pg.locator("#rows tr").first
+    cH, cR = r0.locator('td[data-l="工時"]'), r0.locator('td[data-l="產能"]')
+    check("工時 = 1.50", cH.inner_text().strip() == "1.50", cH.inner_text())
+    check("產能欄只放數字，不放說明", cR.inner_text().strip() == "300", cR.inner_text())
     check("正常範圍不加狀態 class",
-          (cells.nth(7).get_attribute("class") or "").strip() == "flag",
-          cells.nth(7).get_attribute("class"))
+          (cR.get_attribute("class") or "").strip() == "flag", cR.get_attribute("class"))
 
     print("\n── 異常提示移到檢查清單 ──")
     row.locator('input[data-f="bottles"]').fill("120")
     row.locator('input[data-f="bottles"]').blur()
-    cells = pg.locator("#rows tr").first.locator("td")
-    check("偏低時表格只多一個 low class", "low" in (cells.nth(7).get_attribute("class") or ""),
-          cells.nth(7).get_attribute("class"))
-    check("表格裡沒有說明文字", "低於" not in cells.nth(7).inner_text(), cells.nth(7).inner_text())
+    cR = pg.locator("#rows tr").first.locator('td[data-l="產能"]')
+    check("偏低時表格只多一個 low class", "low" in (cR.get_attribute("class") or ""),
+          cR.get_attribute("class"))
+    check("表格裡沒有說明文字", "低於" not in cR.inner_text(), cR.inner_text())
     checks_txt = pg.inner_text("#checksList")
     # D0310 中位數 295，這批 80 → 低於平常 73%
     check("檢查清單說明偏低的原因", "低於平常 73%" in checks_txt, checks_txt[:150])
@@ -189,9 +213,9 @@ with sync_playwright() as p:
     row = pg.locator("#rows tr").first
     row.locator('input[data-f="bottles"]').fill("60")
     row.locator('input[data-f="bottles"]').blur()
-    cells = pg.locator("#rows tr").first.locator("td")
-    check("批次數不足不標記", (cells.nth(7).get_attribute("class") or "").strip() == "flag",
-          cells.nth(7).get_attribute("class"))
+    cR = pg.locator("#rows tr").first.locator('td[data-l="產能"]')
+    check("批次數不足不標記", (cR.get_attribute("class") or "").strip() == "flag",
+          cR.get_attribute("class"))
 
     print("\n── 阻擋型檢查 ──")
     r0 = pg.locator("#rows tr").first
@@ -262,7 +286,9 @@ with sync_playwright() as p:
         check("送出三筆批次", len(body) == 3, len(body))
         b0 = body[0]
         check("欄位名稱正確", set(b0) == {"sku_code","prod_date","start_time","end_time",
-                                          "bottles","headcount","abnormal_ok"}, list(b0))
+                                          "bottles","headcount","exp_date","abnormal_ok"}, list(b0))
+        check("有效日期送 YYYY-MM-DD", b0["exp_date"] == "2027-07-29", b0)
+        check("沒填的有效日期送 null", body[1]["exp_date"] is None, body[1])
         check("不送 hours（資料庫自己算）", "hours" not in b0, list(b0))
         check("不送確認時間（由資料庫蓋章）", "abnormal_ok_at" not in b0, list(b0))
         check("時間是 HH:MM", re.match(r"^\d\d:\d\d$", b0["start_time"]) is not None, b0)
@@ -480,6 +506,25 @@ with sync_playwright() as p:
     pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
     check("按 Esc 也關得掉", not pg.is_visible("#help"))
     check("說明沒有把已輸入的內容清掉", pg.locator("#rows tr").count() > 0)
+
+    print("\n── 舊月份：整筆鎖住，但人數與有效日期可以補 ──")
+    old = [{"id": 77, "sku_code": "D0310", "start_time": "08:00:00", "end_time": "09:30:00",
+            "bottles": 450, "headcount": None, "exp_date": None, "hours": 1.5,
+            "note": None, "abnormal_ok": False}]
+    pg.unroute("**/*"); pg.route("**/*", make_router(old))
+    pg.fill("#datePick", "2026-06-10"); pg.dispatch_event("#datePick", "change")
+    pg.wait_for_timeout(1000)
+    r0 = pg.locator("#rows tr").first
+    check("舊資料的瓶數鎖住", r0.locator('input[data-f="bottles"]').is_disabled())
+    check("舊資料的人數可以補", r0.locator('input[data-f="head"]').is_enabled())
+    check("舊資料的有效日期可以補", r0.locator('input[data-f="exp"]').is_enabled())
+    ex = r0.locator('input[data-f="exp"]'); ex.fill("20270601"); ex.blur()
+    pg.wait_for_timeout(200)
+    check("補有效日期後可以儲存", not pg.is_disabled("#saveBtn"), pg.inner_text("#dirtyHint"))
+    captured["patches"].clear()
+    pg.click("#saveBtn"); pg.wait_for_timeout(1000)
+    sent = [p for u, p in captured["patches"] if "id=eq.77" in u]
+    check("送出的修改帶有效日期", bool(sent) and sent[0].get("exp_date") == "2027-06-01", sent)
 
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
