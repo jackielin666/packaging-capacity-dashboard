@@ -142,12 +142,12 @@ with sync_playwright() as p:
     check("品名自成一欄", nm.count() == 1)
     check("品名與容器都帶出來", "草莓蒟蒻餡" in nm.inner_text() and "PE袋" in nm.inner_text(),
           nm.inner_text())
-    # 欄位順序跟紙本表單一樣：品名 → 有效日期 → 起始
-    check("品名、有效日期、起始依紙本順序排列",
+    # 欄位順序：品名 → 製造日期 → 起始
+    check("品名、製造日期、起始依序排列",
           pg.evaluate("""() => {
             const tds = document.querySelectorAll('#rows tr td');
             return tds[1].classList.contains('name')
-                && tds[2].querySelector('input[data-f=\"exp\"]') !== null
+                && tds[2].querySelector('input[data-f=\"mfg\"]') !== null
                 && tds[3].querySelector('input[data-f=\"start\"]') !== null;
           }"""))
 
@@ -162,24 +162,40 @@ with sync_playwright() as p:
     hd.fill(""); hd.blur()
     check("人數空白不擋", "人數要填" not in pg.inner_text("#checksList"))
 
-    print("\n── 有效日期 ──")
-    ex = row.locator('input[data-f="exp"]')
-    ex.fill("20270729"); ex.blur()
-    check("20270729 → 2027-07-29", ex.input_value() == "2027-07-29", ex.input_value())
-    ex.fill("2027/7/9"); ex.blur()
-    check("2027/7/9 → 2027-07-09", ex.input_value() == "2027-07-09", ex.input_value())
-    ex.fill("20271332"); ex.blur()
-    check("不存在的日期標紅", "bad" in (ex.get_attribute("class") or ""), ex.get_attribute("class"))
-    check("不存在的日期擋下儲存", "有效日期看不懂" in pg.inner_text("#checksList"),
+    # 測試的「今天」是 2026-09-20，也就是包裝日期
+    print("\n── 製造日期 ──")
+    hdr = pg.evaluate("""() => {
+      const th = document.querySelector('.grid th');
+      const cs = getComputedStyle(th);
+      return {size: parseFloat(cs.fontSize), weight: +cs.fontWeight,
+              heads: [...document.querySelectorAll('.grid thead th')].map(t => t.firstChild ? t.firstChild.textContent.trim() : '')};
+    }""")
+    check("表頭字放大到 14px 以上", hdr["size"] >= 14, hdr["size"])
+    check("表頭是粗體", hdr["weight"] >= 700, hdr["weight"])
+    check("表頭寫製造日期", "製造日期" in hdr["heads"] and "有效日期" not in hdr["heads"], hdr["heads"])
+    check("表頭說明改成製造日期", "製造日期照紙本打八碼" in pg.content())
+    mf = row.locator('input[data-f="mfg"]')
+    mf.fill("20260915"); mf.blur()
+    check("20260915 → 2026-09-15", mf.input_value() == "2026-09-15", mf.input_value())
+    mf.fill("2026/9/1"); mf.blur()
+    check("2026/9/1 → 2026-09-01", mf.input_value() == "2026-09-01", mf.input_value())
+    mf.fill("20261332"); mf.blur()
+    check("不存在的日期標紅", "bad" in (mf.get_attribute("class") or ""), mf.get_attribute("class"))
+    check("不存在的日期擋下儲存", "製造日期看不懂" in pg.inner_text("#checksList"),
           pg.inner_text("#checksList")[:200])
-    ex.fill("20260101"); ex.blur()
-    check("早於生產日期會擋", "沒有晚於生產日期" in pg.inner_text("#checksList"),
+    mf.fill("20270729"); mf.blur()
+    check("打成有效日期（晚於包裝日期）會擋", "可能打成有效日期" in pg.inner_text("#checksList"),
           pg.inner_text("#checksList")[:200])
-    ex.fill("20720729"); ex.blur()
-    check("年份打錯（超過 10 年）會擋", "超過 10 年" in pg.inner_text("#checksList"),
+    mf.fill("20260921"); mf.blur()
+    check("晚於包裝日期一天也擋", "晚於包裝日期" in pg.inner_text("#checksList"))
+    mf.fill("20260920"); mf.blur()
+    check("同一天製造、同一天包裝可以", "製造日期" not in pg.inner_text("#checksList"),
           pg.inner_text("#checksList")[:200])
-    ex.fill("20270729"); ex.blur()
-    check("改對之後就不擋", "有效日期" not in pg.inner_text("#checksList"),
+    mf.fill("20250901"); mf.blur()
+    check("早一年以上會擋（年份打錯）", "早一年以上" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    mf.fill("20260915"); mf.blur()
+    check("改對之後就不擋", "製造日期" not in pg.inner_text("#checksList"),
           pg.inner_text("#checksList")[:200])
 
     r0 = pg.locator("#rows tr").first
@@ -297,9 +313,9 @@ with sync_playwright() as p:
         check("送出三筆批次", len(body) == 3, len(body))
         b0 = body[0]
         check("欄位名稱正確", set(b0) == {"sku_code","prod_date","start_time","end_time",
-                                          "bottles","headcount","exp_date","abnormal_ok"}, list(b0))
-        check("有效日期送 YYYY-MM-DD", b0["exp_date"] == "2027-07-29", b0)
-        check("沒填的有效日期送 null", body[1]["exp_date"] is None, body[1])
+                                          "bottles","headcount","mfg_date","abnormal_ok"}, list(b0))
+        check("製造日期送 YYYY-MM-DD", b0["mfg_date"] == "2026-09-15", b0)
+        check("沒填的製造日期送 null", body[1]["mfg_date"] is None, body[1])
         check("不送 hours（資料庫自己算）", "hours" not in b0, list(b0))
         check("不送確認時間（由資料庫蓋章）", "abnormal_ok_at" not in b0, list(b0))
         check("時間是 HH:MM", re.match(r"^\d\d:\d\d$", b0["start_time"]) is not None, b0)
@@ -408,7 +424,9 @@ with sync_playwright() as p:
     txt = raw.decode("utf-8-sig")
     lines = txt.strip().split("\r\n")
     check("有標題列與一筆資料", len(lines) == 2, lines)
-    check("標題含中文欄名", "生產日期" in lines[0] and "產能" in lines[0], lines[0])
+    # 「生產日期」與「製造日期」並列會分不清，包裝的那一天叫「包裝日期」
+    check("標題含中文欄名", "包裝日期" in lines[0] and "製造日期" in lines[0]
+          and "產能" in lines[0], lines[0])
     check("CSV 欄名帶單位", "產能(單位/hr)" in lines[0] and "工時(hr)" in lines[0], lines[0])
     check("帶出品名", "草莓蒟蒻餡" in lines[1], lines[1])
     check("算出產能 300", ",300," in lines[1], lines[1])
@@ -518,9 +536,9 @@ with sync_playwright() as p:
     check("按 Esc 也關得掉", not pg.is_visible("#help"))
     check("說明沒有把已輸入的內容清掉", pg.locator("#rows tr").count() > 0)
 
-    print("\n── 舊月份：整筆鎖住，但人數與有效日期可以補 ──")
+    print("\n── 舊月份：整筆鎖住，但人數與製造日期可以補 ──")
     old = [{"id": 77, "sku_code": "D0310", "start_time": "08:00:00", "end_time": "09:30:00",
-            "bottles": 450, "headcount": None, "exp_date": None, "hours": 1.5,
+            "bottles": 450, "headcount": None, "mfg_date": None, "hours": 1.5,
             "note": None, "abnormal_ok": False}]
     pg.unroute("**/*"); pg.route("**/*", make_router(old))
     pg.fill("#datePick", "2026-06-10"); pg.dispatch_event("#datePick", "change")
@@ -528,34 +546,34 @@ with sync_playwright() as p:
     r0 = pg.locator("#rows tr").first
     check("舊資料的瓶數鎖住", r0.locator('input[data-f="bottles"]').is_disabled())
     check("舊資料的人數可以補", r0.locator('input[data-f="head"]').is_enabled())
-    check("舊資料的有效日期可以補", r0.locator('input[data-f="exp"]').is_enabled())
-    ex = r0.locator('input[data-f="exp"]'); ex.fill("20270601"); ex.blur()
+    check("舊資料的製造日期可以補", r0.locator('input[data-f="mfg"]').is_enabled())
+    ex = r0.locator('input[data-f="mfg"]'); ex.fill("20260605"); ex.blur()
     pg.wait_for_timeout(200)
-    check("補有效日期後可以儲存", not pg.is_disabled("#saveBtn"), pg.inner_text("#dirtyHint"))
+    check("補製造日期後可以儲存", not pg.is_disabled("#saveBtn"), pg.inner_text("#dirtyHint"))
     captured["patches"].clear()
     pg.click("#saveBtn"); pg.wait_for_timeout(1000)
     sent = [p for u, p in captured["patches"] if "id=eq.77" in u]
-    check("送出的修改帶有效日期", bool(sent) and sent[0].get("exp_date") == "2027-06-01", sent)
+    check("送出的修改帶製造日期", bool(sent) and sent[0].get("mfg_date") == "2026-06-05", sent)
 
-    print("\n── 10 月起有效日期必填 ──")
+    print("\n── 10 月起製造日期必填 ──")
     pg.unroute("**/*"); pg.route("**/*", make_router([]))
     pg.fill("#datePick", "2026-10-05"); pg.dispatch_event("#datePick", "change")
     pg.wait_for_timeout(1000)
     r0 = pg.locator("#rows tr").first
-    ex = r0.locator('input[data-f="exp"]')
-    check("有效日期提示是格式，不是像已填好的範例值",
+    ex = r0.locator('input[data-f="mfg"]')
+    check("製造日期提示是格式，不是像已填好的範例值",
           ex.get_attribute("placeholder") == "年月日8碼", ex.get_attribute("placeholder"))
     for f, v in (("sku", "D0310"), ("start", "0800"), ("end", "0930"), ("bottles", "450"), ("head", "5")):
         el = pg.locator("#rows tr").first.locator('input[data-f="%s"]' % f); el.fill(v); el.blur()
     pg.wait_for_timeout(200)
-    check("10 月起沒填有效日期不能存", pg.is_disabled("#saveBtn"))
-    check("檢查清單說明必填", "有效日期沒填" in pg.inner_text("#checksList"),
+    check("10 月起沒填製造日期不能存", pg.is_disabled("#saveBtn"))
+    check("檢查清單說明必填", "製造日期沒填" in pg.inner_text("#checksList"),
           pg.inner_text("#checksList")[:200])
-    ex = pg.locator("#rows tr").first.locator('input[data-f="exp"]')
-    check("沒填的有效日期標紅", "bad" in (ex.get_attribute("class") or ""))
-    ex.fill("20270729"); ex.blur(); pg.wait_for_timeout(200)
+    ex = pg.locator("#rows tr").first.locator('input[data-f="mfg"]')
+    check("沒填的製造日期標紅", "bad" in (ex.get_attribute("class") or ""))
+    ex.fill("20261003"); ex.blur(); pg.wait_for_timeout(200)
     check("填了就可以存", not pg.is_disabled("#saveBtn"), pg.inner_text("#checksList")[:200])
-    check("通過項目列出都有填有效日期", "都有填有效日期" in pg.inner_text("#checksList"))
+    check("通過項目列出都有填製造日期", "都有填製造日期" in pg.inner_text("#checksList"))
 
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
