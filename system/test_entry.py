@@ -151,6 +151,17 @@ with sync_playwright() as p:
                 && tds[3].querySelector('input[data-f=\"start\"]') !== null;
           }"""))
 
+    hd = row.locator('input[data-f="head"]')
+    check("人數欄提示 0，跟瓶數一樣（「—」會被誤會成不用填）",
+          hd.get_attribute("placeholder") == "0", hd.get_attribute("placeholder"))
+    hd.fill("0"); hd.blur()
+    check("人數 0 會擋", "人數要填 1–99 的整數" in pg.inner_text("#checksList"),
+          pg.inner_text("#checksList")[:200])
+    hd.fill("4.5"); hd.blur()
+    check("人數小數會擋", "人數要填 1–99 的整數" in pg.inner_text("#checksList"))
+    hd.fill(""); hd.blur()
+    check("人數空白不擋", "人數要填" not in pg.inner_text("#checksList"))
+
     print("\n── 有效日期 ──")
     ex = row.locator('input[data-f="exp"]')
     ex.fill("20270729"); ex.blur()

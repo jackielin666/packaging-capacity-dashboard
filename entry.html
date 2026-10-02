@@ -1056,7 +1056,7 @@ function renderRow(r, editable) {
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
   tr.appendChild(cell('結束', 'pair', inp('end', '', '0930')));
   tr.appendChild(cell('瓶數', 'pair', inp('bottles', 'num', '0', 'inputmode="numeric"')));
-  tr.appendChild(cell('人數', 'pair', inp('head', 'num', '—', 'inputmode="numeric"')));
+  tr.appendChild(cell('人數', 'pair', inp('head', 'num', '0', 'inputmode="numeric"')));
   tr.appendChild(cell('工時', 'calc', '—'));
   tr.appendChild(cell('產能', 'flag', '—'));
 
@@ -1126,6 +1126,7 @@ function rowIssues(r) {
   if (!en) out.push('結束時間看不懂，直接打四碼例如 0930');
   else if (st && st === en) out.push('結束時間與起始相同，工時會算成 0');
   if (!(+r.bottles > 0)) out.push('瓶數沒填，或不是大於 0 的數字');
+  if (headIssue(r)) out.push(headIssue(r));
   var ei = expIssue(r);
   if (ei) out.push(ei);
   return out;
@@ -1143,6 +1144,12 @@ function expIssue(r) {
   var lim = (+d0.slice(0, 4) + 10) + d0.slice(4);
   if (e2 > lim) return '有效日期 ' + e2 + ' 距生產日期超過 10 年，年份可能打錯';
   return null;
+}
+/** 人數可以空白（歷史資料沒有），但填了就要是 1–99 的整數，與資料庫的限制相同 */
+function headIssue(r) {
+  var h = String(r.head == null ? '' : r.head).trim();
+  if (!h) return null;
+  return /^\d+$/.test(h) && +h >= 1 && +h <= 99 ? null : '人數要填 1–99 的整數';
 }
 function rowComplete(r) { return rowIssues(r).length === 0; }
 
@@ -1207,6 +1214,7 @@ function recalc() {
         if (f === 'end')      wrong = !parseTime(r.end) || (parseTime(r.start) === parseTime(r.end));
         if (f === 'bottles')  wrong = !(+r.bottles > 0);
         if (f === 'exp')      wrong = !!expIssue(r);
+        if (f === 'head')     wrong = !!headIssue(r);
       }
       el.classList.toggle('bad', wrong);
     });
