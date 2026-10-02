@@ -2,6 +2,9 @@
 import json, base64
 from playwright.sync_api import sync_playwright
 
+# 測試資料停在 2026 年 9 月，瀏覽器的「今天」固定在那時，測試才不會隨日曆過期
+TODAY = "2026-09-20T12:00:00+08:00"
+
 PAGE = "file:///home/user/packaging-capacity-dashboard/index.html"
 
 def b64u(o):
@@ -99,6 +102,7 @@ with sync_playwright() as p:
     # ── 情境一：沒登入過的人（例如業務、生管）──────────────
     ctx = b.new_context(viewport={"width": 1280, "height": 1000})
     pg = ctx.new_page()
+    pg.clock.set_fixed_time(TODAY)
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.route("**/*", route)
@@ -167,12 +171,30 @@ with sync_playwright() as p:
     css = open("index.html", encoding="utf-8").read()
     check("手機排版不會在列印時觸發", "@media(max-width:760px){" not in css
           and "@media screen and (max-width:760px){" in css)
-    check("總結整節不分頁", "#secSummary { break-inside:avoid }" in css)
+    # 整節禁止分頁會在內容一多時把第 01 節整個推到第 2 頁，第 1 頁只剩抬頭
+    check("總結各圖塊不切斷、整節不強制換頁",
+          "#secSummary .p1kpi, #secSummary .p1fig, #sumNote { break-inside:avoid }" in css
+          and "#secSummary { break-inside:avoid }" not in css)
     # 標題說幾筆就要列幾筆 —— 列表短一截，連那個數字都會被懷疑
     check("重點清單不截斷", "slice(0, 3)" not in css and "over.slice(0, 5)" not in css)
-    # PDF 只留 4 節；品項總覽、人力、工時成本、單一品項、排程試算都是互動查詢
-    check("互動工具標記為不列入 PDF", pg.locator("section.noprint").count() == 5,
+    # PDF 要是整頁的完整內容：05–09 也要印，只拿掉紙上按不動的控制項
+    check("沒有任何章節被排除在 PDF 外", pg.locator("section.noprint").count() == 0,
           pg.locator("section.noprint").count())
+    check("05–09 標為附錄並列入 PDF", pg.locator("section.appx").count() == 5,
+          pg.locator("section.appx").count())
+    n0 = pg.locator("#tbOverview tr").count()
+    pg.evaluate("dispatchEvent(new Event('beforeprint'))")
+    pg.wait_for_timeout(200)
+    n1 = pg.locator("#tbOverview tr").count()
+    opened = pg.evaluate("[...document.querySelectorAll('details')].every(d => d.open)")
+    pg.evaluate("dispatchEvent(new Event('afterprint'))")
+    pg.wait_for_timeout(200)
+    n2 = pg.locator("#tbOverview tr").count()
+    import re as _re
+    total = int(_re.search(r"本期共 (\d+) 支", pg.inner_text("#tabNote")).group(1))
+    check("列印時品項總覽展開成全部品項", n1 == total and n1 >= n0, (n0, n1, total))
+    check("列印時收合的明細全部展開", opened)
+    check("印完還原成螢幕上的樣子", n2 == n0, (n0, n2))
     check("有產生 PDF 按鈕", pg.is_visible("#pdfBtn"))
 
     # 本月至今：絕對量不比較，並且要講出資料截至哪一天
@@ -288,6 +310,7 @@ with sync_playwright() as p:
         {access:'%s', refresh:'rt', exp: Date.now() + 3600000}));
     """ % JWT))
     pg2 = ctx2.new_page()
+    pg2.clock.set_fixed_time(TODAY)
     pg2.on("pageerror", lambda e: errs.append(str(e)))
     pg2.route("**/*", route)
     pg2.goto(PAGE)
@@ -311,6 +334,7 @@ with sync_playwright() as p:
         {access:'%s', refresh:'rt', exp: Date.now() + 3600000}));
     """ % JWT)
     pg3 = ctx3.new_page()
+    pg3.clock.set_fixed_time(TODAY)
     pg3.on("pageerror", lambda e: errs.append(str(e)))
     pg3.route("**/*", route)
     pg3.goto(PAGE)
