@@ -9,7 +9,7 @@
 --   runs ＋ labour_scored → mfg_batch（料號＋日期＝一個製造批；結案、可用於計算）
 --   packing.batches → pack_scored（離群：每批產能 vs 品項中位數，沿用包裝儀表板 v4）
 --   mfg_batch ＋ pack_scored → sku_month → sku_std（基準期中位數）→ sku_eff → plant_month
---   month_gate（三項門檻）、balance_check（物料平衡）、labour_issues（待修正清單）
+--   month_gate（月份門檻）、balance_check（物料平衡）、labour_issues（待修正清單）
 --   batch_link（2026/10 起以製造日期串接包裝）
 
 insert into production.settings (key, value, note) values
@@ -184,6 +184,7 @@ comment on view production.sku_month is
   'yield_pct＝製成率；per_pot_h＝每鍋人時（製造＋充填，非離群）';
 
 -- ── 6. 每月門檻（納入標準計算的月份）──────────────────────────
+-- 2026-10-06 Jackie 哥決議：包裝人數不擋整個月份，沒填人數的批次逐批排除（見 sku_month 的 headcount 條件）。
 create view production.month_gate with (security_invoker = true) as
 with g as (select (value->>'fg_fill')::numeric as fg_fill, (value->>'head_pct')::numeric as head_pct,
                   (value->>'missing_days')::int as missing_days from production.settings where key = 'gate'),
@@ -199,11 +200,15 @@ select coalesce(mc.ym, ms.ym) as ym,
        coalesce(ms.missing_days <= g.missing_days, false) as gate_pack,
        coalesce(ms.head_pct >= g.head_pct, false) as gate_head,
        coalesce(mc.runs > 0 and 100.0 * mc.fg_filled / mc.runs >= g.fg_fill
-                and ms.missing_days <= g.missing_days and ms.head_pct >= g.head_pct, false) as gate,
+                and ms.missing_days <= g.missing_days, false) as gate,
        coalesce(mc.ym, ms.ym) between b.f and b.t as in_base
 from mc full join ms using (ym) left join ls using (ym) cross join g cross join b;
 comment on view production.month_gate is
-  '每月三項門檻：製造結案率、包裝漏登天數、包裝人數填寫率（settings.gate）。gate＝三項都通過；in_base＝落在標準基準期';
+  '每月門檻：gate＝製造結案率達標且包裝沒有漏登天數（settings.gate）。'
+  '包裝人數改為逐批排除（沒填人數的批次，人時與瓶數都不列入包裝速率），gate_head 只做提醒、不擋月份。in_base＝落在標準基準期';
+update production.settings
+   set note = '月份門檻：fg_fill＝成品數填寫率%、missing_days＝包裝漏登天數上限（兩項擋月份）；head_pct＝包裝人數填寫率，只做提醒（沒填人數的批次逐批排除）'
+ where key = 'gate';
 
 -- ── 7. 品項標準（基準期中通過門檻月份的中位數）──────────────────
 create view production.sku_std with (security_invoker = true) as
@@ -218,7 +223,7 @@ from production.sku_month s
 join production.month_gate g on g.ym = s.ym and g.in_base and g.gate
 group by s.sku_code;
 comment on view production.sku_std is
-  '品項標準：基準期（settings.std_base）內通過三項門檻的月份，各段人時/千瓶的中位數；*_n＝樣本月數（<3 僅供參考）';
+  '品項標準：基準期（settings.std_base）內通過門檻的月份，各段人時/千瓶的中位數；*_n＝樣本月數（<3 僅供參考）';
 
 -- ── 8. 品項 × 月份效率 ────────────────────────────────────────
 -- 只比較「本月有實際、而且有標準」的工段；某段本月沒資料就不列入，避免把缺資料當成省人力。
