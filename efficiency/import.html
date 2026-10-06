@@ -106,7 +106,7 @@ tr.skip-row td { color: var(--muted); }
       <div class="card c12 hidden" id="resultCard">
         <div class="card-head"><div><h2>④ 結果</h2><div class="sub" id="resultSub"></div></div></div>
         <div class="tblwrap" id="resultTbl"></div>
-        <div class="note">「工時異常」＝時間或人數缺漏、結束早於開始，這些列不納入計算，請回 Excel 修正後重新上傳。人時一律依填入的起訖時間計算（午休 12:00–13:00 扣實際重疊）；「O 欄不同」只是提醒 Excel 的「生產時間×人數」公式可能有誤，不影響計算。</div>
+        <div class="note">「工時異常」＝時間或人數缺漏、結束早於開始，這些列不納入計算，請回 Excel 修正後重新上傳。人時一律依填入的起訖時間計算：生產時段完整涵蓋 12:00–13:00 才扣 60 分，12 點多開工或做到 12 點多都照實計入。「O 欄不同」只是提醒 Excel 的「生產時間×人數」可能打錯，不影響計算。</div>
       </div>
 
       <div class="card c12">
@@ -115,7 +115,7 @@ tr.skip-row td { color: var(--muted); }
       </div>
     </div>
   </section>
-  <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（扣 12:00–13:00 午休、加前置）。</footer>
+  <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（完整涵蓋 12:00–13:00 才扣 60 分；加前置）。</footer>
 </div>
 
 <script src="core.js"></script>
