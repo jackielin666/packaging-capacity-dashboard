@@ -17,14 +17,6 @@
 .drop { display: block; border: 2px dashed var(--axis); border-radius: 12px; padding: 34px 16px; text-align: center; cursor: pointer; background: var(--surface); transition: .15s; }
 .drop:hover, .drop.drag { border-color: var(--accent); background: var(--accent-wash); }
 .drop .big { font-size: 19px; font-weight: 700; }
-.login { max-width: 420px; margin: 40px auto; }
-.login label { display: grid; gap: 4px; margin-bottom: 12px; font-size: 14px; color: var(--ink-2); }
-.login input { font: inherit; font-size: 16px; padding: 8px 10px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface); color: var(--ink); }
-.btn { font: inherit; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 10px; padding: 10px 22px; cursor: pointer;
-  background: linear-gradient(145deg, #4a90e2, #2a78d6 45%, #1c5cab); box-shadow: 0 8px 20px -8px rgba(42,120,214,.85), inset 0 1px 0 rgba(255,255,255,.3); }
-.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
-.btn.ghost { color: var(--ink-2); background: var(--surface); border: 1px solid var(--axis); box-shadow: var(--hl); font-weight: 600; }
-.err { color: var(--crit); white-space: pre-line; font-size: 14.5px; margin-top: 8px; }
 .msg { white-space: pre-line; }
 tr.drop-row td { background: color-mix(in srgb, var(--crit) 9%, transparent); }
 tr.skip-row td { color: var(--muted); }
@@ -34,8 +26,6 @@ tr.skip-row td { color: var(--muted); }
 .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 .confirm { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 15px; }
 .confirm input { margin-top: 5px; width: 18px; height: 18px; }
-.who { font-size: 14px; color: var(--ink-2); }
-.hidden { display: none !important; }
 </style>
 </head>
 <body>

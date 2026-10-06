@@ -9,15 +9,1074 @@
 <body>
 <div class="wrap">
   <header class="app">
-    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4 5-4 5M10 7l4 5-4 5M16 7l4 5-4 5"/></svg></span>
-    <h1>品項全流程工時成本</h1>
-    <span class="tag mock">建置中</span>
-    <div class="hdr-note">製造 → 充填 → 包裝 三段人時與直接人工標準成本。儀表板正在建置，目前可先使用資料匯入。</div>
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4 5-4 5M10 7l4 5-4 5M16 7l4 5-4 5"/></svg></span><h1>品項全流程工時成本</h1>
+        <span class="tag">直接人工・標準成本</span>
+    <div class="hdr-btns"><a class="theme-btn hidden" id="importLink" href="import.html" style="text-decoration:none">資料匯入</a><button class="theme-btn help" id="helpBtn" type="button">ⓘ 計算說明</button><button class="theme-btn" id="themeBtn" type="button">深色／淺色</button><button class="theme-btn hidden" id="logout" type="button">登出</button></div>
+    <div class="hdr-note" id="hdrNote">製造 → 充填 → 包裝 三段人時與直接人工標準成本。請先登入。</div>
   </header>
-  <div class="card" style="margin-top:16px">
-    <div class="card-head"><div><h2>目前可以使用</h2><div class="sub">儀表板完成後，這一頁會換成「每月總覽」。</div></div></div>
-    <p><a href="import.html">→ 製成率資料匯入</a>（主管帳號）</p>
+
+  <section id="loginBox" class="card login hidden" style="margin-top:24px">
+    <div class="card-head"><div><h2>登入</h2><div class="sub">用包裝系統的同一組帳號。</div></div></div>
+    <form id="loginForm">
+      <label>帳號<input id="acc" autocomplete="username" required></label>
+      <label>密碼<input id="pw" type="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit" id="loginBtn" style="width:100%">登入</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </section>
+  <section id="loading" class="card" style="margin-top:16px"><div class="empty" id="loadMsg">載入中…</div></section>
+
+  <div id="app" class="hidden">
+  <div class="filters" role="group" aria-label="篩選">
+    <label>月份 <select id="month"></select></label>
+    <label>工時費率 <input type="number" id="rate" min="0" step="10" value="200"> 元/人時</label>
+    <span class="rate-hint">費率只影響畫面上的金額，不存檔；ROI 試算用</span>
+    <span class="who" id="who" style="margin-left:auto"></span>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-p="p1" aria-selected="true">① 每月總覽<span class="q">整體好不好？要處理哪幾項？</span></button>
+    <button role="tab" data-p="p2" aria-selected="false">② 異常地圖<span class="q">哪個品項、哪個月？</span></button>
+    <button role="tab" data-p="p3" aria-selected="false">③ 品項分析<span class="q">為什麼？哪一段？</span></button>
+    <button role="tab" data-p="p4" aria-selected="false">④ 成本試算與 ROI<span class="q">做 N 瓶多少錢？改善省多少？</span></button>
+    <button role="tab" data-p="p5" aria-selected="false">⑤ 資料健康度<span class="q">數字可以相信嗎？</span></button>
+  </nav>
+
+  <!-- ① 每月總覽 -->
+  <section class="page on" id="p1">
+    <p class="lede" id="lede"></p>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="card c7">
+        <div class="card-head"><div><h2 id="trendTitle">效率指數趨勢</h2>
+          <div class="sub">100 ＝ 剛好達到標準；高於 100 ＝ 比標準快。空心點為未結案月份（暫定）。</div></div>
+          <button class="tbl-btn" data-t="trendTbl">數據表</button></div>
+        <div class="chart" id="trend"></div>
+        <div class="data-table" id="trendTbl"></div>
+      </div>
+      <div class="card c5">
+        <div class="card-head"><div><h2 id="lossTitle">本月損失人時 Top 10</h2>
+          <div class="sub">損失人時 ＝ 實際人時 − 標準人時。依損失排序＝處理優先順序。紅色＋「異常」＝效率指數低於 85。點擊看品項分析。</div></div></div>
+        <div id="lossBars"></div>
+      </div>
+      <div class="card c12">
+        <div class="card-head"><div><h2>上月追蹤</h2>
+          <div class="sub" id="followSub"></div></div></div>
+        <div class="tblwrap" id="follow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 異常地圖 -->
+  <section class="page" id="p2">
+    <div class="grid">
+      <div class="card c12">
+        <div class="card-head"><div><h2 id="heatTitle">全廠異常地圖（效率指數）</h2>
+          <div class="sub">每格＝該品項當月的效率指數。預設依料號 A→Z；可切換為依損失排序。點擊品項看分析。</div></div>
+          <div class="tools"><label>排序 <select id="heatSort"><option value="az">料號 A→Z</option><option value="loss">依本月損失人時</option></select></label><label><input type="checkbox" id="heatOnly" checked> 只看本月有生產</label></div></div>
+        <div class="heat-scale" id="heatScale"></div>
+        <div class="tblwrap" id="heat"></div>
+      </div>
+      <div class="card c7">
+        <div class="card-head"><div><h2 id="paretoTitle">人力花在哪裡</h2>
+          <div class="sub" id="paretoSub"></div></div>
+          <button class="tbl-btn" data-t="paretoTbl">數據表</button></div>
+        <div id="pareto"></div>
+        <div class="data-table" id="paretoTbl"></div>
+      </div>
+      <div class="card c5">
+        <div class="card-head"><div><h2>工段結構（全廠月人時）</h2>
+          <div class="sub">每月製造、充填、包裝各用了多少人時；柱內為各段佔比，柱頂為合計。</div></div>
+          <button class="tbl-btn" data-t="stackTbl">數據表</button></div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>製造</span><span><i style="background:var(--s2)"></i>充填</span><span><i style="background:var(--s3)"></i>包裝</span></div>
+        <div class="chart" id="stack"></div>
+        <div class="data-table" id="stackTbl"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 品項分析 -->
+  <section class="page" id="p3">
+    <div class="filters plain">
+      <label>品項 <select id="sku" class="search"></select></label>
+    </div>
+    <p class="lede" id="skuLede"></p>
+    <div class="grid">
+      <div class="card c5">
+        <div class="card-head"><div><h2>哪一段偏離標準？</h2>
+          <div class="sub" id="stageSub"></div></div></div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>製造</span><span><i style="background:var(--s2)"></i>充填</span><span><i style="background:var(--s3)"></i>包裝</span><span><i class="line" style="background:var(--ink);width:2px;height:14px;vertical-align:-2px"></i>標準</span></div>
+        <div class="stagecmp" id="stage"></div>
+        <div class="note">單位：人時/千瓶。黑色直線＝標準；條長超過直線＝比標準慢。</div>
+      </div>
+      <div class="card c7">
+        <div class="card-head"><div><h2>批次控制圖（製造＋充填）</h2>
+          <div class="sub">每個點＝一個生產批。藍帶＝標準 ±20%。帶外的點要問原因。</div></div>
+          <button class="tbl-btn" data-t="ctrlTbl">數據表</button></div>
+        <div class="chart" id="ctrl"></div>
+        <div class="note">包裝人時不在這張圖：生產批的全流程（含包裝）見下方「批次成本卡」。</div>
+        <div class="data-table" id="ctrlTbl"></div>
+      </div>
+      <div class="card c6">
+        <div class="card-head"><div><h2>製成率趨勢</h2>
+          <div class="sub">實際半成品 ÷ 預估半成品。藍帶＝合理範圍 95%–105%。</div></div>
+          <button class="tbl-btn" data-t="yldTbl">數據表</button></div>
+        <div class="chart" id="yld"></div>
+        <div class="data-table" id="yldTbl"></div>
+      </div>
+      <div class="card c6">
+        <div class="card-head"><div><h2>每鍋人時（生管排程用）</h2>
+          <div class="sub" id="potSub">製造＋充填人時 ÷ 鍋數。</div></div>
+          <button class="tbl-btn" data-t="potTbl">數據表</button></div>
+        <div class="chart" id="pot"></div>
+        <div class="data-table" id="potTbl"></div>
+      </div>
+      <div class="card c12">
+        <div class="card-head"><div><h2>批次成本卡（以製造日期串接，2026/10 起）</h2>
+          <div class="sub">從製造到包裝，一個生產批實際花了多少人時、多少錢。</div></div></div>
+        <div class="bcards" id="bcards"></div>
+      </div>
+      <div class="card c12">
+        <div class="card-head"><div><h2>製造 → 包裝 隔了幾天（2026/10 起，全品項）</h2>
+          <div class="sub" id="lagSub"></div></div></div>
+        <div class="chart" id="lag"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 標準成本與 ROI -->
+  <section class="page" id="p4">
+    <div class="grid">
+      <div class="card c12 calc">
+        <div class="card-head"><div><h2>成本試算器：做 N 瓶，各段要多少人時、多少錢？</h2>
+          <div class="sub">拉動數量即時計算。分母一律是「成品瓶數」：要包出這些瓶數，製造、充填、包裝各需投入多少人力。</div></div></div>
+        <div class="calc-ctl">
+          <label>品項<select id="calcSku"></select></label>
+          <label>數量（瓶）<div class="qty"><input type="range" id="calcQty" min="100" max="20000" step="100" value="1000" aria-label="數量拉桿"><input type="number" id="calcQtyN" min="1" step="100" value="1000" aria-label="數量"></div></label>
+          <label>計算依據<div class="seg" role="group"><button type="button" data-b="std" aria-pressed="true">標準</button><button type="button" data-b="act" aria-pressed="false">近 3 個月實際</button></div></label>
+        </div>
+        <div class="calc-out" id="calcOut"></div>
+        <div class="compo" id="calcCompo"></div>
+        <div class="formula" id="calcFormula"></div>
+      </div>
+      <div class="card c12">
+        <div class="card-head"><div><h2>ROI 試算：如果這個品項回到標準，可以省多少？</h2>
+          <div class="sub">預設帶入「損失人時最多」的品項。改任何欄位都會即時重算。</div></div></div>
+        <div class="roi">
+          <label>品項<select id="roiSku"></select></label>
+          <label>每月產量（瓶）<input type="number" id="roiVol" min="0" step="100"></label>
+          <label>目前人時/千瓶（近 3 個月）<input type="number" id="roiCur" min="0" step="0.1"></label>
+          <label>目標效率指數<input type="number" id="roiTgt" min="50" max="150" step="5" value="100"></label>
+        </div>
+        <div class="roi-out" id="roiOut"></div>
+      </div>
+      <div class="card c12">
+        <div class="card-head"><div><h2>標準人工成本表</h2>
+          <div class="sub"><span class="baseTxt"></span>。每瓶成本隨上方工時費率即時換算。點擊品項可帶入上方試算器。</div></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="stdSort"><option value="az">料號 A→Z</option><option value="hrs">依近半年人時</option><option value="cost">依每瓶成本</option></select>
+            <input type="search" id="stdSearch" class="search" placeholder="搜尋料號或品名">
+            <button class="tbl-btn" id="stdExport">匯出 Excel (CSV)</button></div></div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>製造</span><span><i style="background:var(--s2)"></i>充填</span><span><i style="background:var(--s3)"></i>包裝</span></div>
+        <div class="tblwrap" id="stdTbl"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 資料健康度 -->
+  <section class="page" id="p5">
+    <p class="lede" id="hLede"></p>
+    <div class="lights" id="lights"></div>
+    <div class="grid" style="margin-top:16px">
+      <div class="card c12">
+        <div class="card-head"><div><h2>各月檢核總表</h2>
+          <div class="sub">結案率、包裝漏登兩項門檻都通過的月份，才納入標準工時計算；人數填寫率與物料平衡只做提醒。</div></div></div>
+        <div class="tblwrap" id="hTbl"></div>
+      </div>
+      <div class="card c6">
+        <div class="card-head"><div><h2 id="balTitle">物料平衡異常</h2>
+          <div class="sub">近 3 個月 包裝瓶數 ÷ 製造成品數，超出 85%–115%。可能漏登、或料號登錄錯誤。成品數未填齊的月份不檢核。</div></div></div>
+        <div class="tblwrap" id="balTbl"></div>
+      </div>
+      <div class="card c6">
+        <div class="card-head"><div><h2 id="dqTitle">資料品質待處理</h2>
+          <div class="sub">「需修正」＝時間或人數缺漏，不納入計算，請回 Excel 修正後重新匯入。「O 欄提醒」照常計算，只請確認 Excel 是否打錯。</div></div></div>
+        <div class="tblwrap" id="dqTbl"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="foot">資料來源：產品製成率 Excel（每月匯入）、包裝產能資料庫。數字由資料庫即時計算，重新整理頁面即取得最新結果。</footer>
   </div>
 </div>
+<div id="tip" role="tooltip"></div>
+<dialog id="help" aria-labelledby="helpTitle">
+  <div class="hd"><h2 id="helpTitle">計算說明與名詞定義</h2><button class="tbl-btn" id="helpClose" type="button">關閉</button></div>
+  <div class="bd">
+    <h3>一、人時怎麼來</h3>
+    <table class="t"><tbody>
+      <tr><td>製造、充填人時</td><td>來自製成率 Excel「工時」分頁。每段分鐘 ＝（結束 − 開始）＋ 前置作業；生產時段<b>完整涵蓋 12:00–13:00</b> 才扣 60 分午休（12 點多開工、做到 12 點多都照實計入）。人·分 ＝ 分鐘 × 人數。人時以起訖時間計算為準，Excel O 欄只做提醒。只填一段（製造或充填）也算有效。兩個品項共用一段作業時間（一列只填開始、下一列只填結束）時，合併計算後依鍋數分攤。時間或人數缺漏的列不納入。</td></tr>
+      <tr><td>包裝人時</td><td>來自包裝輸入系統：工時（由起訖時間自動推算）× 人數。沒填人數的批次，人時與瓶數<b>都不列入</b>，避免結果失真。</td></tr>
+      <tr><td>產量（分母）</td><td>製造、充填用「成品數（實際）」；包裝用「包裝瓶數」。兩邊各用各的分母，不互相除——同一批製造的量可能分好幾天包裝。</td></tr>
+    </tbody></table>
+    <h3>二、核心指標</h3>
+    <table class="t"><tbody>
+      <tr><td>人時/千瓶</td><td>人時 ÷ 產量 × 1,000。每做 1,000 瓶要花幾個人時。</td></tr>
+      <tr><td>標準</td><td><span class="baseTxt"></span>：基準期內通過門檻的各月 人時/千瓶 的<b>中位數</b>，三段各自計算。每半年檢討一次，不每月變動（避免標準跟著變差的表現一起放寬）。</td></tr>
+      <tr><td>效率指數</td><td>標準人時 ÷ 實際人時 × 100。標準人時 ＝ 各段標準 × 該段實際產量 ÷ 1,000。<b>100 ＝ 剛好達標，高於 100 ＝ 比標準快</b>。燈號：≥95 正常、85–95 注意、&lt;85 異常。</td></tr>
+      <tr><td>損失人時</td><td>實際人時 − 標準人時。全廠合計只加總「比標準慢」的品項，避免被比較快的品項抵銷。</td></tr>
+      <tr><td>人工成本</td><td>人時 × 工時費率。費率只影響畫面，不存檔，方便做 ROI 試算。</td></tr>
+      <tr><td>離群批次</td><td>製造、充填：以每鍋人時判定，同品項 ≥ 8 批時，修正 z 分數 ≥ 3.5 且偏離中位數 ≥ 35% 的批次剔除（最多 10%），沿用製成率系統。包裝：每批產能 ÷ 該品項中位數 &lt; 0.5 或 &gt; 2.5（且工時 ≥ 1 小時）的批次剔除，沿用包裝儀表板。</td></tr>
+    </tbody></table>
+    <h3>三、資料可信度</h3>
+    <table class="t"><tbody>
+      <tr><td>結案</td><td>生產批的「成品數」已填入製成率 Excel 才算結案。未結案的月份標「暫定」，空心點表示。</td></tr>
+      <tr><td>納入標準的門檻</td><td>製造資料結案率 ≥ 95%、包裝 0 天漏登，兩項都通過的月份才納入標準計算。包裝人數填寫率只做提醒：沒填人數的批次已逐批排除。</td></tr>
+      <tr><td>物料平衡</td><td>近 3 個月 包裝瓶數 ÷ 製造成品數 超出 85%–115% 的品項。只列清單、不擋月份——庫存時間差與少量品項本來就會造成短期差異。成品數未填齊的月份不檢核。比值極端（如 &gt;200%）多半是料號登錄錯誤，請優先查。</td></tr>
+    </tbody></table>
+    <div class="warnbox"><b>使用前提醒</b><br>
+      ① 標準只用了基準期的資料；「樣本月數」少於 3 的品項，數字僅供參考。<br>
+      ② 成品數還沒填齊的月份標「暫定」（空心點），下次匯入後數字還會變。<br>
+      ③ 效率指數極低的品項，多半是資料問題而不是真的做慢，請先到「資料健康度」核對。<br>
+      ④ 這裡只反映狀況、不做異常處理紀錄；請製造單位依據數字找問題、提改善。</div>
+  </div>
+</dialog>
+
+<script src="core.js"></script>
+<script>
+/* 品項全流程工時成本：儀表板。版面與圖表沿用設計稿第 3 版；數字由 production 的 view 即時計算。 */
+let D = null, M = [], LAST_CLOSED = null;   // 登入後由 loadData() 填入
+const STAGES = [
+  { k: 'mfg', name: '製造', color: 'var(--s1)', ink: 'var(--s1-ink)' },
+  { k: 'fill', name: '充填', color: 'var(--s2)', ink: 'var(--s2-ink)' },
+  { k: 'pack', name: '包裝', color: 'var(--s3)', ink: 'var(--s3-ink)' },
+];
+const state = { m: null, sku: null, heatSort: 'az', heatOnly: true, stdSort: 'az', calcSku: null, calcQty: 1000, calcBasis: 'std' };
+
+/* ── 小工具 ── */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function s(tag, attrs, ...kids) {
+  const e = document.createElementNS(SVGNS, tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) if (v != null) e.setAttribute(k, v);
+  for (const k of kids.flat()) if (k != null) e.append(k instanceof Node ? k : document.createTextNode(String(k)));
+  return e;
+}
+const fmtS = (v, d = 1) => v == null ? '–' : fmt(Math.abs(v) < Math.pow(10, -d) / 2 ? 0 : v, d);
+const money = v => v == null ? '–' : (Math.abs(v) >= 10000 ? fmt(v / 10000, 1) + ' 萬' : fmt(v, 0)) ;
+// 月份跨年時加上年份（例：26/12 月、27/1 月）
+const mLabel = m => (M.length && M[0].slice(0, 4) !== M[M.length - 1].slice(0, 4) ? m.slice(2, 4) + '/' : '') + `${+m.slice(5)} 月`;
+const isTemp = m => !(D.gate[m] && D.gate[m].gate);
+const nm = c => D.names[c] || '';
+let rate = 200;
+try { const r = localStorage.getItem('pe-rate'); if (r) rate = +r || 200; } catch (e) {}
+
+function niceTicks(lo, hi, n = 4) {
+  if (hi === lo) { hi = lo + 1; }
+  const raw = (hi - lo) / n, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(x => x * p).find(x => x >= raw);
+  const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step;
+  const t = []; for (let v = a; v <= b + step / 2; v += step) t.push(+v.toFixed(6));
+  return t;
+}
+
+/* ── 提示框（值在前、標籤在後）── */
+const tip = $('tip');
+function showTip(ev, rows, title) {
+  tip.replaceChildren();
+  if (title) tip.append(h('div', { class: 'tl' }, title));
+  for (const r of rows) {
+    tip.append(h('div', { class: 'tr' }, r.color ? h('i', { style: `background:${r.color}` }) : null,
+      h('span', { class: 'tv' }, r.v), h('span', { class: 'tl' }, r.l)));
+  }
+  tip.classList.add('on');
+  const x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, hh = tip.offsetHeight;
+  tip.style.left = Math.min(x, innerWidth - w - 8) + 'px';
+  tip.style.top = (y + hh > innerHeight - 8 ? ev.clientY - hh - 10 : y) + 'px';
+}
+const hideTip = () => tip.classList.remove('on');
+
+/* ── 數據表（每張圖都有可讀的表格版本）── */
+function dataTable(el, heads, rows) {
+  el.replaceChildren(h('div', { class: 'tblwrap' }, h('table', { class: 't' },
+    h('thead', null, h('tr', null, heads.map((x, i) => h('th', { class: i ? 'n' : null }, x)))),
+    h('tbody', null, rows.map(r => h('tr', null, r.map((x, i) => h('td', { class: i ? 'n' : null }, x))))))));
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-t]'); if (!b) return;
+  const t = $(b.dataset.t); t.classList.toggle('on');
+  b.textContent = t.classList.contains('on') ? '收起數據表' : '數據表';
+});
+
+/* ── 計算核心 ── */
+function evalSku(c, m) {
+  const a = D.sku[c] && D.sku[c][m], st = D.std[c];
+  if (!a || !st) return null;
+  const r = { c, m, act: 0, std: 0, fg: a.fg, pb: a.pb, stages: {} };
+  const add = (k, hrs, q) => {
+    if (!(hrs > 0 && q > 0 && st[k] != null)) return;
+    const sh = st[k] * q / 1000;
+    r.stages[k] = { act: hrs / q * 1000, std: st[k], h: hrs, sh };
+    r.act += hrs; r.std += sh;
+  };
+  add('mfg', a.mfg, a.fg); add('fill', a.fill, a.fg); add('pack', a.ph, a.pb);
+  if (!r.act) return null;
+  r.ei = r.std / r.act * 100; r.loss = r.act - r.std;
+  return r;
+}
+let allSku = [];
+function monthAll(m) { return allSku.map(c => evalSku(c, m)).filter(Boolean); }
+function plant(m) {
+  const L = monthAll(m), act = L.reduce((a, r) => a + r.act, 0), std = L.reduce((a, r) => a + r.std, 0);
+  const loss = L.reduce((a, r) => a + Math.max(0, r.loss), 0);
+  const stage = { mfg: 0, fill: 0, pack: 0 };
+  for (const r of L) for (const k in r.stages) stage[k] += r.stages[k].h;
+  return { act, std, ei: act ? std / act * 100 : null, loss, n: L.length, list: L, stage };
+}
+function eiStatus(ei) {
+  if (ei == null) return { cls: 'mute', t: '無資料' };
+  if (ei < 85) return { cls: 'crit', t: '異常' };
+  if (ei < 95) return { cls: 'warn', t: '注意' };
+  return { cls: 'good', t: '正常' };
+}
+function stdTotal(c) { const s = D.std[c] || {}; return s.mfg != null && s.fill != null && s.pack != null ? s.mfg + s.fill + s.pack : null; }
+
+/* ── 折線圖（十字線＋提示框）── */
+function lineChart(el, o) {
+  el.replaceChildren();
+  const W = el.clientWidth || 600, H = o.height || 240, ml = 46, mr = 18, mt = 14, mb = 30;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const vals = o.series.flatMap(sr => sr.values).filter(v => v != null);
+  let lo = Math.min(...vals, ...(o.extra || [])), hi = Math.max(...vals, ...(o.extra || []));
+  const pad = (hi - lo) * 0.12 || 5; lo -= pad; hi += pad;
+  if (o.floor0) lo = Math.max(0, lo);
+  const ticks = niceTicks(lo, hi); lo = ticks[0]; hi = ticks[ticks.length - 1];
+  const n = o.x.length, X = i => ml + (n === 1 ? pw / 2 : i * pw / (n - 1)), Y = v => mt + ph - (v - lo) / (hi - lo) * ph;
+  const svg = s('svg', { width: W, height: H, role: 'img', 'aria-label': o.aria || '' });
+  if (o.band) svg.append(s('rect', { x: ml, width: pw, y: Y(Math.min(o.band[1], hi)), height: Math.max(0, Y(Math.max(o.band[0], lo)) - Y(Math.min(o.band[1], hi))), fill: 'var(--band)' }));
+  for (const t of ticks) {
+    svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(t), y2: Y(t), stroke: 'var(--grid)', 'stroke-width': 1 }));
+    svg.append(s('text', { x: ml - 8, y: Y(t) + 4, 'text-anchor': 'end' }, o.yFmt ? o.yFmt(t) : fmt(t)));
+  }
+  o.x.forEach((lb, i) => svg.append(s('text', { x: X(i), y: H - 8, 'text-anchor': 'middle' }, lb)));
+  for (const r of (o.refs || [])) {
+    svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(r.y), y2: Y(r.y), stroke: r.color || 'var(--ink-2)', 'stroke-width': 1.5 }));
+    svg.append(s('text', { x: ml + 6, y: Y(r.y) - 6, class: 'lab' }, r.label));
+  }
+  for (const sr of o.series) {
+    let d = '', pen = false;
+    sr.values.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i) + ' ' + Y(v); pen = true; });
+    if (o.area) {
+      const idx = sr.values.map((v, i) => v == null ? -1 : i).filter(i => i >= 0);
+      if (idx.length > 1) {
+        const gid = 'g' + Math.random().toString(36).slice(2, 8);
+        svg.append(s('defs', null, s('linearGradient', { id: gid, x1: 0, x2: 0, y1: 0, y2: 1 },
+          s('stop', { offset: '0%', 'stop-color': sr.color, 'stop-opacity': .22 }), s('stop', { offset: '100%', 'stop-color': sr.color, 'stop-opacity': 0 }))));
+        svg.append(s('path', { d: d + `L${X(idx[idx.length - 1])} ${mt + ph}L${X(idx[0])} ${mt + ph}Z`, fill: `url(#${gid})` }));
+      }
+    }
+    svg.append(s('path', { d, fill: 'none', stroke: sr.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    sr.values.forEach((v, i) => {
+      if (v == null) return;
+      const hollow = o.hollow && o.hollow(i);
+      svg.append(s('circle', { cx: X(i), cy: Y(v), r: 4.5, fill: hollow ? 'var(--card)' : sr.color, stroke: hollow ? sr.color : 'var(--card)', 'stroke-width': 2 }));
+    });
+    // 只標最後一點
+    const li = sr.values.map((v, i) => v == null ? -1 : i).filter(i => i >= 0).pop();
+    if (li != null && li >= 0 && o.endLabel !== false) svg.append(s('text', { x: X(li) + 8, y: Y(sr.values[li]) - 8, class: 'strong' }, (o.yFmt || fmt)(sr.values[li])));
+  }
+  // 十字線
+  const cross = s('line', { y1: mt, y2: mt + ph, stroke: 'var(--axis)', 'stroke-width': 1, opacity: 0 });
+  svg.append(cross);
+  const hit = s('rect', { x: ml, y: mt, width: pw, height: ph, fill: 'transparent' });
+  hit.addEventListener('pointermove', ev => {
+    const bx = svg.getBoundingClientRect(), px = ev.clientX - bx.left;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - ml) / (n === 1 ? 1 : pw / (n - 1)))));
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('opacity', 1);
+    showTip(ev, o.series.map(sr => ({ color: sr.color, v: sr.values[i] == null ? '–' : (o.yFmt || fmt)(sr.values[i]), l: sr.name })), o.tipTitle ? o.tipTitle(i) : o.x[i]);
+  });
+  hit.addEventListener('pointerleave', () => { cross.setAttribute('opacity', 0); hideTip(); });
+  svg.append(hit);
+  el.append(svg);
+}
+
+/* ── 橫條圖 ── */
+function hbars(el, items, o = {}) {
+  el.replaceChildren();
+  if (!items.length) { el.append(h('div', { class: 'empty' }, o.empty || '無資料')); return; }
+  const max = Math.max(...items.map(x => x.v));
+  const g = h('div', { class: 'hbars' });
+  for (const it of items) {
+    g.append(h('div', { class: 'lbl', title: it.label + ' ' + (it.name || '') }, h('span', { class: 'code' }, it.label), ' ', h('span', { class: 'nm' }, it.name || '')));
+    const row = h('div', { class: 'row', tabindex: 0, onclick: it.onClick || null },
+      h('div', { class: 'bar' + (it.mute ? ' mute' : '') + (it.bad ? ' bad' : ''), style: `width:calc((100% - 160px) * ${Math.max(0.004, it.v / max).toFixed(4)})` + (it.color ? `;background:${it.color}` : '') }),
+      h('span', { class: 'val' }, it.text, it.bad ? h('span', { class: 'flag' }, '異常') : null));
+    row.addEventListener('pointermove', ev => showTip(ev, it.tip, it.label + ' ' + (it.name || '')));
+    row.addEventListener('pointerleave', hideTip);
+    row.addEventListener('focus', () => { const r = row.getBoundingClientRect(); showTip({ clientX: r.right - 40, clientY: r.top }, it.tip, it.label); });
+    row.addEventListener('blur', hideTip);
+    g.append(row);
+  }
+  el.append(g);
+}
+
+/* ── 堆疊直條 ── */
+function stackCols(el, months, rows) {
+  el.replaceChildren();
+  const W = el.clientWidth || 500, H = 250, ml = 50, mr = 10, mt = 14, mb = 30, pw = W - ml - mr, ph = H - mt - mb;
+  const tot = months.map((_, i) => rows.reduce((a, r) => a + r.values[i], 0));
+  const ticks = niceTicks(0, Math.max(...tot)), hi = ticks[ticks.length - 1];
+  const Y = v => mt + ph - v / hi * ph, band = pw / months.length, bw = Math.min(46, band * 0.62);
+  const svg = s('svg', { width: W, height: H, role: 'img', 'aria-label': '工段結構堆疊直條圖' });
+  for (const t of ticks) {
+    svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(t), y2: Y(t), stroke: 'var(--grid)' }));
+    svg.append(s('text', { x: ml - 8, y: Y(t) + 4, 'text-anchor': 'end' }, fmt(t)));
+  }
+  months.forEach((m, i) => {
+    const cx = ml + band * i + band / 2;
+    let base = 0;
+    rows.forEach((r, k) => {
+      const v = r.values[i]; if (!v) return;
+      const y0 = Y(base), y1 = Y(base + v), top = k === rows.length - 1;
+      const hgt = Math.max(0, y0 - y1 - 2);   // 2px 表面間隙
+      const x = cx - bw / 2;
+      const path = top
+        ? `M${x} ${y0 - 2}V${y1 + 4}Q${x} ${y1} ${x + 4} ${y1}H${x + bw - 4}Q${x + bw} ${y1} ${x + bw} ${y1 + 4}V${y0 - 2}Z`
+        : `M${x} ${y0 - 2}V${y0 - 2 - hgt}H${x + bw}V${y0 - 2}Z`;
+      const p = s('path', { d: path, fill: r.color, opacity: isTemp(m) ? 0.55 : 1 });
+      p.addEventListener('pointermove', ev => showTip(ev, rows.map(rr => ({ color: rr.color, v: fmt(rr.values[i]) + ' 人時', l: rr.name })).concat([{ v: fmt(tot[i]) + ' 人時', l: '合計' }]), mLabel(m) + (isTemp(m) ? '（暫定）' : '')));
+      p.addEventListener('pointerleave', hideTip);
+      svg.append(p);
+      const pct = v / tot[i] * 100;
+      if (hgt >= 17) svg.append(s('text', { x: cx, y: (y0 - 2 + y1) / 2 + 4.5, 'text-anchor': 'middle', style: `fill:${r.ink};font-weight:600;font-size:12.5px;pointer-events:none`, opacity: isTemp(m) ? 0.8 : 1 }, fmt(pct, 0) + '%'));
+      base += v;
+    });
+    svg.append(s('text', { x: cx, y: Y(tot[i]) - 6, 'text-anchor': 'middle', class: 'strong' }, fmt(tot[i])));
+    svg.append(s('text', { x: cx, y: H - 8, 'text-anchor': 'middle' }, mLabel(m)));
+  });
+  el.append(svg);
+}
+
+/* ── 控制圖（時間散佈）── */
+function ctrlChart(el, pts, stdv) {
+  el.replaceChildren();
+  if (!pts.length || stdv == null) { el.append(h('div', { class: 'empty' }, '此品項沒有足夠的生產批或尚無標準')); return; }
+  const W = el.clientWidth || 600, H = 260, ml = 46, mr = 64, mt = 14, mb = 30, pw = W - ml - mr, ph = H - mt - mb;
+  const t0 = Date.parse(D.ctrlFrom), t1 = Date.parse(D.ctrlTo);
+  const vals = pts.map(p => p[1]).concat([stdv * 1.25, stdv * 0.75]);
+  const ticks = niceTicks(Math.max(0, Math.min(...vals) * 0.9), Math.max(...vals) * 1.05);
+  const lo = ticks[0], hi = ticks[ticks.length - 1];
+  const X = d => ml + (Date.parse(d) - t0) / (t1 - t0) * pw, Y = v => mt + ph - (v - lo) / (hi - lo) * ph;
+  const svg = s('svg', { width: W, height: H, role: 'img', 'aria-label': '批次控制圖' });
+  svg.append(s('rect', { x: ml, width: pw, y: Y(stdv * 1.2), height: Y(stdv * 0.8) - Y(stdv * 1.2), fill: 'var(--band)' }));
+  for (const t of ticks) {
+    svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(t), y2: Y(t), stroke: 'var(--grid)' }));
+    svg.append(s('text', { x: ml - 8, y: Y(t) + 4, 'text-anchor': 'end' }, fmt(t)));
+  }
+  D.ctrlMonths.forEach((ym, k) => {
+    if (k % 2) return;
+    svg.append(s('text', { x: X(ym + '-01'), y: H - 8, 'text-anchor': 'middle' }, `${+ym.slice(5)}月`));
+  });
+  svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(stdv), y2: Y(stdv), stroke: 'var(--ink-2)', 'stroke-width': 1.5 }));
+  svg.append(s('text', { x: ml + pw + 6, y: Y(stdv) + 4, class: 'lab' }, '標準 ' + fmt(stdv, 1)));
+  svg.append(s('text', { x: ml + pw + 6, y: Y(stdv * 1.2) + 4 }, '+20%'));
+  svg.append(s('text', { x: ml + pw + 6, y: Y(stdv * 0.8) + 4 }, '−20%'));
+  for (const p of pts) {
+    const over = p[1] > stdv * 1.2, under = p[1] < stdv * 0.8;
+    const g = s('g', { tabindex: 0 });
+    g.append(s('circle', { cx: X(p[0]), cy: Y(p[1]), r: 12, fill: 'transparent' }));
+    g.append(s('circle', { cx: X(p[0]), cy: Y(p[1]), r: 4.5, fill: p[3] ? 'var(--card)' : over ? 'var(--crit)' : 'var(--pt)', stroke: p[3] ? 'var(--muted)' : 'var(--card)', 'stroke-width': 2 }));
+    g.addEventListener('pointermove', ev => showTip(ev, [
+      { v: fmt(p[1], 1) + ' 人時/千瓶', l: over ? '超過標準 20%' : under ? '低於標準 20%' : '在範圍內' },
+      { v: fmt(p[2]) + ' 瓶', l: '成品數' }].concat(p[3] ? [{ v: '離群', l: '已剔除，不計入標準' }] : []), p[0]));
+    g.addEventListener('pointerleave', hideTip);
+    svg.append(g);
+  }
+  el.append(svg);
+}
+
+/* ── 直方圖 ── */
+function histogram(el, bins) {
+  el.replaceChildren();
+  const W = el.clientWidth || 600, H = 200, ml = 40, mr = 10, mt = 20, mb = 32, pw = W - ml - mr, ph = H - mt - mb;
+  const ticks = niceTicks(0, Math.max(...bins.map(b => b.n), 4)), hi = ticks[ticks.length - 1];
+  const band = pw / bins.length, bw = Math.min(24, band - 2), Y = v => mt + ph - v / hi * ph;
+  const svg = s('svg', { width: W, height: H, role: 'img', 'aria-label': '製造到包裝間隔天數分布' });
+  for (const t of ticks) {
+    svg.append(s('line', { x1: ml, x2: ml + pw, y1: Y(t), y2: Y(t), stroke: 'var(--grid)' }));
+    svg.append(s('text', { x: ml - 8, y: Y(t) + 4, 'text-anchor': 'end' }, fmt(t)));
+  }
+  bins.forEach((b, i) => {
+    const x = ml + band * i + (band - bw) / 2, y = Y(b.n), y0 = Y(0);
+    if (b.n) {
+      const p = s('path', { d: `M${x} ${y0}V${y + 4}Q${x} ${y} ${x + 4} ${y}H${x + bw - 4}Q${x + bw} ${y} ${x + bw} ${y + 4}V${y0}Z`, fill: b.late ? 'var(--crit)' : 'var(--pt)' });
+      p.addEventListener('pointermove', ev => showTip(ev, [{ v: b.n + ' 批', l: b.label }].concat(b.items ? [{ v: '', l: b.items }] : [])));
+      p.addEventListener('pointerleave', hideTip);
+      svg.append(p);
+      svg.append(s('text', { x: x + bw / 2, y: y - 5, 'text-anchor': 'middle', class: 'strong' }, b.late ? b.n + ' 延遲' : b.n));
+    }
+    svg.append(s('text', { x: x + bw / 2, y: H - 12, 'text-anchor': 'middle' }, b.label));
+  });
+  el.append(svg);
+}
+
+function spark(values, color, w = 150, hh = 30) {
+  const v = values.filter(x => x != null); if (v.length < 2) return null;
+  const lo = Math.min(...v), hi = Math.max(...v), n = values.length;
+  const X = i => 4 + i * (w - 8) / (n - 1), Y = x => hh - 4 - (x - lo) / ((hi - lo) || 1) * (hh - 8);
+  let d = '', pen = false;
+  values.forEach((x, i) => { if (x == null) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i) + ' ' + Y(x); pen = true; });
+  const li = values.length - 1;
+  return s('svg', { width: w, height: hh, class: 'spark', 'aria-hidden': 'true' },
+    s('path', { d, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1.5 }),
+    values[li] != null ? s('circle', { cx: X(li), cy: Y(values[li]), r: 3.5, fill: color, stroke: 'var(--card)', 'stroke-width': 2 }) : null);
+}
+
+/* ══ ① 月會總覽 ══ */
+function renderP1() {
+  const m = state.m, i = M.indexOf(m), prev = M[i - 1];
+  const P = plant(m), PP = prev ? plant(prev) : null;
+  const top = P.list.filter(r => r.loss > 0).sort((a, b) => b.loss - a.loss);
+  const dEI = PP ? P.ei - PP.ei : null;
+  const H0 = D.health[m] || {};
+  const temp = isTemp(m) ? (H0.missing ? `（暫定：包裝漏登 ${H0.missing} 天）` : `（暫定：成品數只填了 ${fmt(H0.fgFill, 1)}%）`) : '';
+  const t2 = top.slice(0, 2);
+  $('lede').replaceChildren(...[
+    `${mLabel(m)}${temp} 全廠效率指數 `, h('b', null, fmt(P.ei, 1)),
+    dEI != null ? `，比上月${dEI >= 0 ? '高' : '低'} ${fmt(Math.abs(dEI), 1)} 點。` : '。',
+    t2.length ? ['損失人時最多的是 ', h('b', null, t2.map(r => `${r.c} ${nm(r.c)}（${fmt(r.loss)} 人時）`).join('、')), `，合計約 ${money(t2.reduce((a, r) => a + r.loss, 0) * rate)} 元。`] : '所有品項都在標準以內。',
+    h('span', { class: 'src' }, `涵蓋 ${P.n} 個品項 · ${D.baseTxt} · 費率 ${rate} 元/人時`)].flat());
+
+  const hl = checks(m).filter(x => x.gate && x.ok).length;
+  const eiSeries = M.map(x => plant(x).ei);
+  const kp = [
+    { k: '效率指數', v: fmt(P.ei, 1), d: dEI == null ? '' : [h('span', { class: dEI >= 0 ? 'up' : 'dn' }, (dEI >= 0 ? '▲ ' : '▼ ') + fmt(Math.abs(dEI), 1)), ' vs 上月'], hero: true, sp: spark(eiSeries.slice(0, i + 1), 'var(--accent)') },
+    { k: '全流程人時', v: fmt(P.act), u: '人時', d: PP ? `上月 ${fmt(PP.act)}` : '' },
+    { k: '人工成本', v: money(P.act * rate), u: '元', d: PP ? `上月 ${money(PP.act * rate)} 元 · 費率 ${rate}` : `費率 ${rate} 元/人時` },
+    { k: '損失人時', v: fmt(P.loss), u: '人時', d: `約 ${money(P.loss * rate)} 元 · ${top.length} 個品項` },
+    { k: '資料齊全度', v: hl + ' / 2', d: (hl === 2 ? '可納入標準計算' : '數字暫定') + ` · 物料平衡待檢視 ${(H0.balance || []).length} 項` },
+  ];
+  $('kpis').replaceChildren(...kp.map(x => h('div', { class: 'kpi' + (x.hero ? ' hero' : '') },
+    h('div', { class: 'k' }, x.k), h('div', { class: 'v' }, x.v, x.u ? h('small', null, x.u) : null), h('div', { class: 'd' }, x.d), x.sp || null)));
+
+  $('trendTitle').textContent = `全廠效率指數趨勢（${M[0].slice(0, 4)}/${+M[0].slice(5)} 起）`;
+  lineChart($('trend'), { x: M.map(mLabel), series: [{ name: '效率指數', values: eiSeries, color: 'var(--accent)' }], area: true,
+    refs: [{ y: 100, label: '標準 100' }], extra: [100], yFmt: v => fmt(v, 0), hollow: k => isTemp(M[k]), height: 300,
+    tipTitle: k => mLabel(M[k]) + (isTemp(M[k]) ? '（暫定）' : ''), aria: '全廠效率指數月趨勢' });
+  dataTable($('trendTbl'), ['月份', '效率指數', '實際人時', '標準人時', '損失人時'], M.map(x => { const p = plant(x); return [mLabel(x) + (isTemp(x) ? '（暫定）' : ''), fmt(p.ei, 1), fmt(p.act), fmt(p.std), fmt(p.loss)]; }));
+
+  $('lossTitle').textContent = `${mLabel(m)}損失人時 Top 10`;
+  hbars($('lossBars'), top.slice(0, 10).map(r => ({ label: r.c, name: nm(r.c), v: r.loss,
+    text: `${fmt(r.loss)} 人時 · ${money(r.loss * rate)} 元`, bad: r.ei < 85,
+    tip: [{ v: fmt(r.loss, 1) + ' 人時', l: '損失' }, { v: fmt(r.ei, 0), l: '效率指數' }, { v: fmt(r.act, 1) + ' / ' + fmt(r.std, 1), l: '實際 / 標準人時' }],
+    onClick: () => goSku(r.c) })), { empty: '本月沒有低於標準的品項' });
+
+  // 上月追蹤
+  if (!prev) { $('followSub').textContent = '第一個月，沒有上月可追蹤。'; $('follow').replaceChildren(); return; }
+  const prevTop = PP.list.filter(r => r.loss > 0).sort((a, b) => b.loss - a.loss).slice(0, 5);
+  $('followSub').textContent = `${mLabel(prev)}損失人時前 5 名，這個月改善了沒？`;
+  const rows = prevTop.map(r => {
+    const now = evalSku(r.c, m);
+    const stt = !now ? { cls: 'mute', t: '本月未生產' } : now.ei >= 95 ? { cls: 'good', t: '已改善' } : now.ei >= 85 ? { cls: 'warn', t: '仍偏低' } : { cls: 'crit', t: '仍異常' };
+    return h('tr', { class: 'click', onclick: () => goSku(r.c) },
+      h('td', null, h('span', { class: 'code' }, r.c), ' ', h('span', { class: 'nm' }, nm(r.c))),
+      h('td', { class: 'n' }, fmt(r.ei, 0)), h('td', { class: 'n' }, now ? fmt(now.ei, 0) : '–'),
+      h('td', { class: 'n' }, now ? fmtS(now.loss) : '–'),
+      h('td', null, h('span', { class: 'st ' + stt.cls }, h('span', null, stt.t))));
+  });
+  $('follow').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
+    h('th', null, '品項'), h('th', { class: 'n' }, '上月效率指數'), h('th', { class: 'n' }, '本月效率指數'), h('th', { class: 'n' }, '本月損失人時（負＝節省）'), h('th', null, '狀態'))),
+    h('tbody', null, rows)));
+}
+
+/* ══ ② 異常地圖 ══ */
+function heatColor(ei) {
+  if (ei == null) return null;
+  const d = ei - 100;
+  if (d <= -25) return ['var(--div-neg-3)', '#fff'];
+  if (d <= -15) return ['var(--div-neg-2)', '#fff'];
+  if (d <= -5) return ['var(--div-neg-1)', 'var(--ink)'];
+  if (d < 5) return ['var(--div-mid)', 'var(--ink)'];
+  if (d < 15) return ['var(--div-pos-1)', 'var(--ink)'];
+  if (d < 25) return ['var(--div-pos-2)', '#fff'];
+  return ['var(--div-pos-3)', '#fff'];
+}
+function renderP2() {
+  const m = state.m;
+  const scale = [['≤75', 'div-neg-3'], ['75–85', 'div-neg-2'], ['85–95', 'div-neg-1'], ['95–105', 'div-mid'], ['105–115', 'div-pos-1'], ['115–125', 'div-pos-2'], ['≥125', 'div-pos-3']];
+  $('heatScale').replaceChildren('比標準慢', h('span', { class: 'sw' }, scale.map(([t, c]) => h('i', { style: `background:var(--${c})`, title: t }))), '比標準快',
+    h('span', { style: 'margin-left:10px;color:var(--muted)' }, '（效率指數 ≤75 … ≥125，中間灰色＝95–105 正常）'));
+  const rows = allSku.map(c => ({ c, cells: M.map(x => evalSku(c, x)), tot: M.reduce((a, x) => a + ((evalSku(c, x) || {}).act || 0), 0) }))
+    .filter(r => r.cells.some(Boolean));
+  const mi = M.indexOf(m);
+  if (state.heatSort === 'az') rows.sort((a, b) => a.c.localeCompare(b.c, 'en'));
+  else rows.sort((a, b) => { const la = a.cells[mi], lb = b.cells[mi]; return (lb ? lb.loss : -1e9) - (la ? la.loss : -1e9) || b.tot - a.tot; });
+  const shown = state.heatOnly ? rows.filter(r => r.cells[mi]) : rows;
+  $('heatTitle').textContent = `全廠異常地圖（效率指數）· ${state.heatSort === 'az' ? '料號 A→Z' : '依' + mLabel(m) + '損失排序'} · ${shown.length} 項`;
+  const tbl = h('table', { class: 'heat' },
+    h('thead', null, h('tr', null, h('th', { style: 'text-align:left' }, '品項'), M.map(x => h('th', null, mLabel(x) + (isTemp(x) ? '*' : ''))))),
+    h('tbody', null, shown.map(r => h('tr', null,
+      h('th', { class: 'rowh', onclick: () => goSku(r.c), title: '看品項分析' }, h('span', { class: 'code' }, r.c), ' ', h('span', { class: 'nm' }, nm(r.c).slice(0, 12))),
+      r.cells.map((e, k) => {
+        const col = e && heatColor(e.ei);
+        const td = h('td', { class: (e ? '' : 'na') + (M[k] === m ? ' sel' : ''), style: col ? `background:${col[0]};color:${col[1]}` : null, tabindex: e ? 0 : null }, e ? fmt(e.ei, 0) : '·');
+        if (e) {
+          td.addEventListener('pointermove', ev => showTip(ev, [{ v: fmt(e.ei, 0), l: '效率指數' }, { v: ((D.sku[r.c][M[k]] || {}).n || 0) + ' 批', l: '製造批數（批數少，波動大）' }, { v: fmt(e.loss, 1) + ' 人時', l: e.loss >= 0 ? '損失' : '節省' }, { v: fmt(e.act, 1) + ' / ' + fmt(e.std, 1), l: '實際 / 標準人時' }], `${r.c} ${nm(r.c)} · ${mLabel(M[k])}`));
+          td.addEventListener('pointerleave', hideTip);
+        }
+        return td;
+      })))));
+  $('heat').replaceChildren(tbl);
+
+  // 柏拉圖：前段 80% 用主色，其餘灰
+  const P = plant(m), list = P.list.slice().sort((a, b) => b.act - a.act);
+  let cum = 0, cut = 0;
+  list.forEach((r, k) => { cum += r.act; if (!cut && cum >= P.act * 0.8) cut = k + 1; });
+  $('paretoTitle').textContent = `人力花在哪裡（${mLabel(m)}全流程人時）`;
+  $('paretoSub').textContent = `前 ${cut} 個品項用掉 80% 人時（共 ${list.length} 項）。藍色＝這 ${cut} 項，是改善的主戰場。下方只列前 20。`;
+  hbars($('pareto'), list.slice(0, 20).map((r, k) => ({ label: r.c, name: nm(r.c), v: r.act, mute: k >= cut,
+    text: `${fmt(r.act)} 人時 · ${fmt(r.act / P.act * 100, 1)}%`,
+    tip: STAGES.filter(st => r.stages[st.k]).map(st => ({ color: st.color, v: fmt(r.stages[st.k].h, 1) + ' 人時', l: st.name })),
+    onClick: () => goSku(r.c) })));
+  let c2 = 0;
+  dataTable($('paretoTbl'), ['品項', '全流程人時', '佔比', '累計'], list.map(r => { c2 += r.act; return [r.c + ' ' + nm(r.c), fmt(r.act, 1), fmt(r.act / P.act * 100, 1) + '%', fmt(c2 / P.act * 100, 1) + '%']; }));
+
+  const rowsS = STAGES.map(st => ({ name: st.name, color: st.color, ink: st.ink, values: M.map(x => plant(x).stage[st.k]) }));
+  stackCols($('stack'), M, rowsS);
+  dataTable($('stackTbl'), ['月份', '製造', '充填', '包裝', '包裝佔比'], M.map((x, k) => { const t = rowsS.reduce((a, r) => a + r.values[k], 0); return [mLabel(x), fmt(rowsS[0].values[k]), fmt(rowsS[1].values[k]), fmt(rowsS[2].values[k]), fmt(rowsS[2].values[k] / t * 100, 1) + '%']; }));
+}
+
+/* ══ ③ 品項分析 ══ */
+function renderP3() {
+  const c = state.sku, m = state.m, e = evalSku(c, m), st = D.std[c] || {};
+  const tot = stdTotal(c);
+  $('skuLede').replaceChildren(...[h('b', null, `${c} ${nm(c)}`), ' · 標準 ', h('b', null, tot ? fmt(tot, 1) : '–'), ' 人時/千瓶',
+    tot ? `（每瓶 ${fmt(tot / 1000 * rate, 2)} 元）` : '', ' · ',
+    e ? [`${mLabel(m)}效率指數 `, h('b', null, fmt(e.ei, 0)), `，${e.loss >= 0 ? '損失' : '節省'} ${fmt(Math.abs(e.loss), 1)} 人時`] : `${mLabel(m)}沒有生產`,
+    e ? h('span', { class: 'st ' + eiStatus(e.ei).cls, style: 'margin-left:10px' }, h('span', null, eiStatus(e.ei).t)) : null,
+    stdTotal(c) != null ? h('button', { class: 'go-btn', onclick: () => { state.calcSku = c; selectTab('p4'); } }, '試算這個品項的成本 →') : null].flat().filter(x => x != null));
+
+  // 工段比較
+  $('stageSub').textContent = `${mLabel(m)}實際 vs 標準（人時/千瓶）`;
+  const box = $('stage'); box.replaceChildren();
+  if (!e) box.append(h('div', { class: 'empty', style: 'grid-column:1/-1' }, '本月沒有生產'));
+  else {
+    const max = Math.max(...STAGES.map(x => e.stages[x.k] ? Math.max(e.stages[x.k].act, e.stages[x.k].std) : 0)) * 1.35;
+    for (const x of STAGES) {
+      const v = e.stages[x.k];
+      box.append(h('div', null, x.name));
+      if (!v) { box.append(h('div', { class: 'nm' }, '本月無資料')); continue; }
+      const dev = (v.act / v.std - 1) * 100;
+      const tr = h('div', { class: 'track' },
+        h('div', { class: 'bar', style: `width:${v.act / max * 100}%;background:${x.color}` }),
+        h('div', { class: 'std', style: `left:${v.std / max * 100}%` }),
+        h('div', { class: 'val', style: `left:calc(${Math.max(v.act, v.std) / max * 100}% + 8px)` },
+          `${fmt(v.act, 1)}（標準 ${fmt(v.std, 1)}，`, h('b', { style: `color:${dev > 20 ? 'var(--crit)' : 'inherit'}` }, (dev >= 0 ? '+' : '') + fmt(dev, 0) + '%'), '）'));
+      tr.addEventListener('pointermove', ev => showTip(ev, [{ color: x.color, v: fmt(v.act, 1), l: '實際 人時/千瓶' }, { v: fmt(v.std, 1), l: '標準' }, { v: fmt(v.h, 1) + ' 人時', l: '本月實際投入' }], x.name));
+      tr.addEventListener('pointerleave', hideTip);
+      box.append(tr);
+    }
+  }
+
+  // 控制圖
+  const pts = D.ctrl[c] || [], sv = st.mfg != null && st.fill != null ? st.mfg + st.fill : null;
+  ctrlChart($('ctrl'), pts, sv);
+  dataTable($('ctrlTbl'), ['製造日', '人時/千瓶', '成品數', '判定'], pts.slice().reverse().map(p => [p[0], fmt(p[1], 1), fmt(p[2]), p[3] ? '離群（剔除）' : sv && p[1] > sv * 1.2 ? '超過 +20%' : sv && p[1] < sv * 0.8 ? '低於 −20%' : '範圍內']));
+
+  // 製成率
+  const ym = D.ctrlMonths;
+  const yv = ym.map(x => (D.yield[c] || {})[x] ?? null);
+  lineChart($('yld'), { x: ym.map(x => (x.endsWith('-01') ? x.slice(2, 4) + '/' : '') + (+x.slice(5))), series: [{ name: '製成率', values: yv, color: 'var(--pt)' }],
+    band: [95, 105], extra: [95, 105], yFmt: v => fmt(v, 0) + '%', height: 220, tipTitle: k => ym[k], aria: '製成率月趨勢' });
+  dataTable($('yldTbl'), ['月份', '製成率', '判定'], ym.map((x, k) => [x, yv[k] == null ? '–' : fmt(yv[k], 1) + '%', yv[k] == null ? '' : yv[k] < 95 || yv[k] > 105 ? '超出範圍' : '正常']));
+
+  // 每鍋人時
+  const pp = D.perpot[c] || {};
+  const y25 = Object.entries(pp).filter(([x]) => x.startsWith(D.prevYear)).map(([, v]) => v);
+  const avg25 = y25.length ? y25.reduce((a, b) => a + b, 0) / y25.length : null;
+  const m26 = D.yearMonths;
+  const pv = m26.map(x => pp[x] ?? null);
+  $('potSub').textContent = `製造＋充填人時 ÷ 鍋數。灰線＝${D.prevYear} 年平均。`;
+  lineChart($('pot'), { x: m26.map(x => +x.slice(5) + '月'), series: [{ name: `每鍋人時（${D.curYear}）`, values: pv, color: 'var(--pt)' }],
+    refs: avg25 ? [{ y: avg25, label: D.prevYear + ' 平均 ' + fmt(avg25, 2), color: 'var(--muted)' }] : [], extra: avg25 ? [avg25] : [],
+    yFmt: v => fmt(v, 1), height: 220, aria: '每鍋人時月趨勢', floor0: true });
+  dataTable($('potTbl'), ['月份', '每鍋人時', D.prevYear + ' 平均'], m26.map((x, k) => [x, fmt(pv[k], 2), fmt(avg25, 2)]));
+
+  // 批次成本卡
+  const lk = D.linked.filter(b => b.c === c);
+  const cards = lk.map(b => {
+    const mh = (b.mfgH || 0) + (b.fillH || 0), all = mh + b.pack;
+    const per = b.closed && b.fg > 0 ? (mh / b.fg + b.pack / b.pb) * 1000 : all / b.pb * 1000;
+    const ei = tot ? tot / per * 100 : null, s2 = eiStatus(ei);
+    return h('div', { class: 'bcard' },
+      h('div', { class: 't1' }, `${b.c} · ${b.mfg.slice(5).replace('-', '/')} 製造`),
+      h('div', { class: 't2' }, `${b.pots || '–'} 鍋 · 已包裝 ${fmt(b.pb)} 瓶 · 製造後 ${b.lag} 天包裝`),
+      h('dl', null,
+        h('dt', null, '製造'), h('dd', null, b.mfgH == null ? '工時未填' : fmt(b.mfgH, 1) + ' 人時'),
+        h('dt', null, '充填'), h('dd', null, b.fillH == null ? '工時未填' : fmt(b.fillH, 1) + ' 人時'),
+        h('dt', null, '包裝'), h('dd', null, fmt(b.pack, 1) + ' 人時'),
+        h('dt', null, '全流程'), h('dd', { class: 'big' }, fmt(all, 1) + ' 人時'),
+        h('dt', null, '人工成本'), h('dd', null, fmt(all * rate) + ' 元（每瓶 ' + fmt(all * rate / b.pb, 2) + ' 元）'),
+        h('dt', null, '每千瓶'), h('dd', null, fmt(per, 1) + ' 人時'),
+        h('dt', null, '效率指數'), h('dd', null, ei ? [fmt(ei, 0) + ' ', h('span', { class: 'st ' + s2.cls }, h('span', null, s2.t))] : '–')),
+      h('div', { class: 't2', style: 'margin-top:6px' }, b.closed
+        ? `已結案：成品 ${fmt(b.fg)} 瓶。每千瓶＝製造充填 ÷ 成品數 ＋ 包裝 ÷ 包裝瓶數`
+        : '成品數尚未填入製成率 Excel → 本批「未結案」，以已包裝瓶數暫代'),
+      b.mfgOutlier ? h('div', { class: 't2' }, '這批製造／充填工時被判為離群，請核對 Excel') : null);
+  });
+  $('bcards').replaceChildren(...(cards.length ? cards : [h('div', { class: 'empty' }, `${c} 近 12 個月還沒有以製造日期串接的批次（包裝紀錄 2026/10 起才有製造日期）。`)]));
+
+  // 間隔天數
+  const bins = Array.from({ length: 11 }, (_, k) => ({ label: k === 10 ? '10+ 天' : k + ' 天', n: 0, late: k > D.lagLate, items: [] }));
+  $('lagSub').textContent = `超過 ${D.lagLate} 天標為延遲：半成品放太久，可能影響品質與庫存。共 ${D.linked.length} 批。`;
+  for (const b of D.linked) { const k = Math.max(0, Math.min(10, b.lag)); bins[k].n++; bins[k].items.push(b.c); }
+  bins.forEach(b => b.items = b.items.join('、'));
+  histogram($('lag'), bins);
+}
+function goSku(c) { state.sku = c; $('sku').value = c; selectTab('p3'); }
+
+/* ══ ④ 標準成本與 ROI ══ */
+function renderP4() {
+  const q = ($('stdSearch').value || '').trim().toLowerCase();
+  const list = allSku.filter(c => stdTotal(c) != null).map(c => {
+    const s2 = D.std[c], t = stdTotal(c);
+    const vol = D.base.reduce((a, x) => a + ((D.sku[c][x] || {}).pb || 0), 0);
+    const hrs = D.base.reduce((a, x) => a + ((evalSku(c, x) || {}).act || 0), 0);
+    return { c, s: s2, t, vol, hrs, n: Math.min(s2.mfg_n, s2.fill_n, s2.pack_n) };
+  });
+  const sorter = { az: (a, b) => a.c.localeCompare(b.c, 'en'), hrs: (a, b) => b.hrs - a.hrs, cost: (a, b) => b.t - a.t }[state.stdSort];
+  list.sort(sorter);
+  const hit = list.filter(r => !q || r.c.toLowerCase().includes(q) || nm(r.c).toLowerCase().includes(q));
+  const shown = hit;
+  const maxT = Math.max(...list.map(r => r.t));
+  const tb = h('table', { class: 't' }, h('thead', null, h('tr', null,
+    h('th', null, '品項'), h('th', null, '標準人時/千瓶（製造｜充填｜包裝）'), h('th', { class: 'n' }, '標準成本/瓶'), h('th', { class: 'n' }, '包裝佔比'), h('th', { class: 'n' }, '樣本月數'))),
+    h('tbody', null, shown.map(r => {
+      const bar = h('div', { style: 'display:flex;gap:2px;height:14px;align-items:center;min-width:160px' },
+        ...STAGES.map(st => h('div', { style: `width:${r.s[st.k] / maxT * 70}%;height:14px;background:${st.color};border-radius:${st.k === 'pack' ? '0 4px 4px 0' : '0'}` })),
+        h('span', { style: 'margin-left:8px;white-space:nowrap' }, fmt(r.t, 1)));
+      const tr = h('tr', { class: 'click', onclick: () => { state.calcSku = r.c; $('calcSku').value = r.c; renderCalc(); scrollTo({ top: 0, behavior: 'smooth' }); } },
+        h('td', null, h('span', { class: 'code' }, r.c), ' ', h('span', { class: 'nm' }, nm(r.c))),
+        h('td', null, bar), h('td', { class: 'n' }, fmt(r.t / 1000 * rate, 2) + ' 元'),
+        h('td', { class: 'n' }, fmt(r.s.pack / r.t * 100, 0) + '%'),
+        h('td', { class: 'n' }, h('span', { class: 'st fixed ' + (r.n < 3 ? 'warn' : 'blank'), title: r.n < 3 ? '樣本少於 3 個月，僅供參考' : '' }, h('span', null, r.n < 3 ? r.n + ' 偏少' : String(r.n)))));
+      tr.addEventListener('pointermove', ev => { if (ev.target.closest('td:nth-child(2)')) showTip(ev, STAGES.map(st => ({ color: st.color, v: fmt(r.s[st.k], 1), l: st.name })), r.c + ' ' + nm(r.c)); else hideTip(); });
+      tr.addEventListener('pointerleave', hideTip);
+      return tr;
+    })));
+  $('stdTbl').replaceChildren(tb, h('div', { class: 'note' }, `共 ${list.length} 個品項有完整三段標準（另有 ${Object.keys(D.std).length - list.length} 項缺某一段的標準，不列入此表）。`));
+  $('stdExport').onclick = () => {
+    const lines = [['料號', '品名', '製造(人時/千瓶)', '充填(人時/千瓶)', '包裝(人時/千瓶)', '合計(人時/千瓶)', `標準成本/瓶(元,費率${rate})`, '樣本月數']]
+      .concat(list.map(r => [r.c, nm(r.c), r.s.mfg, r.s.fill, r.s.pack, +r.t.toFixed(3), +(r.t / 1000 * rate).toFixed(2), r.n]));
+    const csv = '﻿' + lines.map(l => l.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    const a = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), download: `標準人工成本表_${rate}元.csv` });
+    document.body.append(a); a.click(); a.remove();
+  };
+  renderROI(list);
+  renderCalc();
+}
+let roiInit = false;
+function renderROI(list) {
+  const sel = $('roiSku');
+  if (!roiInit) {
+    sel.replaceChildren(...list.slice().sort((a, b) => a.c.localeCompare(b.c, 'en')).map(r => h('option', { value: r.c }, `${r.c} ${nm(r.c)}`)));
+    const worst = plant(state.m).list.filter(r => r.loss > 0 && stdTotal(r.c) != null).sort((a, b) => b.loss - a.loss)[0];
+    if (!list.length) return;
+    sel.value = worst ? worst.c : list[0].c; roiFill(); roiInit = true;
+    sel.onchange = roiFill; for (const id of ['roiVol', 'roiCur', 'roiTgt']) $(id).oninput = roiCalc;
+  }
+  roiCalc();
+}
+function roiFill() {
+  const c = $('roiSku').value, i = M.indexOf(LAST_CLOSED), win = M.slice(Math.max(0, i - 2), i + 1);
+  const vol = D.base.map(x => (D.sku[c][x] || {}).pb || 0).filter(Boolean);
+  $('roiVol').value = vol.length ? Math.round(vol.reduce((a, b) => a + b, 0) / vol.length / 100) * 100 : 1000;
+  const L = win.map(x => evalSku(c, x)).filter(Boolean);
+  const act = L.reduce((a, r) => a + r.act, 0), std = L.reduce((a, r) => a + r.std, 0);
+  $('roiCur').value = std ? (stdTotal(c) * act / std).toFixed(1) : stdTotal(c).toFixed(1);
+  roiCalc();
+}
+function roiCalc() {
+  const c = $('roiSku').value, vol = +$('roiVol').value || 0, cur = +$('roiCur').value || 0, tgt = +$('roiTgt').value || 100;
+  if (!c || stdTotal(c) == null) { $('roiOut').replaceChildren(); return; }
+  const target = stdTotal(c) * 100 / tgt, save = Math.max(0, (cur - target) * vol / 1000);
+  const out = [
+    { k: '目標人時/千瓶', v: fmt(target, 1), d: `標準 ${fmt(stdTotal(c), 1)} × 100 ÷ ${tgt}` },
+    { k: '每月可省人時', v: fmt(save, 1), u: '人時', d: `(${fmt(cur, 1)} − ${fmt(target, 1)}) × ${fmt(vol)} 瓶 ÷ 1000` },
+    { k: '每月可省金額', v: fmt(save * rate), u: '元', d: `× 費率 ${rate} 元` },
+    { k: '一年可省金額', v: money(save * rate * 12), u: '元', d: '× 12 個月（ROI 的效益端）' },
+  ];
+  $('roiOut').replaceChildren(...out.map(x => h('div', { class: 'kpi' }, h('div', { class: 'k' }, x.k), h('div', { class: 'v' }, x.v, x.u ? h('small', null, x.u) : null), h('div', { class: 'd' }, x.d))));
+}
+
+/* ── 成本試算器 ── */
+function actualRates(c) {
+  const i = M.indexOf(LAST_CLOSED), win = M.slice(Math.max(0, i - 2), i + 1);
+  const t = { mfg: 0, fill: 0, fg: 0, ph: 0, pb: 0 };
+  for (const x of win) { const a = (D.sku[c] || {})[x]; if (!a) continue; t.mfg += a.mfg || 0; t.fill += a.fill || 0; t.fg += a.fg || 0; t.ph += a.ph || 0; t.pb += a.pb || 0; }
+  return { mfg: t.fg && t.mfg ? t.mfg / t.fg * 1000 : null, fill: t.fg && t.fill ? t.fill / t.fg * 1000 : null, pack: t.pb && t.ph ? t.ph / t.pb * 1000 : null, win };
+}
+let calcInit = false;
+function renderCalc() {
+  const sel = $('calcSku');
+  if (!calcInit) {
+    const opts = allSku.filter(c => stdTotal(c) != null).sort((a, b) => a.localeCompare(b, 'en'));
+    sel.replaceChildren(...opts.map(c => h('option', { value: c }, `${c} ${nm(c)}`)));
+    sel.onchange = e => { state.calcSku = e.target.value; renderCalc(); };
+    const setQ = v => { state.calcQty = Math.max(1, Math.round(+v || 0)); $('calcQty').value = Math.min(20000, state.calcQty); $('calcQtyN').value = state.calcQty; renderCalc(); };
+    $('calcQty').oninput = e => setQ(e.target.value);
+    $('calcQtyN').oninput = e => setQ(e.target.value);
+    document.querySelectorAll('.seg [data-b]').forEach(b => b.onclick = () => {
+      state.calcBasis = b.dataset.b;
+      document.querySelectorAll('.seg [data-b]').forEach(x => x.setAttribute('aria-pressed', x === b));
+      renderCalc();
+    });
+    calcInit = true;
+  }
+  const c = state.calcSku, q = state.calcQty;
+  if (!c || stdTotal(c) == null) { $('calcOut').replaceChildren(h('div', { class: 'empty' }, '沒有品項有完整三段標準')); return; }
+  sel.value = c;
+  const st = D.std[c], act = actualRates(c), useAct = state.calcBasis === 'act';
+  const rates = {}; let missing = [];
+  for (const x of STAGES) { const r = useAct ? act[x.k] : st[x.k]; if (r == null) missing.push(x.name); rates[x.k] = r ?? st[x.k]; }
+  const hrs = Object.fromEntries(STAGES.map(x => [x.k, rates[x.k] * q / 1000]));
+  const total = hrs.mfg + hrs.fill + hrs.pack;
+  const stdTot = stdTotal(c) * q / 1000;
+  const actTot = ['mfg', 'fill', 'pack'].every(k => act[k] != null) ? (act.mfg + act.fill + act.pack) * q / 1000 : null;
+  const tiles = STAGES.map(x => h('div', { class: 'kpi' },
+    h('div', { class: 'k' }, h('span', { class: 'sw', style: `background:${x.color}` }), x.name),
+    h('div', { class: 'v' }, fmt(hrs[x.k] * rate), h('small', null, '元')),
+    h('div', { class: 'd' }, `${fmt(hrs[x.k], 1)} 人時 · 每瓶 ${fmt(hrs[x.k] * rate / q, 2)} 元`)));
+  const cmp = useAct ? `標準為 ${fmt(stdTot * rate)} 元，實際${total >= stdTot ? '多' : '少'} ${fmt(Math.abs(total - stdTot) / stdTot * 100, 0)}%`
+                     : actTot != null ? `近 3 個月實際約 ${fmt(actTot * rate)} 元（${actTot >= stdTot ? '+' : '−'}${fmt(Math.abs(actTot - stdTot) / stdTot * 100, 0)}%）` : '近 3 個月實際資料不足';
+  $('calcOut').replaceChildren(...tiles, h('div', { class: 'kpi hero' },
+    h('div', { class: 'k' }, `全流程 · ${c} × ${fmt(q)} 瓶`),
+    h('div', { class: 'v' }, fmt(total * rate), h('small', null, '元')),
+    h('div', { class: 'd' }, `${fmt(total, 1)} 人時 · 每瓶 ${fmt(total * rate / q, 2)} 元`),
+    h('div', { class: 'd' }, cmp)));
+  const compo = h('div', { class: 'barwrap', role: 'img', 'aria-label': '各段成本組成' }, ...STAGES.map(x => {
+    const p = hrs[x.k] / total * 100;
+    const seg = h('div', { class: 'seg2', style: `width:${p}%;background:${x.color}` }, p >= 9 ? `${x.name} ${fmt(p, 0)}%` : '');
+    seg.addEventListener('pointermove', ev => showTip(ev, [{ color: x.color, v: fmt(hrs[x.k] * rate) + ' 元', l: `${x.name} · ${fmt(p, 1)}%` }]));
+    seg.addEventListener('pointerleave', hideTip);
+    return seg;
+  }));
+  $('calcCompo').replaceChildren(h('div', { class: 'legend' }, ...STAGES.map(x => h('span', null, h('i', { style: `background:${x.color}` }), `${x.name} ${fmt(hrs[x.k] / total * 100, 0)}%`))), compo);
+  $('calcFormula').replaceChildren(...[...STAGES.map(x => h('div', null, `${x.name}：`, h('b', null, fmt(rates[x.k], 2)), ` 人時/千瓶 × ${fmt(q)} 瓶 ÷ 1,000 ＝ `, h('b', null, fmt(hrs[x.k], 2) + ' 人時'), ` × ${rate} 元 ＝ `, h('b', null, fmt(hrs[x.k] * rate) + ' 元'))),
+    st.mfg_n < 3 || st.fill_n < 3 || st.pack_n < 3 ? h('div', { class: 'warnbox' }, `提醒：${c} 的標準樣本少於 3 個月（製造 ${st.mfg_n}、充填 ${st.fill_n}、包裝 ${st.pack_n}），試算結果僅供參考。`) : null,
+    h('div', { class: 'note' }, (useAct ? `實際＝${act.win.map(mLabel).join('、')}加權平均` : D.baseTxt) + (missing.length ? `；${missing.join('、')}無實際資料，改用標準` : '') + '。數量超過 20,000 瓶請直接輸入數字。')].filter(Boolean));
+}
+
+/* ══ ⑤ 資料健康度 ══ */
+function checks(m) {
+  const H = D.health[m] || { balance: [] }, G = D.gateCfg;
+  const fgOk = H.fgFill != null && H.fgFill >= G.fg_fill, missOk = H.missing != null && H.missing <= G.missing_days;
+  return [
+    { k: '製造資料結案率', v: H.fgFill == null ? '無資料' : fmt(H.fgFill, 1) + '%', ok: fgOk, gate: true,
+      d: H.fgFill == null ? '這個月沒有匯入製成率資料' : fgOk ? '成品數已填齊' : `還有 ${fmt(100 - H.fgFill, 1)}% 的生產批沒填成品數` },
+    { k: '包裝月結', v: H.missing == null ? '無資料' : H.missing + ' 天漏登', ok: missOk, gate: true, d: '工作日都有包裝紀錄或「無作業」標記' },
+    { k: '物料平衡', v: H.fgReady ? H.balance.length + ' 項待檢視' : '暫不檢核', ok: null, gate: false,
+      d: H.fgReady ? '只列清單、不擋月份：近 3 個月包裝 ÷ 製造超出 85–115%' : '成品數未填齊，填齊後才檢核' },
+    { k: '人數填寫率', v: H.headPct == null ? '無資料' : fmt(H.headPct, 0) + '%', ok: H.headPct != null && H.headPct >= G.head_pct, gate: false,
+      d: '提醒（不擋月份）：沒填人數的包裝批次逐批排除' },
+  ];
+}
+function renderP5() {
+  const m = state.m, C = checks(m), G = C.filter(x => x.gate), ok = G.filter(x => x.ok).length;
+  const tag = x => x.ok === null ? ['mute', '檢視清單（不擋）'] : x.gate ? (x.ok ? ['good', '通過'] : ['warn', '需處理']) : (x.ok ? ['good', '正常'] : ['warn', '提醒（不擋）']);
+  $('hLede').replaceChildren(`${mLabel(m)}資料齊全度 `, h('b', null, `${ok} / ${G.length}`), ok === G.length ? '，可以納入標準工時計算。' : '，有項目需要先處理，數字暫定。', C[2].v === '暫不檢核' ? '物料平衡待成品數填齊後檢核。' : `物料平衡另有 ${(D.health[m] || { balance: [] }).balance.length} 項待檢視。`,
+    h('span', { class: 'src' }, '物料平衡每月都有一些品項超出（庫存時間差、少量品項），若當門檻則沒有任何月份能納入，因此只列清單。門檻值存在資料庫設定，可調整。'));
+  $('lights').replaceChildren(...C.map(x => h('div', { class: 'light' }, h('div', { class: 'k' }, x.k), h('div', { class: 'v' }, x.v),
+    h('span', { class: 'st ' + tag(x)[0] }, h('span', null, tag(x)[1])), h('div', { class: 'note', style: 'margin-top:4px' }, x.d))));
+  $('hTbl').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null, h('th', null, '月份'), ...checks(M[0]).map(x => h('th', null, x.k)), h('th', null, '結果'))),
+    h('tbody', null, M.map(x => { const cc = checks(x), n = cc.filter(y => y.gate && !y.ok).length; return h('tr', { class: x === m ? 'click' : null, style: x === m ? 'background:var(--accent-wash)' : null },
+      h('td', null, mLabel(x)), ...cc.map(y => h('td', null, h('span', { class: 'st ' + (y.ok === null ? 'mute' : y.ok ? 'good' : 'warn') }, h('span', null, y.v)))),
+      h('td', null, n === 0 ? h('b', null, '納入標準') : '暫定')); }))));
+  const bal = (D.health[m] || { balance: [] }).balance;
+  $('balTitle').textContent = `物料平衡異常（${mLabel(m)}，${bal.length} 項）`;
+  $('balTbl').replaceChildren(bal.length ? h('table', { class: 't' }, h('thead', null, h('tr', null, h('th', null, '品項'), h('th', { class: 'n' }, '包裝瓶數'), h('th', { class: 'n' }, '製造成品數'), h('th', { class: 'n' }, '比值（紅＝差 >50%）'))),
+    h('tbody', null, bal.map(b => h('tr', { class: 'click', onclick: () => goSku(b.c) }, h('td', null, h('span', { class: 'code' }, b.c), ' ', h('span', { class: 'nm' }, nm(b.c))), h('td', { class: 'n' }, fmt(b.pb)), h('td', { class: 'n' }, fmt(b.fg)),
+      h('td', { class: 'n' }, h('span', { class: 'st fixed ' + (b.r > 1.5 || b.r < 0.5 ? 'crit' : 'warn'), title: b.r > 1.5 || b.r < 0.5 ? '差距超過 50%：優先查' : '差距 15–50%' }, h('span', null, fmt(b.r * 100, 0) + '%'))))))) : h('div', { class: 'empty' }, (D.health[m] || {}).fgReady ? '沒有超出範圍的品項' : '成品數尚未填齊，暫不檢核物料平衡'));
+  const dq = D.anoms.filter(a => a.d.slice(0, 7) === m);
+  $('dqTitle').textContent = `資料品質待處理（${mLabel(m)}，${dq.length} 列）`;
+  $('dqTbl').replaceChildren(dq.length ? h('table', { class: 't' }, h('thead', null, h('tr', null, h('th', null, '日期'), h('th', null, '品項'), h('th', { class: 'n' }, 'Excel 列'), h('th', null, '類型'), h('th', null, '問題'))),
+    h('tbody', null, dq.map(a => h('tr', null, h('td', null, a.d.slice(5).replace('-', '/')), h('td', null, h('span', { class: 'code' }, a.c), ' ', h('span', { class: 'nm' }, a.name || nm(a.c))),
+      h('td', { class: 'n' }, a.row == null ? '–' : a.row),
+      h('td', null, h('span', { class: 'st ' + (a.kind === 'invalid' ? 'crit' : 'warn') }, h('span', null, a.kind === 'invalid' ? '需修正' : 'O 欄提醒'))),
+      h('td', null, a.why))))) : h('div', { class: 'empty' }, '本月沒有待處理的工時資料'));
+}
+
+/* ── 分頁、篩選、重繪 ── */
+let cur = 'p1';
+function selectTab(p) {
+  cur = p;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.p === p));
+  document.querySelectorAll('.page').forEach(s2 => s2.classList.toggle('on', s2.id === p));
+  render(); scrollTo({ top: 0 });
+}
+function render() {
+  hideTip();
+  ({ p1: renderP1, p2: renderP2, p3: renderP3, p4: renderP4, p5: renderP5 })[cur]();
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.p));
+function init() {
+$('month').replaceChildren(...M.slice().reverse().map(x => h('option', { value: x }, `${x.slice(0, 4)} 年 ${+x.slice(5)} 月${isTemp(x) ? '（暫定）' : ''}`)));
+$('month').value = state.m;
+$('month').onchange = e => { state.m = e.target.value; render(); };
+$('rate').value = rate;
+$('rate').oninput = e => { rate = Math.max(0, +e.target.value || 0); try { localStorage.setItem('pe-rate', rate); } catch (er) {} render(); };
+const skuOpts = allSku.filter(c => D.std[c]).sort((a, b) => a.localeCompare(b, 'en'));
+$('sku').replaceChildren(...skuOpts.map(c => h('option', { value: c }, `${c} ${nm(c)}`)));
+$('sku').value = state.sku;
+$('sku').onchange = e => { state.sku = e.target.value; render(); };
+$('heatSort').onchange = e => { state.heatSort = e.target.value; render(); };
+$('heatOnly').onchange = e => { state.heatOnly = e.target.checked; render(); };
+$('stdSort').onchange = e => { state.stdSort = e.target.value; render(); };
+$('stdSearch').oninput = () => render();
+}
+const WHY = {
+  kpis: '<b>效率指數</b> ＝ Σ標準人時 ÷ Σ實際人時 × 100；<b>標準人時</b> ＝ 各段標準（人時/千瓶）× 該段實際產量 ÷ 1,000。<br><b>全流程人時</b> ＝ 製造 ＋ 充填（製成率 Excel 工時分頁）＋ 包裝（工時 × 人數）。<b>人工成本</b> ＝ 人時 × 費率。<br><b>損失人時</b> 只加總比標準慢的品項；<b>資料齊全度</b> ＝ 2 項門檻（結案率、包裝漏登）通過幾項（見「資料健康度」）。',
+  trend: '每點 ＝ 該月全廠效率指數。只計入有標準、且當月有生產的品項。空心點 ＝ 成品數未填齊的月份（暫定），數字之後還會變。',
+  lossBars: '損失人時 ＝ 實際人時 − 標準人時（該品項當月）。金額 ＝ 損失人時 × 費率。紅色＋「異常」＝ 效率指數 &lt; 85。',
+  follow: '取上月損失人時前 5 名，看本月的效率指數：≥95 已改善、85–95 仍偏低、&lt;85 仍異常。「本月損失人時」負值代表比標準省。',
+  heat: '每格 ＝ 該品項當月效率指數。色階：紅 ＝ 比標準慢、藍 ＝ 比標準快、灰 ＝ 95–105 正常。「·」＝ 當月沒生產或缺標準。滑鼠移上去可看批數——批數少的格子波動大，不要單看一格下結論。',
+  pareto: '依當月全流程人時由大到小排列，累計到 80% 的品項以藍色標示。人時大的品項，效率改善 1% 省下的人力也最多。',
+  stack: '各段人時只計入有效批次（剔除資料異常與離群），且只算有標準的品項。柱內百分比 ＝ 該段 ÷ 當月合計。',
+  stage: '<b>實際</b> ＝ 當月該段人時 ÷ 該段產量 × 1,000；製造、充填的產量用成品數，包裝用包裝瓶數。黑線 ＝ 標準；百分比 ＝ 實際比標準多（+）或少（−）。',
+  ctrl: '每點 ＝ 一個生產批：（製造 ＋ 充填人時）÷ 成品數 × 1,000。中線 ＝ 製造＋充填標準，藍帶 ＝ ±20%。空心點 ＝ 離群（剔除，不計入標準）；紅點 ＝ 超過 +20%。',
+  yld: '製成率 ＝ 實際半成品數 ÷ 預估半成品數（月加總）。藍帶 ＝ 合理範圍 95%–105%。',
+  pot: '每鍋人時 ＝（製造 ＋ 充填人時）÷ 鍋數（月加總）。灰線 ＝ 前一年各月平均。給生管排程估人力用。',
+  bcards: '以（料號, 製造日期）把包裝紀錄接到製造批。已結案：每千瓶 ＝（製造＋充填）÷ 成品數 ＋ 包裝 ÷ 包裝瓶數。成品數未填前，以已包裝瓶數當分母，標示「未結案」。效率指數 ＝ 品項全流程標準 ÷ 本批每千瓶人時 × 100。',
+  lag: '間隔 ＝ 第一次包裝日 − 製造日。超過 7 天標紅：半成品放太久，可能影響品質與庫存週轉。',
+  calcOut: '各段人時 ＝ 人時/千瓶 × 數量 ÷ 1,000；成本 ＝ 人時 × 費率。<b>標準</b> ＝ 基準期中位數；<b>近 3 個月實際</b> ＝ 最近 3 個已結案月份的總人時 ÷ 總產量（加權平均）。',
+  roiOut: '目標人時/千瓶 ＝ 標準 × 100 ÷ 目標效率指數。每月可省人時 ＝（目前 − 目標）× 月產量 ÷ 1,000。月產量預設 ＝ 基準期平均包裝瓶數（有填人數的批次）。',
+  stdTbl: '標準 ＝ 基準期各月「人時/千瓶」的中位數，三段分開算再相加。每瓶成本 ＝ 合計 ÷ 1,000 × 費率。樣本月數 ＝ 三段中最少的月數，少於 3 個月僅供參考。',
+  lights: '結案率、包裝月結是門檻，兩項都通過的月份才納入標準計算；物料平衡、人數填寫率只做提醒、不擋月份。',
+  dqTbl: '每段分鐘 ＝（結束 − 開始）＋ 前置；完整涵蓋 12:00–13:00 才扣 60 分午休。人·分 ＝ 分鐘 × 人數。<b>需修正</b> ＝ 時間或人數缺漏，不納入計算；<b>O 欄提醒</b> ＝ 系統算的人·分與 Excel O 欄不同，照常計算（以系統為準），只請確認 Excel。',
+};
+for (const [id, html] of Object.entries(WHY)) {
+  const el = $(id); if (!el) continue;
+  const host = el.closest('.card') || el.parentElement;
+  const d = document.createElement('details'); d.className = 'why';
+  d.innerHTML = '<summary>計算方式</summary><div class="box">' + html + '</div>';
+  const head = host.classList.contains('card') ? host.querySelector('.card-head') : null;
+  if (head) head.after(d); else el.before(d);
+}
+$('helpBtn').onclick = () => $('help').showModal();
+$('helpClose').onclick = () => $('help').close();
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => D && render(), 120); });
+$('themeBtn').onclick = () => { toggleTheme(); if (D) render(); };
+
+/* ══ 登入與資料載入 ══
+ * Data API 單次最多回 1,000 列，超過的 view 一律分頁讀（getAll）。
+ * 只讀彙總好的 view：sku_month（品項×月）、sku_std（標準）、month_gate（門檻）、
+ * mfg_batch（控制圖的生產批）、batch_link（批次串接）、balance_check、labour_issues。
+ */
+const num = v => v == null ? null : +v;
+const ymAdd = (ym, k) => { const d = new Date(+ym.slice(0, 4), +ym.slice(5) - 1 + k, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; };
+const ymRange = (a, b) => { const r = []; for (let x = a; x <= b; x = ymAdd(x, 1)) r.push(x); return r; };
+const ymText = (a, b) => a.slice(0, 4) === b.slice(0, 4) ? `${a.slice(0, 4)}/${+a.slice(5)}–${+b.slice(5)}` : `${a.slice(0, 4)}/${+a.slice(5)}–${b.slice(0, 4)}/${+b.slice(5)}`;
+
+function getAll(path) {
+  const out = [], sep = path.includes('?') ? '&' : '?';
+  const page = off => api(path + sep + 'limit=1000&offset=' + off).then(rows => {
+    out.push(...rows);
+    return rows.length === 1000 ? page(off + 1000) : out;
+  });
+  return page(0);
+}
+
+async function loadData() {
+  const [settings, gates] = await Promise.all([api('settings?select=key,value'), api('month_gate?select=*&order=ym')]);
+  const cfg = Object.fromEntries(settings.map(r => [r.key, r.value]));
+  const live = gates.filter(g => (g.pack_batches || 0) > 0 || g.fg_fill_pct != null);
+  if (!live.length) throw new Error('資料庫裡還沒有資料。請先到「資料匯入」上傳製成率 Excel。');
+  const latest = live[live.length - 1].ym;
+  const bFrom = cfg.std_base.from, bTo = cfg.std_base.to;
+  const m0 = [bFrom, ymAdd(latest, -11)].sort()[1];
+  const months = ymRange(m0 <= latest ? m0 : latest, latest);
+  const ctrlMonths = ymRange(ymAdd(latest, -11), latest);
+  const curYear = latest.slice(0, 4), prevYear = String(+curYear - 1);
+  const from = [prevYear + '-01', bFrom, ctrlMonths[0], months[0]].sort()[0];
+  const ctrlFrom = ctrlMonths[0] + '-01', ctrlTo = ymAdd(latest, 1) + '-01';
+
+  const [sm, std, batches, linked, bal, issues, imp] = await Promise.all([
+    getAll(`sku_month?select=sku_code,ym,sku_name,mfg_h,fill_h,fg_used,n_used,pack_h,pack_b,per_pot_h,yield_pct&ym=gte.${from}&order=sku_code,ym`),
+    getAll('sku_std?select=*&order=sku_code'),
+    getAll(`mfg_batch?select=sku_code,prod_date,fg,labour_h,outlier&closed=is.true&labour_h=gt.0&labour_bad=eq.0&fg=gt.0&prod_date=gte.${ctrlFrom}&order=sku_code,prod_date`),
+    getAll(`batch_link?select=*&mfg_date=gte.${ctrlFrom}&order=mfg_date,sku_code`),
+    getAll(`balance_check?select=sku_code,ym,fg3,pb3,ratio&flagged=is.true&ym=gte.${months[0]}&order=ym,sku_code`),
+    getAll(`labour_issues?select=*&ym=gte.${months[0]}&order=prod_date,src_row`),
+    api('imports?select=file_name,imported_at&order=imported_at.desc&limit=1'),
+  ]);
+
+  const d = { names: {}, sku: {}, std: {}, perpot: {}, yield: {}, ctrl: {}, health: {}, gate: {} };
+  for (const r of sm) {
+    const c = r.sku_code;
+    if (r.sku_name && !d.names[c]) d.names[c] = r.sku_name;
+    (d.sku[c] = d.sku[c] || {})[r.ym] = { mfg: num(r.mfg_h), fill: num(r.fill_h), fg: num(r.fg_used), n: num(r.n_used) || 0, ph: num(r.pack_h), pb: num(r.pack_b) };
+    if (r.per_pot_h != null) (d.perpot[c] = d.perpot[c] || {})[r.ym] = +r.per_pot_h;
+    if (r.yield_pct != null) (d.yield[c] = d.yield[c] || {})[r.ym] = +r.yield_pct;
+  }
+  for (const r of std) d.std[r.sku_code] = { mfg: num(r.mfg_std), mfg_n: r.mfg_n, fill: num(r.fill_std), fill_n: r.fill_n, pack: num(r.pack_std), pack_n: r.pack_n };
+  for (const r of batches) (d.ctrl[r.sku_code] = d.ctrl[r.sku_code] || []).push([r.prod_date, r.labour_h / r.fg * 1000, +r.fg, r.outlier ? 1 : 0]);
+  d.linked = linked.map(r => ({ c: r.sku_code, mfg: r.mfg_date, lag: r.lag_days, pb: +r.pack_b, pack: +r.pack_h, mfgH: num(r.mfg_h), fillH: num(r.fill_h),
+    pots: num(r.pots), fg: num(r.fg), closed: !!r.closed, mfgOutlier: !!r.mfg_outlier }));
+  for (const g of gates) {
+    d.gate[g.ym] = { gate: g.gate };
+    d.health[g.ym] = { fgFill: num(g.fg_fill_pct), missing: g.missing_days, headPct: num(g.head_pct), fgReady: g.gate_mfg, balance: [] };
+  }
+  for (const r of bal) if (d.health[r.ym]) d.health[r.ym].balance.push({ c: r.sku_code, r: +r.ratio, pb: +r.pb3, fg: +r.fg3 });
+  for (const k in d.health) d.health[k].balance.sort((a, b) => Math.abs(Math.log(b.r || 1e-3)) - Math.abs(Math.log(a.r || 1e-3)));
+  d.anoms = issues.map(r => ({ d: r.prod_date, c: r.sku_code, name: r.sku_name, why: r.detail, kind: r.kind, row: r.src_row }));
+  d.base = ymRange(bFrom, bTo).filter(x => d.gate[x] && d.gate[x].gate);
+  d.baseTxt = `標準＝${ymText(bFrom, bTo)} 基準期中位數`;
+  d.gateCfg = cfg.gate; d.lagLate = (cfg.lag_days || {}).late ?? 7;
+  d.ctrlFrom = ctrlFrom; d.ctrlTo = ctrlTo; d.ctrlMonths = ctrlMonths;
+  d.curYear = curYear; d.prevYear = prevYear; d.yearMonths = ymRange(curYear + '-01', latest);
+  d.lastImport = imp && imp[0];
+  return { d, months };
+}
+
+function show(id, on) { $(id).classList.toggle('hidden', !on); }
+
+async function start() {
+  if (!loadSession()) { show('loginBox', true); show('loading', false); return; }
+  show('loginBox', false); show('loading', true); $('loadMsg').textContent = '載入中…';
+  try {
+    const me = await whoAmI();
+    if (!me) throw new Error('這個帳號沒有系統角色，請洽 Jackie 哥。');
+    $('who').textContent = '登入者：' + me.display_name;
+    show('importLink', me.role === 'manager'); show('logout', true);
+    const { d, months } = await loadData();
+    D = d; M = months; allSku = Object.keys(D.sku);
+    LAST_CLOSED = M.filter(x => !isTemp(x)).pop() || M[M.length - 1];
+    state.m = LAST_CLOSED;
+    const top = plant(state.m).list.filter(r => r.loss > 0).sort((a, b) => b.loss - a.loss);
+    const full = allSku.filter(c => stdTotal(c) != null).sort((a, b) => a.localeCompare(b, 'en'));
+    state.sku = (top[0] || {}).c || allSku.filter(c => D.std[c]).sort()[0] || null;
+    state.calcSku = (top.find(r => stdTotal(r.c) != null) || {}).c || full[0] || null;
+    document.querySelectorAll('.baseTxt').forEach(e => e.textContent = D.baseTxt);
+    const li = D.lastImport;
+    $('hdrNote').textContent = `製造 → 充填 → 包裝 三段人時與直接人工標準成本。${D.baseTxt}。` +
+      (li ? `製成率資料最近一次匯入：${li.imported_at.slice(0, 10)}（${li.file_name}）。` : '');
+    init();
+    show('loading', false); show('app', true);
+    render();
+  } catch (e) {
+    if (e.status === 401) { clearSession(); show('loading', false); show('loginBox', true); return; }
+    $('loadMsg').textContent = e.message;
+  }
+}
+
+$('loginForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  $('loginErr').textContent = ''; $('loginBtn').disabled = true;
+  signIn($('acc').value, $('pw').value).then(start)
+    .catch(e => { $('loginErr').textContent = /Invalid login/i.test(e.message) ? '帳號或密碼不對' : e.message; })
+    .then(() => { $('loginBtn').disabled = false; });
+});
+$('logout').onclick = () => { clearSession(); location.reload(); };
+start();
+</script>
 </body>
 </html>
