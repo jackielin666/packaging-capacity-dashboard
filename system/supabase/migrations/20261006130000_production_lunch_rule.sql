@@ -105,6 +105,7 @@ commit;
 select
   production.stage_min('12:30', '16:00', null) = 210 as "12:30開工不扣 ✔",
   production.stage_min('07:00', '16:00', null) = 480 as "涵蓋午休扣60 ✔",
+  production.stage_min('09:00', '14:00', null) = 240 as "09:00–14:00扣60 ✔",
   production.stage_min('07:00', '12:10', null) = 310 as "做到12:10不扣 ✔",
   (select count(*) from production.labour_check where o_note is not null) as "全期O欄不同（應約3）",
   (select string_agg(ym || '：有效' || ok || '／異常' || invalid, '，' order by ym)
