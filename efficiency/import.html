@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>製成率資料匯入 · 品項全流程工時成本</title>
+<link rel="stylesheet" href="style.css">
+<script src="vendor/xlsx.full.min.js"></script>
+<style>
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 16px; }
+@media (max-width: 700px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; box-shadow: var(--shadow), var(--hl); color: var(--muted); font-size: 14px; }
+.step b { display: block; font-size: 16px; color: var(--ink-2); }
+.step.on { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); color: var(--ink-2); }
+.step.on b { color: var(--accent-2); }
+.step.done b::after { content: " ✓"; color: var(--good-ink); }
+.drop { display: block; border: 2px dashed var(--axis); border-radius: 12px; padding: 34px 16px; text-align: center; cursor: pointer; background: var(--surface); transition: .15s; }
+.drop:hover, .drop.drag { border-color: var(--accent); background: var(--accent-wash); }
+.drop .big { font-size: 19px; font-weight: 700; }
+.login { max-width: 420px; margin: 40px auto; }
+.login label { display: grid; gap: 4px; margin-bottom: 12px; font-size: 14px; color: var(--ink-2); }
+.login input { font: inherit; font-size: 16px; padding: 8px 10px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.btn { font: inherit; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 10px; padding: 10px 22px; cursor: pointer;
+  background: linear-gradient(145deg, #4a90e2, #2a78d6 45%, #1c5cab); box-shadow: 0 8px 20px -8px rgba(42,120,214,.85), inset 0 1px 0 rgba(255,255,255,.3); }
+.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.btn.ghost { color: var(--ink-2); background: var(--surface); border: 1px solid var(--axis); box-shadow: var(--hl); font-weight: 600; }
+.err { color: var(--crit); white-space: pre-line; font-size: 14.5px; margin-top: 8px; }
+.msg { white-space: pre-line; }
+tr.drop-row td { background: color-mix(in srgb, var(--crit) 9%, transparent); }
+tr.skip-row td { color: var(--muted); }
+.delta.up { color: var(--good-ink); } .delta.dn { color: var(--crit); font-weight: 700; }
+.bar-prog { height: 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; margin: 10px 0 4px; }
+.bar-prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .2s; }
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.confirm { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 15px; }
+.confirm input { margin-top: 5px; width: 18px; height: 18px; }
+.who { font-size: 14px; color: var(--ink-2); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4 5-4 5M10 7l4 5-4 5M16 7l4 5-4 5"/></svg></span>
+    <h1>製成率資料匯入</h1>
+    <span class="tag">品項全流程工時成本</span>
+    <div class="hdr-btns">
+      <a class="theme-btn" href="./" style="text-decoration:none">← 回儀表板</a>
+      <button class="theme-btn" id="themeBtn" type="button">深色／淺色</button>
+    </div>
+    <div class="hdr-note">每月初上傳一次最新的「產品製成率」Excel。檔案裡有的月份會<b>整月覆蓋</b>：同一份檔案上傳兩次，結果不變。</div>
+  </header>
+
+  <!-- 登入 -->
+  <section id="loginBox" class="card login hidden" style="margin-top:24px">
+    <div class="card-head"><div><h2>登入</h2><div class="sub">用包裝系統的同一組帳號。匯入限主管帳號。</div></div></div>
+    <form id="loginForm">
+      <label>帳號<input id="acc" autocomplete="username" required></label>
+      <label>密碼<input id="pw" type="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit" id="loginBtn" style="width:100%">登入</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </section>
+
+  <section id="app" class="hidden" style="margin-top:16px">
+    <div class="filters" style="justify-content:space-between">
+      <span class="who" id="who"></span>
+      <button class="tbl-btn" id="logout" type="button">登出</button>
+    </div>
+    <div class="steps" style="margin-top:16px">
+      <div class="step on" id="st1"><b>① 選擇檔案</b>產品製成率 Excel</div>
+      <div class="step" id="st2"><b>② 檢查差異</b>每月筆數比對</div>
+      <div class="step" id="st3"><b>③ 匯入</b>整月覆蓋</div>
+      <div class="step" id="st4"><b>④ 結果</b>檢核與紀錄</div>
+    </div>
+
+    <div id="notManager" class="card hidden" style="margin-bottom:16px"><div class="msg" id="notManagerMsg"></div></div>
+
+    <div class="grid">
+      <div class="card c12" id="pickCard">
+        <div class="card-head"><div><h2>① 選擇檔案</h2><div class="sub">需含「資料總表」與「工時」兩個分頁。檔案只在這台電腦解析，送出的只有表格內容。</div></div></div>
+        <label class="drop" id="drop" for="file">
+          <div class="big">點這裡選擇檔案，或把 Excel 拖進來</div>
+          <div class="note">.xlsx／.xlsm</div>
+          <input type="file" id="file" accept=".xlsx,.xlsm,.xls" class="hidden">
+        </label>
+        <div class="err" id="parseErr"></div>
+        <div id="parseInfo" class="note"></div>
+      </div>
+
+      <div class="card c12 hidden" id="diffCard">
+        <div class="card-head"><div><h2>② 檢查差異</h2>
+          <div class="sub">勾選的月份會被新檔<b>整月取代</b>。筆數減少超過 10% 的月份標紅，需要另外確認。</div></div>
+          <div class="tools"><button class="tbl-btn" id="selAll" type="button">全選</button><button class="tbl-btn" id="selRecent" type="button">只選最近 2 個月</button></div></div>
+        <div class="tblwrap" id="diffTbl"></div>
+        <div class="note" id="dbOnly"></div>
+        <label class="confirm hidden" id="dropConfirm"><input type="checkbox" id="dropOk"><span id="dropMsg"></span></label>
+        <div class="actions">
+          <button class="btn" id="go" type="button">③ 開始匯入</button>
+          <span class="note" id="goNote"></span>
+        </div>
+        <div id="prog" class="hidden"><div class="bar-prog"><i id="progBar"></i></div><div class="note" id="progTxt"></div></div>
+        <div class="err" id="importErr"></div>
+      </div>
+
+      <div class="card c12 hidden" id="resultCard">
+        <div class="card-head"><div><h2>④ 結果</h2><div class="sub" id="resultSub"></div></div></div>
+        <div class="tblwrap" id="resultTbl"></div>
+        <div class="note">「工時異常」＝資料不全，或自算人時與 Excel「生產時間×人數」不一致，這些列不納入計算，請回 Excel 修正後重新上傳。</div>
+      </div>
+
+      <div class="card c12">
+        <div class="card-head"><div><h2>最近匯入紀錄</h2><div class="sub">誰、什麼時候、哪個檔、覆蓋了哪些月份。</div></div></div>
+        <div class="tblwrap" id="hist"></div>
+      </div>
+    </div>
+  </section>
+  <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（扣 12:00–13:00 午休、加前置）。</footer>
+</div>
+
+<script src="core.js"></script>
+<script>
+'use strict';
+
+/* ══ Excel 解析（規則與 yield-worktime-stats 相同）══════════════ */
+function excelSerialToYMD(serial) {
+  var d = new Date(Math.round(serial) * 86400000 + Date.UTC(1899, 11, 30));
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
+}
+function ymdKey(o) { return o.y * 10000 + o.m * 100 + o.d; }
+function validYMD(y, m, d) { return m >= 1 && m <= 12 && d >= 1 && d <= new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+function iso(o) { return o.y + '-' + String(o.m).padStart(2, '0') + '-' + String(o.d).padStart(2, '0'); }
+/** 日期欄：Excel 序號、YYYY/M/D、民國年、無年份 M/D（以前後最近的完整日期推斷年份，跨年自動處理） */
+function parseDateColumn(raw) {
+  var n = raw.length, abs = new Array(n).fill(null), rel = new Array(n).fill(null), i;
+  for (i = 0; i < n; i++) {
+    var v = raw[i];
+    if (v == null) continue;
+    if (typeof v === 'number') { if (v > 20000 && v < 80000) abs[i] = excelSerialToYMD(v); continue; }
+    if (typeof v !== 'string') continue;
+    var parts = v.trim().replace(/[.\-年月]/g, '/').replace(/日/g, '').split(/[\/\s]/).filter(function (p) { return p !== '' && p.indexOf(':') < 0; });
+    var nums = parts.map(function (p) { return parseInt(p, 10); });
+    if (nums.some(isNaN)) continue;
+    if (nums.length === 3) {
+      var y = nums[0] < 1000 ? nums[0] + 1911 : nums[0];
+      if (validYMD(y, nums[1], nums[2])) abs[i] = { y: y, m: nums[1], d: nums[2] };
+    } else if (nums.length === 2) rel[i] = { m: nums[0], d: nums[1] };
+  }
+  var last = null;
+  for (i = 0; i < n; i++) {
+    if (abs[i]) { last = abs[i]; continue; }
+    if (rel[i] && last) {
+      for (var y1 of [last.y, last.y + 1]) {
+        if (!validYMD(y1, rel[i].m, rel[i].d)) continue;
+        var c = { y: y1, m: rel[i].m, d: rel[i].d };
+        if (ymdKey(c) >= ymdKey(last)) { abs[i] = c; last = c; break; }
+      }
+    }
+  }
+  var next = null;
+  for (i = n - 1; i >= 0; i--) {
+    if (abs[i]) { next = abs[i]; continue; }
+    if (rel[i] && next) {
+      for (var y2 of [next.y, next.y - 1]) {
+        if (!validYMD(y2, rel[i].m, rel[i].d)) continue;
+        var c2 = { y: y2, m: rel[i].m, d: rel[i].d };
+        if (ymdKey(c2) <= ymdKey(next)) { abs[i] = c2; next = c2; break; }
+      }
+    }
+  }
+  return abs.map(function (o) { return o ? iso(o) : null; });
+}
+function toNum(v) {
+  if (v == null) return null;
+  if (typeof v === 'number') return isFinite(v) ? v : null;
+  if (typeof v === 'string') { var s = v.trim().replace(/,/g, ''); if (!s) return null; var f = parseFloat(s); return isNaN(f) ? null : f; }
+  return null;
+}
+function toInt(v) { var n = toNum(v); return n == null ? null : Math.round(n); }
+/** 時刻／時長 → 分鐘：Excel 日內小數或 H:MM 字串 */
+function timeToMin(v) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number') { if (!isFinite(v)) return null; var f = v >= 1 ? v - Math.floor(v) : v; return Math.round(f * 1440); }
+  if (typeof v === 'string') {
+    var m = v.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (m) return (+m[1]) * 60 + (+m[2]) + (m[3] ? Math.round(+m[3] / 60) : 0);
+    var x = parseFloat(v); if (!isNaN(x) && x > 0 && x < 1) return Math.round(x * 1440);
+  }
+  return null;
+}
+function hhmm(min) { if (min == null) return null; min = Math.min(min, 1439); return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+function normHeader(v) { return v == null ? '' : String(v).replace(/\s/g, ''); }
+function findCol(headers, test, fallback) {
+  for (var i = 0; i < headers.length; i++) { var x = normHeader(headers[i]); if (x && test(x)) return i; }
+  return fallback;
+}
+var has = function () { var ks = [].slice.call(arguments); return function (x) { return ks.every(function (k) { return x.indexOf(k) >= 0; }); }; };
+function findSheet(wb, name) {
+  if (wb.Sheets[name]) return wb.Sheets[name];
+  var hit = wb.SheetNames.find(function (n) { return n.replace(/\s/g, '').indexOf(name) >= 0; });
+  return hit ? wb.Sheets[hit] : null;
+}
+function cellText(v) { return v == null ? '' : String(v).trim(); }
+function textOrNull(v) { var s = cellText(v); return s ? s : null; }
+
+function parseWorkbook(wb) {
+  var wsMain = findSheet(wb, '資料總表'), wsWork = findSheet(wb, '工時');
+  if (!wsMain || !wsWork) throw new Error('找不到「資料總表」或「工時」分頁。\n這個檔案的分頁有：' + wb.SheetNames.join('、'));
+  var out = { runs: [], labour: [], skipRuns: [], skipLabour: [] };
+
+  // ── 資料總表 ──
+  var rows = XLSX.utils.sheet_to_json(wsMain, { header: 1, defval: null, raw: true });
+  var hd = rows[0] || [];
+  var c = {
+    date: findCol(hd, has('日期'), 0), code: findCol(hd, has('料號'), 1), name: findCol(hd, has('品項'), 2),
+    pots: findCol(hd, has('鍋數'), 3), spec: findCol(hd, has('規格'), 4),
+    est: findCol(hd, has('半成品數', '預估'), 6), act: findCol(hd, has('半成品數', '實際'), 7),
+    semikg: findCol(hd, has('半成品重量'), 8), defects: findCol(hd, has('不良品數'), 14),
+    fg: findCol(hd, function (x) { return x.indexOf('成品數') === 0; }, 15), note: findCol(hd, has('備註'), 19)
+  };
+  var body = rows.slice(1), dates = parseDateColumn(body.map(function (r) { return r[c.date]; }));
+  var seq = {};
+  body.forEach(function (r, i) {
+    var code = cellText(r[c.code]);
+    if (!code || code === '料號') return;
+    if (!dates[i]) { out.skipRuns.push({ row: i + 2, code: code, why: '日期無法辨識：' + cellText(r[c.date]) }); return; }
+    var k = code + '|' + dates[i]; seq[k] = (seq[k] || 0) + 1;
+    out.runs.push({ prod_date: dates[i], sku_code: code, seq: seq[k], sku_name: textOrNull(r[c.name]),
+      pots: toNum(r[c.pots]), spec_kg: toNum(r[c.spec]), semi_est: toNum(r[c.est]), semi_act: toNum(r[c.act]),
+      semi_kg: toNum(r[c.semikg]), fg_act: toInt(r[c.fg]), defects: toInt(r[c.defects]),
+      note: textOrNull(r[c.note]), src_row: i + 2 });
+  });
+
+  // ── 工時（製造 E–H、充填 J–M 為固定版面，與製成率系統相同）──
+  var wr = XLSX.utils.sheet_to_json(wsWork, { header: 1, defval: null, raw: true });
+  var wh = wr[0] || [];
+  var o = findCol(wh, has('生產時間', '人數'), 14), tot = findCol(wh, has('總生產時間'), 17);
+  var wbody = wr.slice(1), wdates = parseDateColumn(wbody.map(function (r) { return r[0]; }));
+  var wseq = {};
+  wbody.forEach(function (r, i) {
+    var code = cellText(r[1]);
+    if (!code || code === '料號') return;
+    if (!wdates[i]) { out.skipLabour.push({ row: i + 2, code: code, why: '日期無法辨識：' + cellText(r[0]) }); return; }
+    var k = code + '|' + wdates[i]; wseq[k] = (wseq[k] || 0) + 1;
+    out.labour.push({ prod_date: wdates[i], sku_code: code, seq: wseq[k], sku_name: textOrNull(r[2]), pots: toNum(r[3]),
+      mfg_people: toNum(r[4]), mfg_prep_min: timeToMin(r[5]), mfg_start: hhmm(timeToMin(r[6])), mfg_end: hhmm(timeToMin(r[7])),
+      fill_people: toNum(r[9]), fill_prep_min: timeToMin(r[10]), fill_start: hhmm(timeToMin(r[11])), fill_end: hhmm(timeToMin(r[12])),
+      listed_person_min: toNum(r[o]), listed_total_min: toNum(r[tot]), src_row: i + 2 });
+  });
+  return out;
+}
+
+/* ══ 畫面流程 ══════════════════════════════════════════════ */
+var S = { me: null, file: null, parsed: null, current: {}, months: [], selected: {} };
+var CHUNK = 4;      // 一次送幾個月；每次呼叫都是獨立交易
+var DROP = 0.9;     // 筆數少於原本 90% 要另外確認
+
+function step(n) { for (var i = 1; i <= 4; i++) { $('st' + i).classList.toggle('on', i === n); $('st' + i).classList.toggle('done', i < n); } }
+function show(id, on) { $(id).classList.toggle('hidden', !on); }
+
+function start() {
+  if (!loadSession()) { show('loginBox', true); show('app', false); return; }
+  whoAmI().then(function (me) {
+    if (!me) throw new Error('這個帳號沒有系統角色，請洽 Jackie 哥。');
+    S.me = me;
+    show('loginBox', false); show('app', true);
+    $('who').textContent = '登入者：' + me.display_name + '（' + ({ manager: '主管', operator: '輸入專員', viewer: '檢視者' }[me.role] || me.role) + '）';
+    var mgr = me.role === 'manager';
+    show('notManager', !mgr); show('pickCard', mgr);
+    if (!mgr) $('notManagerMsg').textContent = '只有主管帳號（admin000、admin001）可以匯入製成率資料。\n你可以在下方看到最近的匯入紀錄。';
+    loadHistory();
+  }).catch(function (e) {
+    if (e.status === 401) { clearSession(); show('loginBox', true); show('app', false); return; }
+    show('loginBox', true); $('loginErr').textContent = e.message;
+  });
+}
+
+$('loginForm').addEventListener('submit', function (ev) {
+  ev.preventDefault();
+  $('loginErr').textContent = ''; $('loginBtn').disabled = true;
+  signIn($('acc').value, $('pw').value).then(start)
+    .catch(function (e) { $('loginErr').textContent = /Invalid login/i.test(e.message) ? '帳號或密碼不對' : e.message; })
+    .then(function () { $('loginBtn').disabled = false; });
+});
+$('logout').onclick = function () { clearSession(); location.reload(); };
+$('themeBtn').onclick = toggleTheme;
+
+// ── ① 選檔 ──
+var drop = $('drop');
+['dragover', 'dragenter'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('drag'); }); });
+['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('drag'); }); });
+drop.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); });
+$('file').addEventListener('change', function (e) { if (e.target.files[0]) readFile(e.target.files[0]); });
+
+function readFile(f) {
+  $('parseErr').textContent = ''; $('parseInfo').textContent = '解析中…';
+  show('diffCard', false); show('resultCard', false); step(1);
+  var rd = new FileReader();
+  rd.onload = function (e) {
+    try {
+      var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: false });
+      S.file = f.name; S.parsed = parseWorkbook(wb);
+    } catch (err) { $('parseErr').textContent = '檔案解析失敗：' + err.message; $('parseInfo').textContent = ''; return; }
+    var p = S.parsed;
+    $('parseInfo').replaceChildren(h('b', null, f.name), `：資料總表 ${fmt(p.runs.length)} 列、工時 ${fmt(p.labour.length)} 列`,
+      p.skipRuns.length + p.skipLabour.length ? `；${p.skipRuns.length + p.skipLabour.length} 列日期無法辨識，不匯入（見下方差異表下的說明）` : '');
+    loadDiff();
+  };
+  rd.readAsArrayBuffer(f);
+}
+
+// ── ② 差異 ──
+function countByMonth(p) {
+  var m = {};
+  function g(k) { return m[k] || (m[k] = { runs: 0, fg: 0, labour: 0 }); }
+  p.runs.forEach(function (r) { var x = g(r.prod_date.slice(0, 7)); x.runs++; if (r.fg_act != null && r.fg_act > 0) x.fg++; });
+  p.labour.forEach(function (r) { g(r.prod_date.slice(0, 7)).labour++; });
+  return m;
+}
+function loadDiff() {
+  api('month_counts?select=ym,runs,fg_filled,labour&order=ym').then(function (rows) {
+    S.current = {}; (rows || []).forEach(function (r) { S.current[r.ym] = r; });
+    S.newCounts = countByMonth(S.parsed);
+    S.months = Object.keys(S.newCounts).sort();
+    S.selected = {}; S.months.forEach(function (m) { S.selected[m] = true; });
+    renderDiff(); show('diffCard', true); step(2);
+  }).catch(function (e) { $('parseErr').textContent = '讀取資料庫現況失敗：' + e.message; });
+}
+function isDrop(m) {
+  var cur = S.current[m], nw = S.newCounts[m];
+  return cur && ((cur.runs > 0 && nw.runs < cur.runs * DROP) || (cur.labour > 0 && nw.labour < cur.labour * DROP));
+}
+function deltaCell(a, b) {
+  if (a == null) return h('span', { class: 'delta up' }, '新增');
+  var d = b - a;
+  return h('span', { class: 'delta ' + (d < 0 && b < a * DROP ? 'dn' : d > 0 ? 'up' : '') }, d === 0 ? '不變' : (d > 0 ? '+' : '') + fmt(d));
+}
+function renderDiff() {
+  var tb = h('tbody');
+  S.months.forEach(function (m) {
+    var cur = S.current[m], nw = S.newCounts[m], dr = isDrop(m);
+    var cb = h('input', { type: 'checkbox', 'aria-label': m + ' 匯入' }); cb.checked = !!S.selected[m];
+    cb.onchange = function () { S.selected[m] = cb.checked; renderDiff(); };
+    tb.append(h('tr', { class: (dr ? 'drop-row' : '') + (S.selected[m] ? '' : ' skip-row') },
+      h('td', null, cb), h('td', null, m),
+      h('td', { class: 'n' }, cur ? fmt(cur.runs) : '–'), h('td', { class: 'n' }, fmt(nw.runs)), h('td', { class: 'n' }, deltaCell(cur && cur.runs, nw.runs)),
+      h('td', { class: 'n' }, nw.runs ? fmt(nw.fg / nw.runs * 100) + '%' : '–'),
+      h('td', { class: 'n' }, cur ? fmt(cur.labour) : '–'), h('td', { class: 'n' }, fmt(nw.labour)), h('td', { class: 'n' }, deltaCell(cur && cur.labour, nw.labour))));
+  });
+  $('diffTbl').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
+    h('th', null, '匯入'), h('th', null, '月份'), h('th', { class: 'n' }, '資料總表 目前'), h('th', { class: 'n' }, '新檔'), h('th', { class: 'n' }, '差異'),
+    h('th', { class: 'n' }, '成品數已填'), h('th', { class: 'n' }, '工時 目前'), h('th', { class: 'n' }, '新檔'), h('th', { class: 'n' }, '差異'))), tb));
+  var dbOnly = Object.keys(S.current).filter(function (m) { return !S.newCounts[m]; });
+  var skipped = S.parsed.skipRuns.concat(S.parsed.skipLabour);
+  $('dbOnly').replaceChildren(
+    dbOnly.length ? '資料庫有、新檔沒有的月份（不會被動到）：' + dbOnly.join('、') + '。' : '',
+    skipped.length ? h('div', null, '日期無法辨識、未匯入的列：' + skipped.slice(0, 8).map(function (s) { return '第 ' + s.row + ' 列 ' + s.code; }).join('、') + (skipped.length > 8 ? ' 等 ' + skipped.length + ' 列' : '')) : '');
+  var sel = S.months.filter(function (m) { return S.selected[m]; }), drops = sel.filter(isDrop);
+  show('dropConfirm', drops.length > 0);
+  if (drops.length) $('dropMsg').textContent = '我確認 ' + drops.join('、') + ' 的筆數比資料庫少了 10% 以上，是 Excel 刪除或修正過資料，不是上傳錯檔。';
+  else $('dropOk').checked = false;
+  updateGo();
+}
+function updateGo() {
+  var sel = S.months.filter(function (m) { return S.selected[m]; });
+  var needOk = sel.some(isDrop) && !$('dropOk').checked;
+  $('go').disabled = !sel.length || needOk;
+  $('goNote').textContent = !sel.length ? '請至少勾選一個月份' : needOk ? '請先勾選上方的確認' : '將取代 ' + sel.length + ' 個月份（' + sel[0] + ' ～ ' + sel[sel.length - 1] + '）';
+}
+$('dropOk').onchange = updateGo;
+$('selAll').onclick = function () { S.months.forEach(function (m) { S.selected[m] = true; }); renderDiff(); };
+$('selRecent').onclick = function () { var r = S.months.slice(-2); S.months.forEach(function (m) { S.selected[m] = r.indexOf(m) >= 0; }); renderDiff(); };
+
+// ── ③ 匯入：分批送出，每批是一個交易 ──
+$('go').onclick = function () {
+  var sel = S.months.filter(function (m) { return S.selected[m]; });
+  var chunks = []; for (var i = 0; i < sel.length; i += CHUNK) chunks.push(sel.slice(i, i + CHUNK));
+  $('go').disabled = true; $('importErr').textContent = ''; show('prog', true); step(3);
+  var done = [], totals = { runs: 0, labour: 0 };
+  (function next(k) {
+    $('progBar').style.width = (k / chunks.length * 100) + '%';
+    if (k === chunks.length) { $('progTxt').textContent = '完成'; finish(done, totals); return; }
+    var ms = chunks[k];
+    $('progTxt').textContent = '匯入中 ' + ms[0] + (ms.length > 1 ? ' ～ ' + ms[ms.length - 1] : '') + '（第 ' + (k + 1) + ' / ' + chunks.length + ' 批）';
+    var inM = function (r) { return ms.indexOf(r.prod_date.slice(0, 7)) >= 0; };
+    api('rpc/import_months', { method: 'POST', body: JSON.stringify({
+      p_file: S.file, p_months: ms, p_runs: S.parsed.runs.filter(inM), p_labour: S.parsed.labour.filter(inM) }) })
+      .then(function (res) { done = done.concat(ms); totals.runs += res.runs; totals.labour += res.labour; next(k + 1); })
+      .catch(function (e) {
+        $('importErr').textContent = '第 ' + (k + 1) + ' 批（' + ms.join('、') + '）失敗，這一批已全部取消、資料庫維持原樣：\n' + e.message
+          + (done.length ? '\n前面已完成的月份：' + done.join('、') + '（已成功寫入）' : '');
+        $('go').disabled = false; if (done.length) finish(done, totals);
+      });
+  })(0);
+};
+
+// ── ④ 結果 ──
+function finish(months, totals) {
+  step(4);
+  Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty&order=ym')])
+    .then(function (res) {
+      var mc = {}, ls = {}; res[0].forEach(function (r) { mc[r.ym] = r; }); res[1].forEach(function (r) { ls[r.ym] = r; });
+      $('resultSub').textContent = '已匯入 ' + months.length + ' 個月份：資料總表 ' + fmt(totals.runs) + ' 列、工時 ' + fmt(totals.labour) + ' 列。';
+      var rows = months.slice().reverse().map(function (m) {
+        var a = mc[m] || {}, b = ls[m] || {};
+        return h('tr', null, h('td', null, m), h('td', { class: 'n' }, fmt(a.runs)),
+          h('td', { class: 'n' }, a.runs ? h('span', { class: 'st fixed ' + (a.fg_filled / a.runs >= 0.95 ? 'good' : 'warn') }, h('span', null, fmt(a.fg_filled / a.runs * 100) + '%')) : '–'),
+          h('td', { class: 'n' }, fmt(b.ok)), h('td', { class: 'n' }, b.invalid ? h('span', { class: 'st fixed warn' }, h('span', null, fmt(b.invalid))) : '0'), h('td', { class: 'n' }, fmt(b.empty)));
+      });
+      $('resultTbl').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
+        h('th', null, '月份'), h('th', { class: 'n' }, '資料總表'), h('th', { class: 'n' }, '結案率（成品數已填）'),
+        h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'))), h('tbody', null, rows)));
+      show('resultCard', true); loadHistory();
+    }).catch(function (e) { $('importErr').textContent = '匯入完成，但讀取結果失敗：' + e.message; });
+}
+
+function loadHistory() {
+  Promise.all([api('imports?select=id,file_name,months,runs_rows,labour_rows,imported_by,imported_at&order=id.desc&limit=8'),
+               api('members?select=user_id,display_name', { schema: 'packing' }).catch(function () { return []; })])
+    .then(function (res) {
+      var who = {}; res[1].forEach(function (m) { who[m.user_id] = m.display_name; });
+      if (!res[0].length) { $('hist').replaceChildren(h('div', { class: 'empty' }, '還沒有匯入紀錄')); return; }
+      $('hist').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
+        h('th', null, '時間'), h('th', null, '匯入者'), h('th', null, '檔案'), h('th', null, '月份'), h('th', { class: 'n' }, '資料總表'), h('th', { class: 'n' }, '工時'))),
+        h('tbody', null, res[0].map(function (r) {
+          var ms = (r.months || []).slice().sort();
+          return h('tr', null, h('td', null, new Date(r.imported_at).toLocaleString('zh-TW', { hour12: false })), h('td', null, who[r.imported_by] || '–'),
+            h('td', null, r.file_name), h('td', null, ms.length > 2 ? ms[0] + ' ～ ' + ms[ms.length - 1] + '（' + ms.length + ' 個月）' : ms.join('、')),
+            h('td', { class: 'n' }, fmt(r.runs_rows)), h('td', { class: 'n' }, fmt(r.labour_rows)));
+        }))));
+    }).catch(function (e) { $('hist').replaceChildren(h('div', { class: 'err' }, '讀取匯入紀錄失敗：' + e.message)); });
+}
+
+start();
+</script>
+</body>
+</html>
