@@ -17,14 +17,6 @@
 .drop { display: block; border: 2px dashed var(--axis); border-radius: 12px; padding: 34px 16px; text-align: center; cursor: pointer; background: var(--surface); transition: .15s; }
 .drop:hover, .drop.drag { border-color: var(--accent); background: var(--accent-wash); }
 .drop .big { font-size: 19px; font-weight: 700; }
-.login { max-width: 420px; margin: 40px auto; }
-.login label { display: grid; gap: 4px; margin-bottom: 12px; font-size: 14px; color: var(--ink-2); }
-.login input { font: inherit; font-size: 16px; padding: 8px 10px; border: 1px solid var(--axis); border-radius: 8px; background: var(--surface); color: var(--ink); }
-.btn { font: inherit; font-size: 16px; font-weight: 700; color: #fff; border: 0; border-radius: 10px; padding: 10px 22px; cursor: pointer;
-  background: linear-gradient(145deg, #4a90e2, #2a78d6 45%, #1c5cab); box-shadow: 0 8px 20px -8px rgba(42,120,214,.85), inset 0 1px 0 rgba(255,255,255,.3); }
-.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
-.btn.ghost { color: var(--ink-2); background: var(--surface); border: 1px solid var(--axis); box-shadow: var(--hl); font-weight: 600; }
-.err { color: var(--crit); white-space: pre-line; font-size: 14.5px; margin-top: 8px; }
 .msg { white-space: pre-line; }
 tr.drop-row td { background: color-mix(in srgb, var(--crit) 9%, transparent); }
 tr.skip-row td { color: var(--muted); }
@@ -34,8 +26,6 @@ tr.skip-row td { color: var(--muted); }
 .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 .confirm { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 15px; }
 .confirm input { margin-top: 5px; width: 18px; height: 18px; }
-.who { font-size: 14px; color: var(--ink-2); }
-.hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -106,7 +96,7 @@ tr.skip-row td { color: var(--muted); }
       <div class="card c12 hidden" id="resultCard">
         <div class="card-head"><div><h2>④ 結果</h2><div class="sub" id="resultSub"></div></div></div>
         <div class="tblwrap" id="resultTbl"></div>
-        <div class="note">「工時異常」＝資料不全，或自算人時與 Excel「生產時間×人數」不一致，這些列不納入計算，請回 Excel 修正後重新上傳。</div>
+        <div class="note">「工時異常」＝時間或人數缺漏、結束早於開始，這些列不納入計算，請回 Excel 修正後重新上傳。人時一律依填入的起訖時間計算：生產時段完整涵蓋 12:00–13:00 才扣 60 分，12 點多開工或做到 12 點多都照實計入。「O 欄不同」只是提醒 Excel 的「生產時間×人數」可能打錯，不影響計算。</div>
       </div>
 
       <div class="card c12">
@@ -115,7 +105,7 @@ tr.skip-row td { color: var(--muted); }
       </div>
     </div>
   </section>
-  <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（扣 12:00–13:00 午休、加前置）。</footer>
+  <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（完整涵蓋 12:00–13:00 才扣 60 分；加前置）。</footer>
 </div>
 
 <script src="core.js"></script>
@@ -397,7 +387,7 @@ $('go').onclick = function () {
 // ── ④ 結果 ──
 function finish(months, totals) {
   step(4);
-  Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty&order=ym')])
+  Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty,o_mismatch&order=ym')])
     .then(function (res) {
       var mc = {}, ls = {}; res[0].forEach(function (r) { mc[r.ym] = r; }); res[1].forEach(function (r) { ls[r.ym] = r; });
       $('resultSub').textContent = '已匯入 ' + months.length + ' 個月份：資料總表 ' + fmt(totals.runs) + ' 列、工時 ' + fmt(totals.labour) + ' 列。';
@@ -405,11 +395,11 @@ function finish(months, totals) {
         var a = mc[m] || {}, b = ls[m] || {};
         return h('tr', null, h('td', null, m), h('td', { class: 'n' }, fmt(a.runs)),
           h('td', { class: 'n' }, a.runs ? h('span', { class: 'st fixed ' + (a.fg_filled / a.runs >= 0.95 ? 'good' : 'warn') }, h('span', null, fmt(a.fg_filled / a.runs * 100) + '%')) : '–'),
-          h('td', { class: 'n' }, fmt(b.ok)), h('td', { class: 'n' }, b.invalid ? h('span', { class: 'st fixed warn' }, h('span', null, fmt(b.invalid))) : '0'), h('td', { class: 'n' }, fmt(b.empty)));
+          h('td', { class: 'n' }, fmt(b.ok)), h('td', { class: 'n' }, b.invalid ? h('span', { class: 'st fixed warn' }, h('span', null, fmt(b.invalid))) : '0'), h('td', { class: 'n' }, fmt(b.empty)), h('td', { class: 'n' }, b.o_mismatch ? fmt(b.o_mismatch) : '0'));
       });
       $('resultTbl').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
         h('th', null, '月份'), h('th', { class: 'n' }, '資料總表'), h('th', { class: 'n' }, '結案率（成品數已填）'),
-        h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'))), h('tbody', null, rows)));
+        h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'), h('th', { class: 'n' }, 'O 欄不同（僅提醒）'))), h('tbody', null, rows)));
       show('resultCard', true); loadHistory();
     }).catch(function (e) { $('importErr').textContent = '匯入完成，但讀取結果失敗：' + e.message; });
 }
