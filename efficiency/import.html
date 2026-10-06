@@ -106,7 +106,7 @@ tr.skip-row td { color: var(--muted); }
       <div class="card c12 hidden" id="resultCard">
         <div class="card-head"><div><h2>④ 結果</h2><div class="sub" id="resultSub"></div></div></div>
         <div class="tblwrap" id="resultTbl"></div>
-        <div class="note">「工時異常」＝資料不全，或自算人時與 Excel「生產時間×人數」不一致，這些列不納入計算，請回 Excel 修正後重新上傳。</div>
+        <div class="note">「工時異常」＝時間或人數缺漏、結束早於開始，這些列不納入計算，請回 Excel 修正後重新上傳。人時一律依填入的起訖時間計算（午休 12:00–13:00 扣實際重疊）；「O 欄不同」只是提醒 Excel 的「生產時間×人數」公式可能有誤，不影響計算。</div>
       </div>
 
       <div class="card c12">
@@ -397,7 +397,7 @@ $('go').onclick = function () {
 // ── ④ 結果 ──
 function finish(months, totals) {
   step(4);
-  Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty&order=ym')])
+  Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty,o_mismatch&order=ym')])
     .then(function (res) {
       var mc = {}, ls = {}; res[0].forEach(function (r) { mc[r.ym] = r; }); res[1].forEach(function (r) { ls[r.ym] = r; });
       $('resultSub').textContent = '已匯入 ' + months.length + ' 個月份：資料總表 ' + fmt(totals.runs) + ' 列、工時 ' + fmt(totals.labour) + ' 列。';
@@ -405,11 +405,11 @@ function finish(months, totals) {
         var a = mc[m] || {}, b = ls[m] || {};
         return h('tr', null, h('td', null, m), h('td', { class: 'n' }, fmt(a.runs)),
           h('td', { class: 'n' }, a.runs ? h('span', { class: 'st fixed ' + (a.fg_filled / a.runs >= 0.95 ? 'good' : 'warn') }, h('span', null, fmt(a.fg_filled / a.runs * 100) + '%')) : '–'),
-          h('td', { class: 'n' }, fmt(b.ok)), h('td', { class: 'n' }, b.invalid ? h('span', { class: 'st fixed warn' }, h('span', null, fmt(b.invalid))) : '0'), h('td', { class: 'n' }, fmt(b.empty)));
+          h('td', { class: 'n' }, fmt(b.ok)), h('td', { class: 'n' }, b.invalid ? h('span', { class: 'st fixed warn' }, h('span', null, fmt(b.invalid))) : '0'), h('td', { class: 'n' }, fmt(b.empty)), h('td', { class: 'n' }, b.o_mismatch ? fmt(b.o_mismatch) : '0'));
       });
       $('resultTbl').replaceChildren(h('table', { class: 't' }, h('thead', null, h('tr', null,
         h('th', null, '月份'), h('th', { class: 'n' }, '資料總表'), h('th', { class: 'n' }, '結案率（成品數已填）'),
-        h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'))), h('tbody', null, rows)));
+        h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'), h('th', { class: 'n' }, 'O 欄不同（僅提醒）'))), h('tbody', null, rows)));
       show('resultCard', true); loadHistory();
     }).catch(function (e) { $('importErr').textContent = '匯入完成，但讀取結果失敗：' + e.message; });
 }

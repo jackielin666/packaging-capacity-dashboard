@@ -67,7 +67,7 @@ def router(role, current, rpc_fail=False):
             body = json.loads(r.request.post_data); calls.append(body)
             if rpc_fail: return r.fulfill(status=400, json={"message": "有資料列的日期不在這次匯入的月份內，已全部取消"})
             return r.fulfill(json={"import_id": 1, "runs": len(body["p_runs"]), "labour": len(body["p_labour"]), "runs_deleted": 0, "labour_deleted": 0})
-        if "/rest/v1/labour_status_by_month" in u: return r.fulfill(json=[{"ym": "2026-01", "ok": 2, "invalid": 0, "empty": 0}])
+        if "/rest/v1/labour_status_by_month" in u: return r.fulfill(json=[{"ym": "2026-01", "ok": 2, "invalid": 0, "empty": 0, "o_mismatch": 1}])
         if "/rest/v1/imports" in u: return r.fulfill(json=[{"id": 1, "file_name": "t.xlsx", "months": ["2026-01", "2025-12"], "runs_rows": 6, "labour_rows": 3, "imported_by": "u-1", "imported_at": "2026-10-06T08:00:00Z"}])
         return r.fulfill(status=404, body="{}")
     return route, calls
@@ -135,6 +135,7 @@ with tempfile.TemporaryDirectory() as tmp, sync_playwright() as p:
     check("B2011 前置 00:40 → 40 分", lab[("B2011", "2026-01-02")]["mfg_prep_min"] == 40)
     check("結果顯示", "已匯入 2 個月份" in pg.inner_text("#resultSub"), pg.inner_text("#resultSub"))
     check("步驟停在 ④", "on" in pg.get_attribute("#st4", "class"))
+    check("結果表列出 O 欄不同（僅提醒）", "O 欄不同" in pg.inner_text("#resultTbl"), pg.inner_text("#resultTbl")[:200])
     check("沒有 JS 錯誤", not errs, errs[:3])
 
     print("── 主管：資料庫拒絕 ──")
