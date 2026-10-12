@@ -15,8 +15,26 @@
 .step.on b { color: var(--accent-2); }
 .step.done b::after { content: " ✓"; color: var(--good-ink); }
 .drop { display: block; border: 2px dashed var(--axis); border-radius: 12px; padding: 34px 16px; text-align: center; cursor: pointer; background: var(--surface); transition: .15s; }
-.drop:hover, .drop.drag { border-color: var(--accent); background: var(--accent-wash); }
+.drop:hover { border-color: var(--accent); background: var(--accent-wash); }
 .drop .big { font-size: 19px; font-weight: 700; }
+.drop .ico { font-size: 30px; line-height: 1; margin-bottom: 6px; }
+/* 拖曳經過：藍色實線、加粗、放大 */
+.drop.drag { border: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); transform: scale(1.015);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
+.drop.drag .big { color: var(--accent-2); }
+/* 解析中、已讀取、失敗 */
+.drop.busy { border-style: solid; border-color: var(--accent); }
+.drop.loaded { border: 2px solid var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); }
+.drop.loaded .big { color: var(--good-ink); }
+.drop.bad { border: 2px solid var(--crit); background: color-mix(in srgb, var(--crit) 8%, var(--surface)); }
+/* 匯入按鈕：檔案讀完後固定在右下角，不用捲動 */
+.actions.float { position: fixed; right: 24px; bottom: 24px; z-index: 50; margin: 0; max-width: min(520px, calc(100vw - 48px));
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px;
+  box-shadow: 0 14px 34px -10px rgba(0,0,0,.35), var(--hl); }
+.actions.float .note { flex: 1 1 200px; }
+.actions .jump { color: var(--accent-2); cursor: pointer; text-decoration: underline; }
+@media (max-width: 600px) { .actions.float { left: 12px; right: 12px; bottom: 12px; max-width: none; } }
+body.has-float { padding-bottom: 110px; }
 .msg { white-space: pre-line; }
 tr.drop-row td { background: color-mix(in srgb, var(--crit) 9%, transparent); }
 tr.skip-row td { color: var(--muted); }
@@ -70,8 +88,9 @@ tr.skip-row td { color: var(--muted); }
       <div class="card c12" id="pickCard">
         <div class="card-head"><div><h2>① 選擇檔案</h2><div class="sub">需含「資料總表」與「工時」兩個分頁。檔案只在這台電腦解析，送出的只有表格內容。</div></div></div>
         <label class="drop" id="drop" for="file">
-          <div class="big">點這裡選擇檔案，或把 Excel 拖進來</div>
-          <div class="note">.xlsx／.xlsm</div>
+          <div class="ico" id="dropIco" aria-hidden="true">📄</div>
+          <div class="big" id="dropTitle">點這裡選擇檔案，或把 Excel 拖進來</div>
+          <div class="note" id="dropSub">.xlsx／.xlsm</div>
           <input type="file" id="file" accept=".xlsx,.xlsm,.xls" class="hidden">
         </label>
         <div class="err" id="parseErr"></div>
@@ -85,7 +104,7 @@ tr.skip-row td { color: var(--muted); }
         <div class="tblwrap" id="diffTbl"></div>
         <div class="note" id="dbOnly"></div>
         <label class="confirm hidden" id="dropConfirm"><input type="checkbox" id="dropOk"><span id="dropMsg"></span></label>
-        <div class="actions">
+        <div class="actions" id="actBar">
           <button class="btn" id="go" type="button">③ 開始匯入</button>
           <span class="note" id="goNote"></span>
         </div>
@@ -275,25 +294,55 @@ $('loginForm').addEventListener('submit', function (ev) {
 $('logout').onclick = function () { clearSession(); location.reload(); };
 $('themeBtn').onclick = toggleTheme;
 
+// 匯入按鈕列：檔案讀完後固定在右下角
+function floatBar(on) { $('actBar').classList.toggle('float', on); document.body.classList.toggle('has-float', on); }
+
 // ── ① 選檔 ──
-var drop = $('drop');
-['dragover', 'dragenter'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('drag'); }); });
-['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('drag'); }); });
-drop.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); });
+var drop = $('drop'), dragN = 0, DROP_IDLE = { ico: '📄', title: '點這裡選擇檔案，或把 Excel 拖進來', sub: '.xlsx／.xlsm' };
+function dropState(cls, ico, title, sub) {
+  drop.classList.remove('busy', 'loaded', 'bad'); if (cls) drop.classList.add(cls);
+  $('dropIco').textContent = ico; $('dropTitle').textContent = title; $('dropSub').textContent = sub;
+}
+var dropSaved = null;
+drop.addEventListener('dragenter', function (e) {
+  e.preventDefault();
+  if (dragN++ === 0) {
+    dropSaved = [$('dropIco').textContent, $('dropTitle').textContent, $('dropSub').textContent];
+    drop.classList.add('drag'); $('dropIco').textContent = '⬇'; $('dropTitle').textContent = '放開即可讀取檔案'; $('dropSub').textContent = '';
+  }
+});
+drop.addEventListener('dragover', function (e) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+drop.addEventListener('dragleave', function () {
+  if (--dragN > 0) return;
+  dragN = 0; drop.classList.remove('drag');
+  if (dropSaved) { $('dropIco').textContent = dropSaved[0]; $('dropTitle').textContent = dropSaved[1]; $('dropSub').textContent = dropSaved[2]; }
+});
+drop.addEventListener('drop', function (e) {
+  e.preventDefault(); dragN = 0; drop.classList.remove('drag');
+  if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+  else if (dropSaved) { $('dropIco').textContent = dropSaved[0]; $('dropTitle').textContent = dropSaved[1]; $('dropSub').textContent = dropSaved[2]; }
+});
+['dragover', 'drop'].forEach(function (t) { window.addEventListener(t, function (e) { if (!drop.contains(e.target)) e.preventDefault(); }); });
 $('file').addEventListener('change', function (e) { if (e.target.files[0]) readFile(e.target.files[0]); });
 
 function readFile(f) {
-  $('parseErr').textContent = ''; $('parseInfo').textContent = '解析中…';
-  show('diffCard', false); show('resultCard', false); step(1);
+  $('parseErr').textContent = ''; $('parseInfo').textContent = '';
+  dropState('busy', '⏳', '讀取中…', f.name);
+  floatBar(false); show('diffCard', false); show('resultCard', false); step(1);
   var rd = new FileReader();
   rd.onload = function (e) {
     try {
       var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: false });
       S.file = f.name; S.parsed = parseWorkbook(wb);
-    } catch (err) { $('parseErr').textContent = '檔案解析失敗：' + err.message; $('parseInfo').textContent = ''; return; }
+    } catch (err) {
+      $('parseErr').textContent = '檔案解析失敗：' + err.message; $('parseInfo').textContent = '';
+      dropState('bad', '✕', '這個檔案讀不到', f.name + '　·　點這裡改選其他檔案'); return;
+    }
     var p = S.parsed;
-    $('parseInfo').replaceChildren(h('b', null, f.name), `：資料總表 ${fmt(p.runs.length)} 列、工時 ${fmt(p.labour.length)} 列`,
-      p.skipRuns.length + p.skipLabour.length ? `；${p.skipRuns.length + p.skipLabour.length} 列日期無法辨識，不匯入（見下方差異表下的說明）` : '');
+    dropState('loaded', '✓', '已讀取：' + f.name, `資料總表 ${fmt(p.runs.length)} 列、工時 ${fmt(p.labour.length)} 列　·　點這裡可改選其他檔案`);
+    // 檔名與列數已顯示在綠框裡；這裡只留需要注意的提醒
+    $('parseInfo').textContent = p.skipRuns.length + p.skipLabour.length
+      ? `⚠ ${p.skipRuns.length + p.skipLabour.length} 列日期無法辨識，不匯入（見下方差異表下的說明）` : '';
     loadDiff();
   };
   rd.readAsArrayBuffer(f);
@@ -313,7 +362,7 @@ function loadDiff() {
     S.newCounts = countByMonth(S.parsed);
     S.months = Object.keys(S.newCounts).sort();
     S.selected = {}; S.months.forEach(function (m) { S.selected[m] = true; });
-    renderDiff(); show('diffCard', true); step(2);
+    renderDiff(); show('diffCard', true); step(2); floatBar(true);
   }).catch(function (e) { $('parseErr').textContent = '讀取資料庫現況失敗：' + e.message; });
 }
 function isDrop(m) {
@@ -355,7 +404,10 @@ function updateGo() {
   var sel = S.months.filter(function (m) { return S.selected[m]; });
   var needOk = sel.some(isDrop) && !$('dropOk').checked;
   $('go').disabled = !sel.length || needOk;
-  $('goNote').textContent = !sel.length ? '請至少勾選一個月份' : needOk ? '請先勾選上方的確認' : '將取代 ' + sel.length + ' 個月份（' + sel[0] + ' ～ ' + sel[sel.length - 1] + '）';
+  $('go').textContent = sel.length ? '③ 匯入 ' + sel.length + ' 個月份' : '③ 開始匯入';
+  if (!sel.length) $('goNote').textContent = '請至少勾選一個月份';
+  else if (needOk) $('goNote').replaceChildren('筆數大減的月份需要先確認：', h('span', { class: 'jump', onclick: function () { $('dropConfirm').scrollIntoView({ behavior: 'smooth', block: 'center' }); } }, '前往勾選 ↑'));
+  else $('goNote').textContent = '將取代 ' + sel.length + ' 個月份（' + sel[0] + ' ～ ' + sel[sel.length - 1] + '）';
 }
 $('dropOk').onchange = updateGo;
 $('selAll').onclick = function () { S.months.forEach(function (m) { S.selected[m] = true; }); renderDiff(); };
@@ -369,6 +421,7 @@ $('go').onclick = function () {
   var done = [], totals = { runs: 0, labour: 0 };
   (function next(k) {
     $('progBar').style.width = (k / chunks.length * 100) + '%';
+    $('go').textContent = '匯入中… ' + k + ' / ' + chunks.length + ' 批';
     if (k === chunks.length) { $('progTxt').textContent = '完成'; finish(done, totals); return; }
     var ms = chunks[k];
     $('progTxt').textContent = '匯入中 ' + ms[0] + (ms.length > 1 ? ' ～ ' + ms[ms.length - 1] : '') + '（第 ' + (k + 1) + ' / ' + chunks.length + ' 批）';
@@ -379,7 +432,7 @@ $('go').onclick = function () {
       .catch(function (e) {
         $('importErr').textContent = '第 ' + (k + 1) + ' 批（' + ms.join('、') + '）失敗，這一批已全部取消、資料庫維持原樣：\n' + e.message
           + (done.length ? '\n前面已完成的月份：' + done.join('、') + '（已成功寫入）' : '');
-        $('go').disabled = false; if (done.length) finish(done, totals);
+        $('go').disabled = false; updateGo(); if (done.length) finish(done, totals);
       });
   })(0);
 };
@@ -387,6 +440,7 @@ $('go').onclick = function () {
 // ── ④ 結果 ──
 function finish(months, totals) {
   step(4);
+  if (!$('importErr').textContent) { floatBar(false); $('go').textContent = '✓ 已匯入'; }
   Promise.all([api('month_counts?select=ym,runs,fg_filled,labour&order=ym'), api('labour_status_by_month?select=ym,ok,invalid,empty,o_mismatch&order=ym')])
     .then(function (res) {
       var mc = {}, ls = {}; res[0].forEach(function (r) { mc[r.ym] = r; }); res[1].forEach(function (r) { ls[r.ym] = r; });
@@ -401,6 +455,7 @@ function finish(months, totals) {
         h('th', null, '月份'), h('th', { class: 'n' }, '資料總表'), h('th', { class: 'n' }, '結案率（成品數已填）'),
         h('th', { class: 'n' }, '工時 有效'), h('th', { class: 'n' }, '工時 異常'), h('th', { class: 'n' }, '非人工列'), h('th', { class: 'n' }, 'O 欄不同（僅提醒）'))), h('tbody', null, rows)));
       show('resultCard', true); loadHistory();
+      if (!$('actBar').classList.contains('float')) $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }).catch(function (e) { $('importErr').textContent = '匯入完成，但讀取結果失敗：' + e.message; });
 }
 
