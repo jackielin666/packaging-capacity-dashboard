@@ -195,6 +195,20 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .hist{background:0;border:0;color:var(--accent);cursor:pointer;font:11px "Noto Sans TC",sans-serif;
   padding:0 0 0 9px;text-decoration:underline;text-underline-offset:2px}
 .hist:hover{color:var(--ink)}
+/* ── 新增品項 ── */
+.addsku{background:0;border:1px solid var(--signal);color:var(--signal);cursor:pointer;border-radius:3px;
+  font:500 11.5px/1 "Noto Sans TC",sans-serif;padding:4px 8px;margin-left:8px}
+.addsku:hover{background:var(--signal);color:#fff}
+#newSku .box{max-width:520px}
+#nsForm .field input,#nsForm .field select{width:100%;padding:11px 13px;border:1px solid var(--rule-2);
+  border-radius:3px;font:15px "Noto Sans TC",sans-serif;background:#fff;color:var(--ink)}
+#nsForm .field input:focus,#nsForm .field select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+#nsForm .field input.bad{border:1.5px solid var(--signal)}
+#nsForm .hint{font-size:12px;color:var(--ink-3);margin-top:5px;line-height:1.5}
+#nsForm .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#nsForm .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+#nsWarn{font-size:13px;line-height:1.55;padding:10px 12px;border-radius:3px;margin-bottom:14px;
+  background:var(--signal-wash);color:var(--signal)}
 .helpbody h3{font-size:14.5px;margin:20px 0 8px;padding-bottom:5px;
   border-bottom:1px solid var(--rule)}
 .helpbody h3:first-child{margin-top:4px}
@@ -572,6 +586,49 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
   </div>
 </div>
 
+<div class="modal" id="newSku" hidden>
+  <div class="box">
+    <div class="top">
+      <div>
+        <h2>新增品項</h2>
+        <div class="sub">存好之後，這支品項就會出現在品項清單，其他系統也查得到。請照工單或產品標籤填寫。</div>
+      </div>
+      <button class="x2" id="nsClose" type="button" title="關閉">×</button>
+    </div>
+    <form class="scroll" id="nsForm" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="nsCode">品號</label>
+        <input id="nsCode" autocapitalize="characters" spellcheck="false" maxlength="15" placeholder="例如 D2233">
+        <div class="hint">英文字母開頭，4～10 碼英數字，可帶「-1」這類尾碼。小寫會自動轉大寫。</div>
+      </div>
+      <div class="field">
+        <label for="nsName">品名</label>
+        <input id="nsName" maxlength="60" placeholder="例如 上好佳藍莓餡(好)">
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="nsWeight">每單位重量（公斤）</label>
+          <input id="nsWeight" inputmode="decimal" placeholder="例如 4.5">
+        </div>
+        <div class="field">
+          <label for="nsCt">容器</label>
+          <select id="nsCt"></select>
+        </div>
+      </div>
+      <div class="field" id="nsCtOtherBox" hidden>
+        <label for="nsCtOther">其他容器名稱</label>
+        <input id="nsCtOther" maxlength="20" placeholder="例如 鋁罐">
+      </div>
+      <div id="nsWarn" hidden></div>
+      <div class="msg bad" id="nsErr" hidden style="margin:0 0 14px"></div>
+      <div class="acts">
+        <button class="btn ghost" type="button" id="nsCancel">取消</button>
+        <button class="btn" type="submit" id="nsSave">儲存品項</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal" id="help" hidden>
   <div class="box">
     <div class="top">
@@ -587,6 +644,9 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <ol>
         <li><b>選日期</b> —— 左上角的日曆。可以補登前幾天，不一定要當天登打。</li>
         <li><b>那天有生產</b>：逐批輸入品號、製造日期、起始、結束、瓶數、人數。</li>
+        <li><b>清單裡沒有的新品</b>：打品號後品名欄會顯示「查無此品號」，按旁邊的<b>新增品項</b>，
+          填品名、每單位重量、容器後儲存，就會加入品項清單，其他系統也查得到。
+          已經建好的品項要改名或停用，請找主管。</li>
         <li><b>那天沒有包裝作業</b>：直接勾「當日無包裝作業」，不必留空。<br>
           <span class="tip">留空和「沒生產」是兩件事 —— 留空會一直掛在待補清單上。</span></li>
         <li>確認下方檢查項目沒有紅色，按 <b>儲存</b>。</li>
@@ -932,13 +992,7 @@ function boot() {
     // 品項下拉。常做的排前面，現場打前兩碼就能選到。
     state.importedThrough = (res[2] && res[2][0]) ? res[2][0].prod_date : null;
 
-    var dl = $('skuList'), html = '';
-    res[1].forEach(function (s) {
-      state.skus[s.code] = s;
-      state.stats[s.code] = s;
-      html += '<option value="' + s.code + '">' + s.code + '　' + s.name + '</option>';
-    });
-    dl.innerHTML = html;
+    fillSkuList(res[1]);
 
     $('loginView').hidden = true;
     $('appView').hidden = false;
@@ -948,6 +1002,22 @@ function boot() {
     }
     return loadDay(today()).then(loadCheck);
   });
+}
+
+/** 品項下拉清單。品名可能是專員自己建的，一律跳脫後才放進 HTML。 */
+function fillSkuList(rows) {
+  var html = '';
+  state.skus = {};
+  rows.forEach(function (s) {
+    state.skus[s.code] = s;
+    state.stats[s.code] = s;
+    html += '<option value="' + esc(s.code) + '">' + esc(s.code) + '　' + esc(s.name) + '</option>';
+  });
+  $('skuList').innerHTML = html;
+}
+function loadSkus() {
+  return api('sku_stats?select=code,name,container,batches,mean_rate,median_rate,last_date'
+             + '&active=is.true&order=batches.desc').then(fillSkuList);
 }
 
 // ══ 載入某一天 ═════════════════════════════════════════════
@@ -1051,7 +1121,7 @@ function renderRow(r, editable) {
   var nm = sku
     ? esc(sku.name) + (sku.container ? ' <span class="ct">· ' + esc(sku.container) + '</span>' : '')
       + '<button class="hist" type="button">歷史</button>'
-    : (r.sku ? '查無此品號' : '');
+    : (r.sku ? '查無此品號' + (canAddSku() ? '<button class="addsku" type="button">新增品項</button>' : '') : '');
   tr.appendChild(cell('品名', 'name' + (!sku && r.sku ? ' miss' : ''), nm));
   tr.appendChild(cell('製造日期', 'pair', inp('mfg', '', '年月日8碼', 'inputmode="numeric"')));
   tr.appendChild(cell('起始', 'pair', inp('start', '', '0800')));
@@ -1091,6 +1161,8 @@ function renderRow(r, editable) {
 
   var hb = tr.querySelector('.hist');
   if (hb) hb.addEventListener('click', function () { openHistory(r.sku, r); });
+  var ab = tr.querySelector('.addsku');
+  if (ab) ab.addEventListener('click', function () { openNewSku(r); });
 
   tr.dataset.key = r.key;
   return tr;
@@ -1122,7 +1194,8 @@ function rowBlank(r) {
 function rowIssues(r) {
   var out = [], st = parseTime(r.start), en = parseTime(r.end);
   if (!state.skus[r.sku])
-    out.push(r.sku ? '品號 ' + r.sku + ' 不在品項主檔內' : '還沒選品項');
+    out.push(r.sku ? '品號 ' + r.sku + ' 不在品項主檔內'
+      + (canAddSku() ? '，是新品的話按品名欄的「新增品項」' : '') : '還沒選品項');
   if (!st) out.push('起始時間看不懂，直接打四碼例如 0800');
   if (!en) out.push('結束時間看不懂，直接打四碼例如 0930');
   else if (st && st === en) out.push('結束時間與起始相同，工時會算成 0');
@@ -1892,6 +1965,104 @@ function renderHistory(code, sku, rows, row) {
 }
 
 function closeHistory() { $('hist').hidden = true; }
+
+// ══ 新增品項 ══════════════════════════════════════════════
+/**
+ * 現場遇到清單裡沒有的新品，專員可以自己建，不用等主管。
+ * 只開放「新增」：改名、停用、刪除仍是主管的權限，資料庫端也是同樣的規則
+ * （skus_insert_operator）。品項主檔之後會被其他系統拿來對應，所以格式在這裡就先把關。
+ */
+var SKU_CODE_RE = /^[A-Z][0-9A-Z]{3,9}(-[0-9A-Z]{1,4})?$/;
+var nsRow = null, nsWarned = false;
+function canAddSku() { return state.role === 'operator' || state.role === 'manager'; }
+
+function openNewSku(row) {
+  nsRow = row || null; nsWarned = false;
+  var cts = {};
+  Object.keys(state.skus).forEach(function (k) { if (state.skus[k].container) cts[state.skus[k].container] = 1; });
+  var opts = '<option value="">請選擇</option>';
+  Object.keys(cts).sort().forEach(function (c) { opts += '<option value="' + esc(c) + '">' + esc(c) + '</option>'; });
+  opts += '<option value="__other">其他（自行輸入）</option>';
+  $('nsCt').innerHTML = opts;
+  $('nsCode').value = row && row.sku ? String(row.sku).trim().toUpperCase() : '';
+  $('nsName').value = ''; $('nsWeight').value = ''; $('nsCtOther').value = '';
+  $('nsCtOtherBox').hidden = true; $('nsWarn').hidden = true; $('nsErr').hidden = true;
+  $('nsSave').textContent = '儲存品項'; $('nsSave').disabled = false;
+  ['nsCode', 'nsName', 'nsWeight', 'nsCtOther'].forEach(function (id) { $(id).classList.remove('bad'); });
+  $('newSku').hidden = false;
+  ($('nsCode').value ? $('nsName') : $('nsCode')).focus();
+}
+function closeNewSku() { $('newSku').hidden = true; nsRow = null; }
+
+function nsValues() {
+  var ct = $('nsCt').value === '__other' ? $('nsCtOther').value.trim() : $('nsCt').value;
+  return {
+    code: $('nsCode').value.trim().toUpperCase(),
+    name: $('nsName').value.trim(),
+    weight: $('nsWeight').value.trim(),
+    container: ct
+  };
+}
+/** 回傳 [欄位 id, 說明]；全部正確回 null */
+function nsProblem(v) {
+  if (!SKU_CODE_RE.test(v.code)) return ['nsCode', '品號格式不對：英文字母開頭，4～10 碼英數字，例如 D2233 或 D0132-1。'];
+  if (state.skus[v.code]) return ['nsCode', '品號 ' + v.code + ' 已經在清單裡了（' + state.skus[v.code].name + '），不用再新增。'];
+  if (!v.name) return ['nsName', '請填品名。'];
+  var w = Number(v.weight);
+  if (!v.weight || !(w > 0) || w > 100) return ['nsWeight', '每單位重量要填大於 0、不超過 100 的公斤數，例如 4.5。'];
+  if (!v.container) return [$('nsCt').value === '__other' ? 'nsCtOther' : 'nsCt', '請選擇容器。'];
+  return null;
+}
+
+$('nsCt').addEventListener('change', function () {
+  $('nsCtOtherBox').hidden = $('nsCt').value !== '__other';
+  if (!$('nsCtOtherBox').hidden) $('nsCtOther').focus();
+});
+$('nsCode').addEventListener('blur', function () { $('nsCode').value = $('nsCode').value.trim().toUpperCase(); });
+['nsCode', 'nsName', 'nsWeight', 'nsCtOther'].forEach(function (id) {
+  $(id).addEventListener('input', function () { $(id).classList.remove('bad'); nsWarned = false; $('nsSave').textContent = '儲存品項'; $('nsWarn').hidden = true; });
+});
+$('nsClose').addEventListener('click', closeNewSku);
+$('nsCancel').addEventListener('click', closeNewSku);
+$('newSku').addEventListener('click', function (e) { if (e.target === $('newSku')) closeNewSku(); });
+
+$('nsForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var v = nsValues(), bad = nsProblem(v);
+  $('nsErr').hidden = true;
+  if (bad) {
+    $(bad[0]).classList.add('bad'); $(bad[0]).focus();
+    $('nsErr').textContent = bad[1]; $('nsErr').hidden = false;
+    return;
+  }
+  // 同名的品項多半是同一支產品打了不同品號 —— 先提醒一次，確認後才存
+  var same = Object.keys(state.skus).filter(function (k) { return state.skus[k].name === v.name; });
+  if (same.length && !nsWarned) {
+    nsWarned = true;
+    $('nsWarn').textContent = '清單裡已經有同名的品項：' + same.join('、') + '。如果是同一支產品，請改用既有品號；確定是不同品項再按一次「仍要新增」。';
+    $('nsWarn').hidden = false;
+    $('nsSave').textContent = '仍要新增';
+    return;
+  }
+  $('nsSave').disabled = true; $('nsSave').textContent = '儲存中…';
+  api('skus', { method: 'POST', prefer: 'return=representation',
+    body: JSON.stringify({ code: v.code, name: v.name, unit_weight_kg: Number(v.weight), container: v.container }) })
+    .then(function () { return loadSkus(); })
+    .then(function () {
+      var row = nsRow;
+      closeNewSku();
+      if (row && !row.deleted) { row.sku = v.code; row.dirty = true; }
+      renderDay();
+      banner('ok', '<b>已新增品項 ' + esc(v.code) + '</b>　' + esc(v.name) + '，現在可以在品項清單選到它了。');
+    })
+    .catch(function (err) {
+      var m = String(err.message || err);
+      if (/duplicate key|23505/.test(m)) m = '品號 ' + v.code + ' 已經有人建立了，請重新整理頁面後直接選用。';
+      else if (/row-level security|42501|permission/.test(m)) m = '你的帳號沒有新增品項的權限，請找主管。';
+      $('nsErr').textContent = '儲存失敗：' + m; $('nsErr').hidden = false;
+      $('nsSave').disabled = false; $('nsSave').textContent = '儲存品項';
+    });
+});
 $('histClose').addEventListener('click', closeHistory);
 $('hist').addEventListener('click', function (e) { if (e.target === $('hist')) closeHistory(); });
 
@@ -1930,6 +2101,7 @@ document.addEventListener('keydown', function (e) {
     return;
   }
   if (e.key === 'Escape' && !$('hist').hidden) closeHistory();
+  if (e.key === 'Escape' && !$('newSku').hidden) closeNewSku();
 });
 
 // ══ 操作 ═══════════════════════════════════════════════════
