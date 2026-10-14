@@ -22,7 +22,7 @@ SKUS = [
      "mean_rate":500,"median_rate":500,"last_date":"2026-08-01"},
 ]
 
-captured = {"posts": [], "patches": [], "deletes": []}
+captured = {"posts": [], "patches": [], "deletes": [], "skus": []}
 
 def make_router(existing_batches):
     def route(r):
@@ -36,6 +36,13 @@ def make_router(existing_batches):
         if "/rest/v1/members" in u:
             return r.fulfill(status=200, content_type="application/json",
                              body=json.dumps([{"display_name":"測試專員","role":"operator"}]))
+        if "/rest/v1/skus" in u and m == "POST":
+            body = json.loads(r.request.post_data or "{}")
+            captured["skus"].append(body)
+            # 新品項加進清單，之後重讀 sku_stats 就看得到
+            SKUS.append({"code": body["code"], "name": body["name"], "container": body.get("container"),
+                         "batches": 0, "mean_rate": None, "median_rate": None, "last_date": None})
+            return r.fulfill(status=201, content_type="application/json", body=json.dumps([body]))
         if "/rest/v1/sku_stats" in u:
             return r.fulfill(status=200, content_type="application/json", body=json.dumps(SKUS))
         if "/rest/v1/batches" in u:
@@ -574,6 +581,45 @@ with sync_playwright() as p:
     ex.fill("20261003"); ex.blur(); pg.wait_for_timeout(200)
     check("填了就可以存", not pg.is_disabled("#saveBtn"), pg.inner_text("#checksList")[:200])
     check("通過項目列出都有填製造日期", "都有填製造日期" in pg.inner_text("#checksList"))
+
+    print("\n── 新增品項 ──")
+    pg.click("#addRow"); pg.wait_for_timeout(200)
+    nr = pg.locator("#rows tr").last
+    el = nr.locator('input[data-f="sku"]'); el.fill("d2299"); el.blur(); pg.wait_for_timeout(200)
+    nr = pg.locator("#rows tr").last
+    nm = nr.locator("td.name")
+    check("查不到的品號會提示", "查無此品號" in nm.inner_text(), nm.inner_text())
+    check("旁邊有「新增品項」按鈕", nr.locator("button.addsku").count() == 1)
+    nr.locator("button.addsku").click(); pg.wait_for_timeout(200)
+    check("開啟新增品項視窗", pg.is_visible("#newSku"))
+    check("品號帶入並轉大寫", pg.input_value("#nsCode") == "D2299", pg.input_value("#nsCode"))
+    opts = pg.eval_on_selector_all("#nsCt option", "es => es.map(e => e.textContent)")
+    check("容器選單列出既有容器", "PE袋" in opts and "馬口鐵" in opts and any("其他" in o for o in opts), opts)
+    pg.click("#nsSave"); pg.wait_for_timeout(150)
+    check("沒填品名會擋", pg.is_visible("#nsErr") and "品名" in pg.inner_text("#nsErr"), pg.inner_text("#nsErr"))
+    check("沒存就沒送出", len(captured["skus"]) == 0)
+    pg.fill("#nsName", "測試新品(1*4.5kg)"); pg.fill("#nsWeight", "450")
+    pg.select_option("#nsCt", "PE袋"); pg.click("#nsSave"); pg.wait_for_timeout(150)
+    check("重量不合理會擋", "重量" in pg.inner_text("#nsErr"), pg.inner_text("#nsErr"))
+    pg.fill("#nsCode", "X1"); pg.fill("#nsWeight", "4.5"); pg.click("#nsSave"); pg.wait_for_timeout(150)
+    check("品號格式錯會擋", "品號格式" in pg.inner_text("#nsErr"), pg.inner_text("#nsErr"))
+    pg.fill("#nsCode", "D0310"); pg.click("#nsSave"); pg.wait_for_timeout(150)
+    check("已存在的品號會擋", "已經在清單裡" in pg.inner_text("#nsErr"), pg.inner_text("#nsErr"))
+    pg.fill("#nsCode", "D2299"); pg.fill("#nsName", "很少做的品項"); pg.click("#nsSave"); pg.wait_for_timeout(150)
+    check("同名品項先提醒一次", pg.is_visible("#nsWarn") and "Z9999" in pg.inner_text("#nsWarn"), pg.inner_text("#nsWarn"))
+    check("按鈕改成「仍要新增」", pg.inner_text("#nsSave").strip() == "仍要新增", pg.inner_text("#nsSave"))
+    pg.fill("#nsName", "測試新品(1*4.5kg)"); pg.select_option("#nsCt", "__other")
+    check("選「其他」才出現自行輸入", pg.is_visible("#nsCtOther"))
+    pg.fill("#nsCtOther", "鋁罐"); pg.click("#nsSave"); pg.wait_for_timeout(900)
+    check("送出一筆新增品項", len(captured["skus"]) == 1, captured["skus"])
+    if captured["skus"]:
+        sk = captured["skus"][0]
+        check("送出的欄位正確", sk == {"code": "D2299", "name": "測試新品(1*4.5kg)", "unit_weight_kg": 4.5, "container": "鋁罐"}, sk)
+    check("存好後關閉視窗", not pg.is_visible("#newSku"))
+    nr = pg.locator("#rows tr").last
+    check("該列直接帶出新品名", "測試新品" in nr.locator("td.name").inner_text(), nr.locator("td.name").inner_text())
+    check("顯示已新增", "已新增品項 D2299" in pg.inner_text("#banner"), pg.inner_text("#banner"))
+    check("品項清單也有新品", pg.locator('#skuList option[value="D2299"]').count() == 1)
 
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
