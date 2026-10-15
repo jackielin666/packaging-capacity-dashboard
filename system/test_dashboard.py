@@ -327,6 +327,22 @@ with sync_playwright() as p:
                    clip={"x": 0, "y": 0, "width": 1280, "height": 620})
     ctx2.close()
 
+    print("\n── 閒置 15 分鐘自動登出 ──")
+    ctx4 = b.new_context(viewport={"width": 1280, "height": 1000})
+    pg4 = ctx4.new_page()
+    pg4.clock.install(time=TODAY)
+    pg4.route("**/*", route)
+    pg4.goto(PAGE)
+    pg4.evaluate("""() => localStorage.setItem('packing.session', JSON.stringify(
+        {access:'%s', refresh:'rt', exp: Date.now() + 3600000}))""" % JWT)
+    pg4.reload(); pg4.clock.run_for(3000)
+    check("登入後開始計時（有記最後操作時間）", pg4.evaluate("!!localStorage.getItem('packing.lastActive')"))
+    pg4.clock.run_for("15:10")
+    pg4.wait_for_selector("#lg:not([hidden])", timeout=5000)
+    check("儀表板閒置 15 分鐘也登出", pg4.is_visible("#lg"))
+    check("登入視窗說明是閒置登出", "閒置超過 15 分鐘" in pg4.inner_text("#lgErr"), pg4.inner_text("#lgErr"))
+    ctx4.close()
+
     print("\n── 月報 ──")
     ctx3 = b.new_context(viewport={"width": 1280, "height": 1000})
     ctx3.add_init_script("""
