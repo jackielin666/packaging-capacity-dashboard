@@ -703,6 +703,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 </div>
 
 <datalist id="skuList"></datalist>
+<script src="idle.js"></script>
 <script>
 (function () {
 'use strict';
@@ -977,9 +978,17 @@ $('loginForm').addEventListener('submit', function (e) {
 });
 
 $('logoutBtn').addEventListener('click', function () {
+  PackingIdle.signOut(null);      // 順便撤銷這組登入，被複製走的權杖也失效
   clearSession();
   location.reload();
 });
+
+/** 這一頁有沒有還沒存的修改。閒置提醒與切換日期都用這個判斷。 */
+function hasUnsaved() {
+  return state.rows.some(function (r) {
+    return (r.dirty && (r.id || rowComplete(r))) || (r.deleted && r.id);
+  });
+}
 
 // ══ 啟動 ═══════════════════════════════════════════════════
 function boot() {
@@ -996,6 +1005,8 @@ function boot() {
     if (!me) throw new Error('這個帳號還沒有被指派角色，請聯絡系統管理者。');
     state.role = me.role;
     state.name = me.display_name;
+    // 共用電腦：15 分鐘沒操作就登出，避免下一個人用前一個人的帳號改資料
+    PackingIdle.start({ hasUnsaved: hasUnsaved, onLogout: function () { location.reload(); } });
 
     $('who').textContent = me.display_name;
 
@@ -2117,9 +2128,7 @@ document.addEventListener('keydown', function (e) {
 
 // ══ 操作 ═══════════════════════════════════════════════════
 function guardUnsaved(go) {
-  var dirty = state.rows.some(function (r) {
-    return (r.dirty && (r.id || rowComplete(r))) || (r.deleted && r.id);
-  });
+  var dirty = hasUnsaved();
   if (dirty && !confirm('本日有尚未儲存的變更，離開這一天就會消失。確定要離開嗎？')) return;
   go();
 }
@@ -2170,9 +2179,12 @@ window.addEventListener('beforeunload', function (e) {
 function showLogin() {
   $('bootView').hidden = true;
   $('loginView').hidden = false;
+  var why = PackingIdle.takeNotice();
+  if (why) { $('loginErr').textContent = why; $('loginErr').hidden = false; }
   $('acc').focus();
 }
 
+PackingIdle.expireIfStale();      // 上次操作超過 15 分鐘（例如隔天才開）就先作廢登入
 loadSession();
 if (sess && sess.refresh) {
   // 已登入過就直接續用，不要讓人每天早上重打一次密碼

@@ -99,6 +99,7 @@ design/entry-mockup.html      靜態設計稿（填好示範資料、沒有程�
 entry.html                    輸入介面（部署在 GitHub Pages）
 index.html                    首頁：自動轉到 entry.html（帶 ?sku= 的舊儀表板連結轉到 dashboard.html）
 dashboard.html                儀表板
+idle.js                       兩頁共用：閒置 15 分鐘自動登出（登出前 1 分鐘提醒）
 ```
 
 **版控裡只放「結構」，不放「資料」。** 歷史批次與品項主檔放在

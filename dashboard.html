@@ -891,6 +891,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 
 </div>
 
+<script src="idle.js"></script>
 <script>
 /* 包裝產能儀表板 ── 計算引擎
  *
@@ -3470,9 +3471,12 @@ async function showWho() {
 }
 
 $('dashOut').onclick = () => {
+  PackingIdle.signOut(null);      // 順便撤銷這組登入，被複製走的權杖也失效
   try { localStorage.removeItem(SS); } catch (e) {}
   location.reload();
 };
+// 與輸入頁同一套規則：15 分鐘沒操作就登出（兩頁共用最後操作時間）
+const watchIdle = () => PackingIdle.start({ onLogout: () => location.reload() });
 
 async function loadLive(quiet) {
   $('liveBtn').disabled = true;
@@ -3497,7 +3501,12 @@ async function loadLive(quiet) {
 }
 
 /* ── 登入 ── */
-const openLogin  = () => { $('lg').hidden = false; $('lgErr').hidden = true; $('lgAcc').focus(); };
+const openLogin  = () => {
+  $('lg').hidden = false; $('lgErr').hidden = true;
+  const why = PackingIdle.takeNotice();
+  if (why) { $('lgErr').textContent = why; $('lgErr').hidden = false; }
+  $('lgAcc').focus();
+};
 // 還沒讀到資料時關掉登入視窗只會看到空白頁，所以先擋住
 const closeLogin = () => { if (state.R) $('lg').hidden = true; };
 $('lgClose').onclick = closeLogin;
@@ -3518,6 +3527,7 @@ $('lgForm').onsubmit = async e => {
     if (!r.ok) throw new Error(/Invalid login/i.test(j.error_description || j.msg || '')
       ? '帳號或密碼不對。' : (j.error_description || j.msg || `登入失敗（${r.status}）`));
     writeSess(j);
+    watchIdle();
     await loadLive();     // 先把資料讀進來，closeLogin 才肯關（沒資料時關掉是空白頁）
     closeLogin();
   } catch (err) {
@@ -3532,5 +3542,6 @@ $('liveBtn').onclick = () => (readSess() && sess.refresh) ? loadLive() : openLog
 
 /* 啟動 */
 // 登入後才有資料可看。沒有帳號的人請看月報 PDF。
-if (readSess() && sess.refresh) loadLive(); else openLogin();
+PackingIdle.expireIfStale();      // 上次操作超過 15 分鐘（例如隔天才開）就先作廢登入
+if (readSess() && sess.refresh) { watchIdle(); loadLive(); } else openLogin();
 </script>

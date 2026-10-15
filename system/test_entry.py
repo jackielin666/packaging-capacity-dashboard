@@ -642,6 +642,37 @@ with sync_playwright() as p:
     for l in errs[:10]: print("  " + l)
     check("沒有 JS 錯誤", not errs, errs[:3])
 
+    print("\n── 閒置 15 分鐘自動登出 ──")
+    ip = b.new_page(viewport={"width": 1280, "height": 900})
+    ip.clock.install(time=TODAY)
+    ip.route("**/*", make_router([]))
+    ip.goto(PAGE); ip.fill("#acc", "op"); ip.fill("#pw", "x"); ip.click("#loginBtn")
+    ip.wait_for_selector("#appView:not([hidden])")
+    ip.clock.run_for("13:00")
+    check("13 分鐘還不提醒", not ip.is_visible("#idleWarn"))
+    ip.clock.run_for("01:10")
+    check("登出前 1 分鐘提醒", ip.is_visible("#idleWarn") and "秒後自動登出" in ip.inner_text("#idleWarn"),
+          ip.inner_text("#idleWarn") if ip.locator("#idleWarn").count() else "無")
+    ip.mouse.move(300, 300); ip.mouse.move(320, 320); ip.clock.run_for(1500)
+    check("動一下滑鼠就繼續", not ip.is_visible("#idleWarn"))
+    el = ip.locator("#rows tr").first.locator('input[data-f="sku"]'); el.fill("D0310"); el.blur()
+    for f, v in (("start", "0800"), ("end", "0930"), ("bottles", "450")):
+        e2 = ip.locator("#rows tr").first.locator('input[data-f="%s"]' % f); e2.fill(v); e2.blur()
+    ip.clock.run_for("14:10")
+    check("有未存資料時提醒先儲存", "尚未儲存" in ip.inner_text("#idleWarn"), ip.inner_text("#idleWarn"))
+    ip.clock.run_for("01:10")
+    ip.wait_for_selector("#loginView:not([hidden])", timeout=5000)
+    check("15 分鐘沒動就回到登入畫面", ip.is_visible("#loginView"))
+    check("登入畫面說明是閒置登出", "閒置超過 15 分鐘" in ip.inner_text("#loginErr"), ip.inner_text("#loginErr"))
+    check("登入狀態已清掉", ip.evaluate("localStorage.getItem('packing.session')") is None)
+    # 隔天才打開：登入狀態還在，但最後操作是昨天 → 一打開就是登入畫面
+    ip.evaluate("""() => { localStorage.setItem('packing.session', JSON.stringify({access:'x.e30.y', refresh:'rt', exp: Date.now()+3600000}));
+                           localStorage.setItem('packing.lastActive', String(Date.now() - 20*60*1000)); }""")
+    ip.reload(); ip.wait_for_selector("#loginView:not([hidden])", timeout=5000)
+    check("超過 15 分鐘才打開，直接要求重新登入", ip.is_visible("#loginView") and "請重新登入" in ip.inner_text("#loginErr"),
+          ip.inner_text("#loginErr"))
+    ip.close()
+
     print("\n── 首頁是資料輸入 ──")
     home = b.new_page()
     home.route("**/*", lambda r: r.abort() if "/rest/v1/" in r.request.url or "fonts.g" in r.request.url else r.continue_())
