@@ -482,7 +482,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       <div class="head">
         <div>
           <h2>本日批次</h2>
-          <div class="sub">時間直接打 <b>0800</b>，離開欄位自動變 08:00；製造日期照紙本打八碼 <b>20261001</b>，自動變 2026-10-01（是<b>製造日期</b>，不是有效日期）。工時、產能由系統計算。</div>
+          <div class="sub">時間直接打 <b>0800</b>，離開欄位自動變 08:00；製造日期照紙本打八碼 <b>20261001</b>，自動變 2026-10-01（是<b>製造日期</b>，不是有效日期）。工時、產能由系統計算，<b>午休 12:00–13:00 自動扣除</b>。</div>
         </div>
         <div class="keys">ENTER 下一格</div>
       </div>
@@ -666,6 +666,7 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
           用「品號＋製造日期」對應產品製成率檔案，串出這支品項調理／充填／包裝的完整工時。
           <b>2026 年 10 月起必填</b>，沒填不能儲存。<br>
           <b>注意不要打成有效日期</b>：製造日期不可能晚於包裝日期，打成有效日期（例如 2027 年）系統會擋下來。</td></tr>
+        <tr><td>工時</td><td>系統自動算：結束 − 起始，<b>扣掉午休 12:00–13:00</b>。例如 08:50–13:15 算 3.42 小時。不用填。</td></tr>
         <tr><td>產能</td><td>系統自動算（瓶數 ÷ 工時），不用填。</td></tr>
       </tbody></table>
 
@@ -788,11 +789,20 @@ function toMin(t) {
   var p = t.split(':'); return (+p[0]) * 60 + (+p[1]);
 }
 /** 與資料庫的工時計算方式完全一致（跨午夜加 24 小時，取到小數三位） */
+/**
+ * 工時＝結束 − 起始，扣掉與午休 12:00–13:00 重疊的時間（午休整條線都停）。
+ * 跨午夜的批次拆成 [起始, 24:00) 與 [00:00, 結束) 兩段各自扣。
+ * 與資料庫 batches.hours 的生成算式相同；整批都落在午休裡回 0，由檢查擋下。
+ */
+var LUNCH = [720, 780];
+function lunchOverlap(a, b) { return Math.max(0, Math.min(b, LUNCH[1]) - Math.max(a, LUNCH[0])); }
 function calcHours(st, en) {
   var a = toMin(st), b = toMin(en);
   if (a === null || b === null || a === b) return null;
-  var d = b - a; if (d < 0) d += 1440;
-  return Math.round(d / 60 * 1000) / 1000;
+  var d = b - a, lunch;
+  if (d < 0) { d += 1440; lunch = lunchOverlap(a, 1440) + lunchOverlap(0, b); }
+  else lunch = lunchOverlap(a, b);
+  return Math.round((d - lunch) / 60 * 1000) / 1000;
 }
 
 // ══ 連線 ═══════════════════════════════════════════════════
@@ -1199,6 +1209,7 @@ function rowIssues(r) {
   if (!st) out.push('起始時間看不懂，直接打四碼例如 0800');
   if (!en) out.push('結束時間看不懂，直接打四碼例如 0930');
   else if (st && st === en) out.push('結束時間與起始相同，工時會算成 0');
+  else if (st && calcHours(st, en) === 0) out.push('整批都在午休 12:00–13:00 之間，扣掉午休工時是 0，請確認時間');
   if (!(+r.bottles > 0)) out.push('瓶數沒填，或不是大於 0 的數字');
   if (headIssue(r)) out.push(headIssue(r));
   var mi = mfgIssue(r);
