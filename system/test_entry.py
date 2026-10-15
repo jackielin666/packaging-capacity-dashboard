@@ -212,6 +212,23 @@ with sync_playwright() as p:
     check("正常範圍不加狀態 class",
           (cR.get_attribute("class") or "").strip() == "flag", cR.get_attribute("class"))
 
+    print("\n── 午休 12:00–13:00 自動扣除 ──")
+    # 從畫面上的工時欄讀，和現場看到的一樣
+    def shown(st, en):
+        rr = pg.locator("#rows tr").first
+        rr.locator('input[data-f="start"]').fill(st); rr.locator('input[data-f="start"]').blur()
+        rr.locator('input[data-f="end"]').fill(en); rr.locator('input[data-f="end"]').blur()
+        return pg.locator("#rows tr").first.locator('td[data-l="工時"]').inner_text().strip()
+    hrs = [shown("0850", "1315"), shown("0800", "1200"), shown("1300", "1500"), shown("1130", "1230")]
+    check("跨午休扣 1 小時（08:50–13:15 → 3.42）", hrs[0] == "3.42", hrs)
+    check("午休前結束不扣（08:00–12:00 → 4.00）", hrs[1] == "4.00", hrs)
+    check("午休後開始不扣（13:00–15:00 → 2.00）", hrs[2] == "2.00", hrs)
+    check("跨一半只扣重疊的（11:30–12:30 → 0.50）", hrs[3] == "0.50", hrs)
+    shown("1210", "1240")
+    check("整批在午休內會擋", "整批都在午休" in pg.inner_text("#checksList"), pg.inner_text("#checksList")[:200])
+    shown("0800", "0930")
+    check("說明列寫出午休自動扣除", "午休 12:00–13:00 自動扣除" in pg.content())
+
     print("\n── 異常提示移到檢查清單 ──")
     row.locator('input[data-f="bottles"]').fill("120")
     row.locator('input[data-f="bottles"]').blur()
