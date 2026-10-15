@@ -464,7 +464,7 @@ with sync_playwright() as p:
     check("頂欄有兩個分頁", tabs.count() == 2, tabs.count())
     check("目前在資料輸入且標示為選中",
           "on" in (tabs.nth(0).get_attribute("class") or ""), tabs.nth(0).get_attribute("class"))
-    check("另一個連到儀表板", tabs.nth(1).get_attribute("href") == "index.html",
+    check("另一個連到儀表板", tabs.nth(1).get_attribute("href") == "dashboard.html",
           tabs.nth(1).get_attribute("href"))
     check("系統名稱一致", pg.inner_text(".topbar .t") == "包裝產能系統",
           pg.inner_text(".topbar .t"))
@@ -641,6 +641,15 @@ with sync_playwright() as p:
     print("\n── console ──")
     for l in errs[:10]: print("  " + l)
     check("沒有 JS 錯誤", not errs, errs[:3])
+
+    print("\n── 首頁是資料輸入 ──")
+    home = b.new_page()
+    home.route("**/*", lambda r: r.abort() if "/rest/v1/" in r.request.url or "fonts.g" in r.request.url else r.continue_())
+    home.goto(PAGE.replace("entry.html", "index.html")); home.wait_for_url("**/entry.html", timeout=5000)
+    check("打開首頁直接進資料輸入", home.url.endswith("/entry.html"), home.url)
+    home.goto(PAGE.replace("entry.html", "index.html?sku=D0310")); home.wait_for_url("**/dashboard.html?sku=D0310", timeout=5000)
+    check("舊的儀表板連結（?sku=）照樣進儀表板", home.url.endswith("/dashboard.html?sku=D0310"), home.url)
+    home.close()
 
     b.close()
 

@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 # 測試資料停在 2026 年 9 月，瀏覽器的「今天」固定在那時，測試才不會隨日曆過期
 TODAY = "2026-09-20T12:00:00+08:00"
 
-PAGE = "file:///home/user/packaging-capacity-dashboard/index.html"
+PAGE = "file:///home/user/packaging-capacity-dashboard/dashboard.html"
 
 def b64u(o):
     return base64.urlsafe_b64encode(json.dumps(o).encode()).decode().rstrip("=")
@@ -114,7 +114,7 @@ with sync_playwright() as p:
     check("沒有內建資料可看", calls["batches"] == 0, calls)
     check("原始碼不再夾帶生產明細",
           "PAYLOAD:START" not in open(
-              "/home/user/packaging-capacity-dashboard/index.html", encoding="utf-8").read())
+              "/home/user/packaging-capacity-dashboard/dashboard.html", encoding="utf-8").read())
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(200)
     check("沒有資料時關不掉登入視窗（否則是空白頁）", pg.is_visible("#lgForm"))
@@ -127,7 +127,7 @@ with sync_playwright() as p:
           tabs.nth(0).get_attribute("href"))
     check("系統名稱與輸入頁一致", pg.inner_text(".topbar .t") == "包裝產能系統",
           pg.inner_text(".topbar .t"))
-    # index.html 一直沒有 charset 宣告，靠瀏覽器猜 —— 改個 CSS 就可能猜錯，整頁變亂碼
+    # 儀表板一直沒有 charset 宣告，靠瀏覽器猜 —— 改個 CSS 就可能猜錯，整頁變亂碼
     check("有 charset 宣告，中文不會變亂碼", "包裝產能系統" in pg.inner_text(".topbar"),
           pg.inner_text(".topbar")[:60])
     # 兩個分頁按鈕字數不同（4 字 vs 3 字），不設等寬看起來一長一短
@@ -168,7 +168,7 @@ with sync_playwright() as p:
     check("有改善清單", pg.locator("#sumLoss svg").count() >= 1)
     # A4 可用寬度只有 695px，比手機斷點 760px 還窄 —— 沒排除 print 的話
     # 整份 PDF 的表格都會退回「一列一張卡片」的手機排版
-    css = open("index.html", encoding="utf-8").read()
+    css = open("dashboard.html", encoding="utf-8").read()
     check("手機排版不會在列印時觸發", "@media(max-width:760px){" not in css
           and "@media screen and (max-width:760px){" in css)
     # 整節禁止分頁會在內容一多時把第 01 節整個推到第 2 頁，第 1 頁只剩抬頭

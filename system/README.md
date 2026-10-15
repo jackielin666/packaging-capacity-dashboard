@@ -97,7 +97,8 @@ system/test_entry.py          輸入介面的自動化測試
 system/make_mockup.py         產生下面那份設計稿
 design/entry-mockup.html      靜態設計稿（填好示範資料、沒有程式碼，可單獨打開）
 entry.html                    輸入介面（部署在 GitHub Pages）
-index.html                    儀表板
+index.html                    首頁：自動轉到 entry.html（帶 ?sku= 的舊儀表板連結轉到 dashboard.html）
+dashboard.html                儀表板
 ```
 
 **版控裡只放「結構」，不放「資料」。** 歷史批次與品項主檔放在
@@ -157,7 +158,7 @@ Supabase Auth 底層一定要用信箱格式，所以前端會自動把 `admin00
 ## 兩個頁面怎麼互通
 
 ```
-產品包裝資料輸入  entry.html  ──「儀表板 →」──▶  包裝產能與效率儀表板  index.html
+產品包裝資料輸入  entry.html  ──「儀表板 →」──▶  包裝產能與效率儀表板  dashboard.html
                              ◀──「← 資料輸入」──
 ```
 
