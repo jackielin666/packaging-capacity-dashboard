@@ -325,6 +325,26 @@ with sync_playwright() as p:
     pg2.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
                         "fae20c10-d8ac-59cc-87ad-7eb93e78031d/scratchpad/dash_live.png",
                    clip={"x": 0, "y": 0, "width": 1280, "height": 620})
+
+    print("\n── 最適人數（人力四象限）──")
+    res = pg2.evaluate("""() => {
+      const rows = [];
+      for (let i = 0; i < 12; i++) rows.push({ s: 'T1', h: 2, b: 1800, n: 3 });   // 3 人：每人 300
+      for (let i = 0; i < 12; i++) rows.push({ s: 'T1', h: 2, b: 1800, n: 4 });   // 4 人：線速一樣，每人 225
+      rows.push({ s: 'T1', h: 0.3, b: 900, n: 2 });                               // 0.5 小時以下不算
+      rows.push({ s: 'T2', h: 2, b: 1000, n: 5 });                                // 只有一種配置，判定不了
+      return crewStats(rows).map(c => ({ sku: c.sku, best: c.best.n, extra: c.extra, overN: c.overN,
+                                         crews: c.crews.map(k => k.n), share: Math.round(c.share * 1000) / 1000 }));
+    }""")
+    check("最適人數取每人處理量最高的配置", res and res[0]["best"] == 3, res)
+    check("多用的人時＝多出來的人數 × 工時", res and res[0]["extra"] == 24 and res[0]["overN"] == 12, res)
+    check("佔比＝多用人時 ÷ 總人時", res and res[0]["share"] == round(24 / 168, 3), res)
+    check("0.5 小時以下的批次不列入", res and res[0]["crews"] == [3, 4], res)
+    check("只有一種人數配置的品項不判定", len(res) == 1, res)
+    check("第 06 節有最適人數表", pg2.locator("#bestCrew").count() == 1)
+    pg2.select_option("#selMain", "D0310"); pg2.wait_for_timeout(400)
+    check("單一品項有人數與每人處理量圖", pg2.locator("#cCrew svg, #cCrew .rep-empty").count() == 1)
+    check("圖的標題帶品號", "D0310" in pg2.inner_text("#crewTitle"), pg2.inner_text("#crewTitle"))
     ctx2.close()
 
     print("\n── 閒置 15 分鐘自動登出 ──")
