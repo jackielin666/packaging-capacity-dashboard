@@ -861,6 +861,13 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
       <div class="chart"><div id="cScatter"></div><div class="tip" id="tScatter"></div></div>
     </div>
 
+    <div class="fig">
+      <div class="fig-t" id="crewTitle"></div>
+      <div class="fig-s">每種人數配置的每人處理量（中位數），柱子下方是批數。
+        深色是最適人數；批數不到 10 批的配置以淡色顯示，參考就好。看的是最近 12 個月。</div>
+      <div class="chart"><div id="cCrew"></div></div>
+    </div>
+
     <div class="notes" id="skuNotes"></div>
   </div>
 </section>
@@ -1593,6 +1600,50 @@ function dotChart(skus) {
 
 /* ─────────── 02b 工時與產出散佈圖 ─────────── */
 
+/** 08 單一品項：人數與每人處理量 */
+function crewChart(sku, nm) {
+  $('crewTitle').textContent = `${sku}${nm ? '　' + nm : ''}　人數與每人處理量`;
+  const c = crewStats(baseRows().filter(x => x.s === sku))[0];
+  const rows = [];
+  if (!c) {
+    // 判定不出最適人數時（配置單一或批數不足）仍把現有配置畫出來
+    const g = new Map();
+    baseRows().filter(x => x.s === sku && x.n > 0 && x.h >= CREW_MIN_H).forEach(x => {
+      if (!g.has(x.n)) g.set(x.n, []); g.get(x.n).push(x.b / x.h / x.n);
+    });
+    [...g.entries()].sort((a, b) => a[0] - b[0]).forEach(([n, v]) => rows.push({ n, count: v.length, pp: medianOf(v) }));
+  } else rows.push(...c.crews);
+  if (!rows.length) {
+    $('cCrew').innerHTML = '<div class="rep-empty">最近 12 個月這支品項沒有填人數的批次。</div>';
+    return;
+  }
+  const W = 900, H = 300, L = 64, R = 24, T = 26, B = 52;
+  const pw = W - L - R, ph = H - T - B;
+  const maxV = Math.max(...rows.map(r => r.pp)) * 1.15;
+  const Y = v => T + ph - (v / maxV) * ph;
+  const bw = Math.min(56, pw / rows.length * 0.55), step = pw / rows.length;
+  const muted = cssv('--ink-3'), rule = cssv('--rule'), ink = cssv('--ink');
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${sku} 各人數配置的每人處理量">`;
+  const sy = niceStep(maxV);
+  for (let v = 0; v <= maxV; v += sy) {
+    s += `<line x1="${L}" y1="${Y(v)}" x2="${W - R}" y2="${Y(v)}" stroke="${rule}"/>`;
+    s += `<text x="${L - 10}" y="${Y(v) + 4}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="end">${fmt(v)}</text>`;
+  }
+  s += `<text x="${L}" y="${T - 12}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="start">每人處理量（單位／人·hr）</text>`;
+  rows.forEach((r, i) => {
+    const x = L + step * i + (step - bw) / 2, isBest = c && r.n === c.best.n;
+    const fill = isBest ? cssv('--accent') : muted;
+    const op = r.count >= CREW_MIN_N ? 1 : 0.4;
+    s += `<rect x="${x}" y="${Y(r.pp)}" width="${bw}" height="${Y(0) - Y(r.pp)}" rx="4" fill="${fill}" fill-opacity="${op}">`
+      + `<title>${r.n} 人：每人 ${fmt(r.pp)} 單位/hr，${r.count} 批</title></rect>`;
+    s += `<text x="${x + bw / 2}" y="${Y(r.pp) - 6}" fill="${ink}" font-size="11" text-anchor="middle" font-family="'IBM Plex Mono',monospace">${fmt(r.pp)}</text>`;
+    s += `<text x="${x + bw / 2}" y="${T + ph + 18}" fill="${ink}" font-size="12" text-anchor="middle">${r.n} 人${isBest ? '（最適）' : ''}</text>`;
+    s += `<text x="${x + bw / 2}" y="${T + ph + 34}" fill="${muted}" font-size="10.5" text-anchor="middle">${r.count} 批</text>`;
+  });
+  s += `<line x1="${L}" y1="${T + ph}" x2="${W - R}" y2="${T + ph}" stroke="${cssv('--rule-2')}"/>`;
+  $('cCrew').innerHTML = s + '</svg>';
+}
+
 function scatter(skus) {
   const el = $('cScatter'), tip = $('tScatter');
   const W = 900, H = 380, L = 64, R = 24, T = 24, B = 48;
@@ -1916,6 +1967,7 @@ function renderSku(sku) {
   // 而且每支的平常水準不同 —— 三組上下限畫在一起就分不出哪條線是誰的。
   dotChart([s]);
   scatter([s]);
+  crewChart(sku, nm);
   renderSkuNotes(s);
 }
 
@@ -2149,6 +2201,55 @@ const LOSS_ALERT_H = 5;    // 異常：本期多花 ≥ 5 小時
    「近 12 個月最好的一個月」當作下次檢討目標時的參考。 */
 const IDX_TARGET = 100;        // 全廠效率指數目標：回到常態
 const LOSS_TARGET_PCT = 12;    // 多花工時率目標 %：2025-10 的實績，證明做得到
+
+/* ── 每支品項用幾個人最有效率 ──
+   人力四象限的第二層：同一支品項，不同人數配置的每人處理量放在一起比。
+   基準期間與平常水準相同（最近 12 個月），只算有填人數、工時 0.5 小時以上的批次
+   —— 20 分鐘的批次，時間差 5 分鐘產能就差 25%，會把配置的比較帶偏。
+   最適人數＝批數 ≥ CREW_MIN_N 的配置中，每人處理量（中位數）最高的那一種；
+   批數太少的配置只列出來參考，不拿來當結論。 */
+const CREW_MIN_N = 10;
+const CREW_MIN_H = 0.5;
+function medianOf(a) {
+  if (!a.length) return null;
+  const v = a.slice().sort((x, y) => x - y), m = v.length >> 1;
+  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+}
+/** 回傳每支品項的人數配置實績與最適人數（只回有最適人數可判定的品項）。 */
+function crewStats(rows) {
+  const by = new Map();
+  rows.forEach(x => {
+    if (!(x.n > 0) || x.h < CREW_MIN_H) return;
+    if (!by.has(x.s)) by.set(x.s, new Map());
+    const g = by.get(x.s);
+    if (!g.has(x.n)) g.set(x.n, []);
+    g.get(x.n).push(x);
+  });
+  const out = [];
+  by.forEach((g, sku) => {
+    const crews = [...g.entries()].map(([n, list]) => ({
+      n, count: list.length,
+      hrs: list.reduce((a, x) => a + x.h, 0),
+      ph: list.reduce((a, x) => a + x.h * x.n, 0),
+      line: medianOf(list.map(x => x.b / x.h)),
+      pp: medianOf(list.map(x => x.b / x.h / x.n)),
+    })).sort((a, b) => a.n - b.n);
+    const ok = crews.filter(c => c.count >= CREW_MIN_N);
+    if (!ok.length || crews.length < 2) return;
+    const best = ok.reduce((a, c) => (c.pp > a.pp ? c : a));
+    const over = crews.filter(c => c.n > best.n);
+    const extra = over.reduce((a, c) => a + (c.n - best.n) * c.hrs, 0);
+    const ph = crews.reduce((a, c) => a + c.ph, 0);
+    out.push({ sku, crews, best, overN: over.reduce((a, c) => a + c.count, 0),
+               extra, share: ph ? extra / ph : 0,
+               batches: crews.reduce((a, c) => a + c.count, 0) });
+  });
+  return out.sort((a, b) => b.extra - a.extra);
+}
+function baseRows() {
+  const M = state.R.meta;
+  return state.R.batches.filter(x => x.m >= M.baseFrom && x.m <= M.baseTo);
+}
 
 function quadrants(rows) {
   const bySku = new Map();
@@ -3154,15 +3255,49 @@ function renderOdd(S) {
 
 /* ═══════════ 05 人力與工時分配 ═══════════ */
 
+/** 第 06 節下半：最適人數表。看的是最近 12 個月，不隨選定的期間變動。 */
+function crewTableHtml() {
+  const M = state.R.meta;
+  const all = crewStats(baseRows());
+  const list = all.filter(c => c.extra > 0).slice(0, 10);
+  if (!all.length) return `<div class="rep-empty" style="margin-top:20px">最近 12 個月還沒有品項的人數配置
+    累積到 ${CREW_MIN_N} 批以上，暫時無法判定最適人數。</div>`;
+  const rows = list.map(c => `<tr>
+    <td><b>${c.sku}</b>${skuName(c.sku)}</td>
+    <td class="num"><b>${c.best.n} 人</b></td>
+    <td class="num">${fmt(c.best.pp)}</td>
+    <td class="num">${fmt(c.best.line)}</td>
+    <td class="num">${c.crews.map(k => `${k.n}人×${k.count}`).join('　')}</td>
+    <td class="num">${c.overN}</td>
+    <td class="num">${f1(c.extra)}</td>
+    <td class="num ${c.share >= 0.1 ? 'lo' : ''}">${Math.round(c.share * 100)}%</td></tr>`).join('');
+  const tot = list.reduce((a, c) => a + c.extra, 0);
+  return `<div class="fig-t" style="margin-top:22px" id="bestCrew">每支品項用幾個人最有效率</div>
+  ${list.length ? `<table class="rtab"><thead><tr>
+    <th>品號 / 品名</th><th class="num">最適人數</th>
+    <th class="num">最適時每人處理量<i>單位／人·hr</i></th><th class="num">最適時線速<i>單位/hr</i></th>
+    <th class="num">人數配置<i>人數×批數</i></th><th class="num">超過最適<i>批</i></th>
+    <th class="num">多用的人時<i>理論上限</i></th><th class="num">佔該品項<i>人時</i></th>
+  </tr></thead><tbody>${rows}</tbody></table>`
+  : '<div class="rep-empty">每支可判定的品項都已經用最適人數在做，沒有超過的批次。</div>'}
+  <div class="rep-note"><b>最適人數</b>＝${M.baseFrom} ～ ${M.baseTo} 之間，批數 ${CREW_MIN_N} 批以上的人數配置中，
+    每人處理量（中位數）最高的那一種；只算有填人數、工時 ${CREW_MIN_H} 小時以上的批次。
+    共 ${all.length} 支品項可以判定，列出多用人時最多的前 ${list.length} 支${list.length ? `，合計 ${f1(tot)} 人時` : ''}。<br>
+    <b>多用的人時</b>＝人數超過最適人數的批次，多出來的人數 × 工時。這是理論上限：
+    大批量、換線、清機可能真的需要多派人，實際能省的通常是一部分。
+    <b>只拿同一支品項的不同人數比</b>，不跨品項比。</div>`;
+}
+
 function renderLabour(S, lab, labS, quads) {
   const { cur } = S;
   if (!lab.usable) {
-    $('labBox').innerHTML = lab.withHead === 0
+    $('labBox').innerHTML = (lab.withHead === 0
       ? `<div class="rep-empty">本期沒有任何一批填了人數，無法判讀人力配置。<br>
           ${noHeadNote()}；在那之前的月份只有線性產能，沒有處理效率。</div>`
       : `<div class="rep-empty">本期人數覆蓋率 ${lab.pct}%
           （${lab.withHead} / ${lab.n} 批），未達 ${HEAD_MIN_PCT}%，不足以判讀人力配置。<br>
-          只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`;
+          只用「有填人數的那幾批」代表整段期間會有選擇偏誤，寧可不出數字。</div>`)
+      + crewTableHtml();
     return;
   }
   /* 逐支品項的人均數字已經在第 05 節的「處理效率」欄，不再重複一張表。
@@ -3205,7 +3340,8 @@ function renderLabour(S, lab, labS, quads) {
     <b>線性正常，每人處理量偏低</b>＝人配得比平常多，但線的速度沒有跟上 ——
     請包裝班說明：是換線、清機、新手，還是排得下但站不開？
     <b>這一類只看產能完全看不到</b>，因為線性看起來是正常的。</div>`
-  : '<div class="rep-empty">本期沒有人力配置與線速不相稱的批次。</div>'}`;
+  : '<div class="rep-empty">本期沒有人力配置與線速不相稱的批次。</div>'}
+  ${crewTableHtml()}`;
 }
 
 /* ═══════════ 06 吃工時但產量不高 ═══════════ */
