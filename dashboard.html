@@ -103,6 +103,11 @@ th i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.06em;
   border-radius:3px;background:var(--paper);font:15px "IBM Plex Mono",monospace;color:var(--ink)}
 .modal .field input:focus{outline:2px solid var(--accent);outline-offset:-1px;
   border-color:transparent}
+.modal .field input:-webkit-autofill,.modal .field input:-webkit-autofill:hover,
+.modal .field input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--paper) inset;
+  box-shadow:0 0 0 1000px var(--paper) inset;-webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
+#lgBtn{background:var(--bar);border-color:var(--bar);color:#fff;font-size:14px;font-weight:700;letter-spacing:.3em}
+#lgBtn:hover:not(:disabled){background:#085347;border-color:#085347;opacity:1}
 [hidden]{display:none!important}
 
 /* ── 月報 ── */
