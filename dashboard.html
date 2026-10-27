@@ -3656,7 +3656,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogin()
 
 $('lgForm').onsubmit = async e => {
   e.preventDefault();
-  const acc = $('lgAcc').value.trim(), pw = $('lgPw').value;
+  // 中文輸入法全形模式打出的「ａｄｍ０」轉回半形（帳密都只用英數字）
+  const half = v => String(v || '').normalize('NFKC').replace(/\s+/g, '');
+  const acc = half($('lgAcc').value), pw = half($('lgPw').value);
   $('lgBtn').disabled = true; $('lgBtn').textContent = '登入中…';
   $('lgErr').hidden = true;
   try {

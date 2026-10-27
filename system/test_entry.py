@@ -120,9 +120,20 @@ with sync_playwright() as p:
     print("\n── 登入 ──")
     check("未登入時顯示登入畫面", pg.is_visible("#loginForm"))
 
-    pg.fill("#acc", "admin000")
-    pg.fill("#pw", "admin000")
-    pg.click("#loginBtn")
+    # 「顯示」按鈕：密碼看得到才能核對有沒有打錯
+    pg.click("#pwEye")
+    check("按「顯示」看得到密碼", pg.get_attribute("#pw", "type") == "text")
+    pg.click("#pwEye")
+    check("再按一次又藏起來", pg.get_attribute("#pw", "type") == "password")
+
+    # 中文輸入法全形模式打的「ＴＥＳＴ０１」「９８７６」要轉回半形再送
+    pg.fill("#acc", " ＴＥＳＴ０１ ")
+    pg.fill("#pw", "ｘｙ９８７６")
+    with pg.expect_request("**/auth/v1/token**") as rq:
+        pg.click("#loginBtn")
+    sent = json.loads(rq.value.post_data)
+    check("全形帳號轉成半形、小寫、去空白", sent.get("email") == "test01@packing.local", sent)
+    check("全形密碼轉成半形", sent.get("password") == "xy9876", sent)
     pg.wait_for_selector("#appView:not([hidden])", timeout=8000)
     check("登入後進入主畫面", pg.is_visible("#rows"))
     who = pg.inner_text("#who").strip()
