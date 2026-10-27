@@ -56,6 +56,13 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
 .field input:-webkit-autofill,.field input:-webkit-autofill:hover,.field input:-webkit-autofill:focus{
   -webkit-box-shadow:0 0 0 1000px #fff inset;box-shadow:0 0 0 1000px #fff inset;
   -webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
+.pwbox{position:relative}
+.pwbox input{padding-right:70px}
+.pweye{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:none;border:0;
+  border-radius:3px;color:var(--bar);font:500 13px "Noto Sans TC",sans-serif;padding:7px 10px;cursor:pointer}
+.pweye:hover{background:var(--accent-wash)}
+.pweye:focus-visible{outline:2px solid var(--accent)}
+.capshint{font-size:12.5px;color:var(--signal);margin-top:6px}
 .login .btn{width:100%;padding:13px;margin-top:6px;background:var(--bar);border-color:var(--bar);
   color:#fff;font-size:15px;font-weight:700;letter-spacing:.3em;transition:background .15s}
 .login .btn:hover:not(:disabled){background:#085347;border-color:#085347;opacity:1}
@@ -425,7 +432,11 @@ h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;text-wrap:balance}
       </div>
       <div class="field">
         <label for="pw">密碼</label>
-        <input id="pw" name="password" type="password" autocomplete="current-password" required>
+        <div class="pwbox">
+          <input id="pw" name="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="pweye" id="pwEye" aria-pressed="false">顯示</button>
+        </div>
+        <div class="capshint" id="capsHint" hidden>大寫鎖定（Caps Lock）開著</div>
       </div>
 
       <button class="btn" type="submit" id="loginBtn">登入</button>
@@ -972,9 +983,26 @@ function banner(kind, html) {
 }
 
 // ══ 登入畫面 ═══════════════════════════════════════════════
+/** 中文輸入法在全形模式時，打出來的是「ａｄｍ０」「２３５７９」，看起來一樣、送出去卻是別的字，
+ *  資料庫只會回「帳密不對」。帳號密碼都只用英數字，所以一律轉成半形、去掉空白再送。 */
+function halfWidth(s) { return String(s || '').normalize('NFKC').replace(/\s+/g, ''); }
+
+$('pwEye').addEventListener('click', function () {
+  var show = $('pw').type === 'password';
+  $('pw').type = show ? 'text' : 'password';
+  this.textContent = show ? '隱藏' : '顯示';
+  this.setAttribute('aria-pressed', String(show));
+  $('pw').focus();
+});
+['keydown', 'keyup'].forEach(function (ev) {
+  $('pw').addEventListener(ev, function (e) {
+    if (e.getModifierState) $('capsHint').hidden = !e.getModifierState('CapsLock');
+  });
+});
+
 $('loginForm').addEventListener('submit', function (e) {
   e.preventDefault();
-  var acc = $('acc').value.trim(), pw = $('pw').value;
+  var acc = halfWidth($('acc').value), pw = halfWidth($('pw').value);
   if (!acc || !pw) return;
   $('loginBtn').disabled = true; $('loginBtn').textContent = '登入中…';
   $('loginErr').hidden = true;
@@ -983,7 +1011,7 @@ $('loginForm').addEventListener('submit', function (e) {
     .then(boot)
     .catch(function (err) {
       $('loginErr').textContent = /Invalid login/i.test(err.message)
-        ? '帳號或密碼不對，請再試一次。' : err.message;
+        ? '帳號或密碼不對，請再試一次。\n可按密碼欄右邊的「顯示」，核對有沒有打錯。' : err.message;
       $('loginErr').style.whiteSpace = 'pre-line';
       $('loginErr').hidden = false;
     })
