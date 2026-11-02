@@ -510,6 +510,8 @@ python3 system/make_mockup.py
 
 ## 待辦（需要 Jackie 哥操作）
 
+> 功能面的待辦（排程試算升級等）另見 [`BACKLOG.md`](BACKLOG.md)。
+
 1. **開放 `packing` schema 給 Data API**
    Supabase 後台 → Project Settings → API → Exposed schemas，把 `packing` 加進去。
    不做這步，前端與備份程式都讀不到任何資料。
