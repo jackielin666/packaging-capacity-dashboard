@@ -527,16 +527,25 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px;cursor:point
 .qty span{font-size:14px;color:var(--ink-3);margin-left:4px}
 .calc .out{display:grid;grid-template-columns:repeat(3,1fr);margin-top:20px;
   border:1px solid var(--rule);border-radius:3px;overflow:hidden}
-.calc .out div{padding:15px 17px;background:var(--sunk)}
-.calc .out div + div{border-left:1px solid var(--rule)}
+.calc .out > div{padding:15px 17px;background:var(--sunk)}
+.calc .out > div + div{border-left:1px solid var(--rule)}
 .calc .out .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.07em;
   text-transform:uppercase;color:var(--ink-3)}
 .calc .out .v{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:500;margin-top:4px}
 .calc .out .s{font-size:11.5px;color:var(--ink-3);margin-top:3px;line-height:1.5}
-.calc .out div.pick{background:var(--accent-wash)}
-.calc .out div.pick .v{color:var(--accent)}
+.calc .out > div.pick{background:var(--accent-wash)}
+.calc .out > div.pick .v{color:var(--accent)}
 @media screen and (max-width:640px){.calc .out{grid-template-columns:1fr}
-  .calc .out div+div{border-left:0;border-top:1px solid var(--rule)}}
+  .calc .out > div+div{border-left:0;border-top:1px solid var(--rule)}}
+.calc .out .warn{color:var(--signal);font-weight:600}
+/* 09 各人數比較表：選中的那一列底色，點任一列就換成那個人數 */
+.calc .crewt{margin-top:18px;overflow-x:auto}
+.calc .crewt th,.calc .crewt td{white-space:nowrap}   /* 手機上橫向捲動，不要每格擠成直排 */
+.calc .crewt tbody tr{cursor:pointer}
+.calc .crewt tbody tr:hover td{background:var(--sunk)}
+.calc .crewt tbody tr.sel td{background:var(--accent-wash)}
+.calc .crewt td.best{color:var(--accent);font-weight:600}
+.calc .crewt td.few{color:var(--signal)}
 
 /* ── alerts ── */
 .alert-card{border:1px solid var(--rule);border-left:3px solid var(--ink-3);background:var(--surface);
@@ -615,7 +624,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
   .fig, .chart, .calc, .skukpi, .notes > * { break-inside:avoid }
   .fig { margin-bottom:10px }
   .calc { padding:10px 12px }
-  .calc .out div { padding:8px 10px }
+  .calc .out > div { padding:8px 10px }
   .skukpi div { padding:6px 8px 8px }
   .skukpi .v { font-size:15px }
   .printhead { display:block!important }
@@ -880,17 +889,20 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);font-si
 <section class="appx">
   <div class="sec-head"><div class="sec-num">09</div><h2>排程試算</h2>
     <span class="tool">可互動查詢</span></div>
-  <p class="sec-sub">拖動下面的量，即時算出所需工時。用<b>這支產品自己的實績</b>換算，不用全廠平均。</p>
+  <p class="sec-sub">選品項與人數、拖動計畫量，即時算出<b>需要工時</b>與<b>需要人時</b>。
+    用<b>這支產品、這個人數自己的實績</b>換算，不用全廠平均；下方同時列出各人數的比較，標出最適人數。</p>
   <div class="body">
     <div class="calc">
       <div class="bar" style="margin-bottom:10px">
         <label>品項</label><select id="selCalc"></select>
+        <label>人數</label><select id="selCrew"></select>
         <span class="printonly" id="calcSkuP"></span>
         <span style="flex:1"></span>
         <span class="qty" id="qtyLabel"></span>
       </div>
       <input type="range" id="qtySlider" min="500" max="30000" step="100" value="5000">
       <div class="out" id="calcOut"></div>
+      <div class="crewt" id="calcCrew"></div>
       <div class="fig-n" id="calcNote"></div>
     </div>
   </div>
@@ -1608,16 +1620,8 @@ function dotChart(skus) {
 /** 08 單一品項：人數與每人處理量 */
 function crewChart(sku, nm) {
   $('crewTitle').textContent = `${sku}${nm ? '　' + nm : ''}　人數與每人處理量`;
-  const c = crewStats(baseRows().filter(x => x.s === sku))[0];
-  const rows = [];
-  if (!c) {
-    // 判定不出最適人數時（配置單一或批數不足）仍把現有配置畫出來
-    const g = new Map();
-    baseRows().filter(x => x.s === sku && x.n > 0 && x.h >= CREW_MIN_H).forEach(x => {
-      if (!g.has(x.n)) g.set(x.n, []); g.get(x.n).push(x.b / x.h / x.n);
-    });
-    [...g.entries()].sort((a, b) => a[0] - b[0]).forEach(([n, v]) => rows.push({ n, count: v.length, pp: medianOf(v) }));
-  } else rows.push(...c.crews);
+  // 判定不出最適人數時（配置單一或批數不足）仍把現有配置畫出來
+  const { crews: rows, best } = skuCrews(sku);
   if (!rows.length) {
     $('cCrew').innerHTML = '<div class="rep-empty">最近 12 個月這支品項沒有填人數的批次。</div>';
     return;
@@ -1636,7 +1640,7 @@ function crewChart(sku, nm) {
   }
   s += `<text x="${L}" y="${T - 12}" fill="${muted}" font-size="10.5" font-family="'IBM Plex Mono',monospace" text-anchor="start">每人處理量（單位／人·hr）</text>`;
   rows.forEach((r, i) => {
-    const x = L + step * i + (step - bw) / 2, isBest = c && r.n === c.best.n;
+    const x = L + step * i + (step - bw) / 2, isBest = best && r.n === best.n;
     const fill = isBest ? cssv('--accent') : muted;
     const op = r.count >= CREW_MIN_N ? 1 : 0.4;
     s += `<rect x="${x}" y="${Y(r.pp)}" width="${bw}" height="${Y(0) - Y(r.pp)}" rx="4" fill="${fill}" fill-opacity="${op}">`
@@ -2025,7 +2029,13 @@ function renderSkuNotes(s) {
   $('skuNotes').innerHTML = cards.join('');
 }
 
-/* ── 03 排程試算 ── */
+/* ── 09 排程試算 ──
+   人數放進公式：工時＝計畫量 ÷「這支品項、這個人數」的線速中位數；人時＝工時 × 人數。
+   同一支品項，3 人和 5 人的線速不一樣，算出來的工時、人時也不一樣 —— 這才是排班用得上的數字。
+   ‧ 資料範圍與 08 的人數圖相同（最近 12 個月、有填人數、工時 ≥ 0.5 小時），兩處數字一致
+   ‧ 批數 ≥ CREW_MIN_N 才算數；不足的照列但標「樣本不足，僅供參考」
+   ‧ 沒做過的人數不估：不從 3 人、4 人去外推 6 人（多一個人不一定多一份產能）
+   ‧ 這支品項完全沒有人數資料時，退回原本「只算工時」的算法 */
 
 /** 滑桿範圍貼著該品項的實際批量走，預設就是它的典型一批 */
 function setSliderRange(s) {
@@ -2034,13 +2044,98 @@ function setSliderRange(s) {
   el.min = 100; el.step = 100; el.max = typical * 20; el.value = typical;
 }
 
+/** 換品項時：滑桿回到典型批量，人數選單換成這支品項做過的人數，預設最適人數 */
+function prepCalc(sku) {
+  const s = state.R.skus.find(x => x.sku === sku);
+  if (!s) return;
+  setSliderRange(s);
+  const { crews, best } = skuCrews(sku);
+  const el = $('selCrew');
+  if (!crews.length) {
+    el.innerHTML = '<option value="">無人數實績</option>';
+    el.disabled = true;
+    return;
+  }
+  el.disabled = false;
+  el.innerHTML = crews.map(c => `<option value="${c.n}">${c.n} 人${best && c.n === best.n ? '（最適）'
+    : c.count < CREW_MIN_N ? '（樣本少）' : ''}</option>`).join('');
+  // 沒有最適人數時，預設最常用的人數
+  const def = best || crews.reduce((a, c) => (c.count > a.count ? c : a));
+  el.value = def.n;
+}
+
 function calc() {
   const sku = $('selCalc').value, s = state.R.skus.find(x => x.sku === sku);
   if (!s) return;
   const qty = +$('qtySlider').value;
   const nm = nameOf(sku);
-  $('calcSkuP').textContent = `${sku}${nm ? '　' + nm : ''}　計畫包裝量`;
   $('qtyLabel').innerHTML = `${fmt(qty)}<span>瓶</span>`;
+  const { crews, best } = skuCrews(sku);
+  const k = crews.find(c => c.n === +$('selCrew').value);
+  $('calcSkuP').textContent = `${sku}${nm ? '　' + nm : ''}${k ? `　${k.n} 人` : ''}　計畫包裝量`;
+  if (!k) { calcNoHead(s, qty); return; }
+
+  const M = state.R.meta;
+  const hrs = c => qty / c.line, ph = c => qty / c.line * c.n;
+  const few = k.count < CREW_MIN_N;
+  const fewTxt = `<span class="warn">樣本不足（${k.count} 批），僅供參考</span>`;
+  let cmpK, cmpV, cmpS;
+  if (!best) {
+    cmpK = '跟最適人數比'; cmpV = '無法判定';
+    cmpS = crews.length < 2 ? '這支品項只用過一種人數，沒得比'
+      : `要有一種人數累積 ${CREW_MIN_N} 批以上才能判定`;
+  } else if (k.n === best.n) {
+    cmpK = '跟最適人數比'; cmpV = '✓ 最適';
+    cmpS = `這支品項人時最省的配置（${best.count} 批實績）`;
+  } else {
+    const d = ph(k) - ph(best);
+    cmpK = d >= 0 ? '比最適人數多用' : '比最適人數少用';
+    cmpV = `${d >= 0 ? '+' : '−'}${f1(Math.abs(d))}<span class="u" style="font-size:13px"> 人時</span>`;
+    cmpS = `最適 ${best.n} 人：${f1(hrs(best))} 小時 · ${f1(ph(best))} 人時`
+      + (d < 0 ? `<br>${fewTxt.replace('僅供參考', '最適仍以批數夠的為準')}` : '');
+  }
+  $('calcOut').innerHTML = `
+    <div><div class="k">需要工時 · ${k.n} 人</div>
+      <div class="v">${f1(hrs(k))}<span class="u" style="font-size:13px"> 小時</span></div>
+      <div class="s">線速 ${fmt(k.line)} 瓶/hr（${k.count} 批中位數）<br>${few ? fewTxt
+        : `做到前 1/4 水準：${f1(qty / k.fast)} 小時`}</div></div>
+    <div class="pick"><div class="k">需要人時</div>
+      <div class="v">${f1(ph(k))}<span class="u" style="font-size:13px"> 人時</span></div>
+      <div class="s">＝ ${f1(hrs(k))} 小時 × ${k.n} 人<br>每人處理量 ${fmt(k.pp)} 瓶/人·hr</div></div>
+    <div><div class="k">${cmpK}</div>
+      <div class="v">${cmpV}</div>
+      <div class="s">${cmpS}</div></div>`;
+
+  const minPh = best ? ph(best) : null;
+  $('calcCrew').innerHTML = `<table class="rtab"><thead><tr>
+    <th>人數</th><th class="num">實績<i>批</i></th><th class="num">線速<i>瓶/hr</i></th>
+    <th class="num">每人處理量<i>瓶／人·hr</i></th><th class="num">需要工時<i>小時</i></th>
+    <th class="num">需要人時<i>人時</i></th><th class="num">比最適<i>人時</i></th><th>說明</th>
+    </tr></thead><tbody>${crews.map(c => {
+      const isBest = best && c.n === best.n, small = c.count < CREW_MIN_N;
+      const diff = minPh == null || isBest ? '—'
+        : `${ph(c) >= minPh ? '+' : '−'}${f1(Math.abs(ph(c) - minPh))}`;
+      return `<tr data-n="${c.n}" class="${c.n === k.n ? 'sel' : ''}" title="點一下改用 ${c.n} 人試算">
+        <td class="${isBest ? 'best' : ''}">${c.n} 人${isBest ? '（最適）' : ''}</td>
+        <td class="num">${c.count}</td><td class="num">${fmt(c.line)}</td><td class="num">${fmt(c.pp)}</td>
+        <td class="num">${f1(hrs(c))}</td><td class="num">${f1(ph(c))}</td><td class="num">${diff}</td>
+        <td class="${small ? 'few' : ''}">${isBest ? '人時最省' : small ? '樣本不足，僅供參考' : ''}</td></tr>`;
+    }).join('')}</tbody></table>`;
+  $('calcCrew').querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => {
+    $('selCrew').value = tr.dataset.n; calc();
+  });
+
+  const done = new Set(crews.map(c => c.n));
+  const never = [2, 3, 4, 5, 6].filter(n => !done.has(n));
+  $('calcNote').innerHTML =
+    `<b>算法：</b>需要工時＝計畫量 ÷ 這個人數的線速（中位數）；需要人時＝需要工時 × 人數。
+     資料是 ${M.baseFrom} ～ ${M.baseTo} 這支品項有填人數、工時 ${CREW_MIN_H} 小時以上的批次，與第 08 節的人數圖同一套。
+     <b>最適人數</b>＝批數 ${CREW_MIN_N} 批以上的人數中，人時最省的那一種；人數多、工時短，不一定比較划算。`
+    + (never.length ? `<br>沒有 ${never.join('、')} 人的實績，所以不估 —— 多一個人不一定多一份產能，不能用比例外推。` : '');
+}
+
+/** 這支品項沒有人數資料：只能用它自己的線速估工時（原本的算法），人時估不出來 */
+function calcNoHead(s, qty) {
   const rows = [
     ['常態水準', s.med, '一半的批次做得到'],
     ['合理目標', s.p75, `這支已有 1/4 的批次做到`],
@@ -2050,6 +2145,8 @@ function calc() {
     `<div class="${i === 1 ? 'pick' : ''}"><div class="k">${k}</div>
      <div class="v">${(qty / r).toFixed(1)}<span class="u" style="font-size:13px"> 小時</span></div>
      <div class="s">${fmt(r)} 單位/hr<br>${note}</div></div>`).join('');
+  $('calcCrew').innerHTML = `<div class="rep-empty">這支品項最近 12 個月沒有填人數的批次，
+    只能估<b>工時</b>、估不出<b>人時</b>與最適人數。補登人數後這裡會自動改成依人數試算。</div>`;
   const naive = qty / state.R.meta.rate, real = qty / s.med;
   const ratio = real / naive;
   const dir = ratio > 1 ? `<b>少估 ${ratio.toFixed(1)} 倍</b>（工時會不夠用）`
@@ -2082,15 +2179,14 @@ function render() {
   const initial = state.R.skus.some(s => s.sku === wanted) ? wanted
     : [...state.R.skus].sort((a, b) => b.d - a.d)[0].sku;
   $('selMain').value = initial; $('selCalc').value = initial;
-  const s = state.R.skus.find(x => x.sku === initial);
-  setSliderRange(s);
+  prepCalc(initial);
   renderSku(initial); calc();
 }
 
 function goto(sku) {
   if (!state.R.skus.some(s => s.sku === sku)) return;
   $('selMain').value = sku; $('selCalc').value = sku;
-  setSliderRange(state.R.skus.find(x => x.sku === sku));
+  prepCalc(sku);
   renderSku(sku); calc();
   history.replaceState(null, '', '?sku=' + encodeURIComponent(sku));
   $('selMain').closest('section').scrollIntoView({ behavior: 'smooth' });
@@ -2112,10 +2208,8 @@ function showError(msg) {
 
 $('skuSearch').oninput = applySearch;
 $('selMain').onchange = () => goto($('selMain').value);
-$('selCalc').onchange = () => {
-  setSliderRange(state.R.skus.find(x => x.sku === $('selCalc').value));
-  calc();
-};
+$('selCalc').onchange = () => { prepCalc($('selCalc').value); calc(); };
+$('selCrew').onchange = calc;
 $('qtySlider').oninput = calc;
 
 /* ─────────── 人力（人均產能）───────────
@@ -2220,6 +2314,37 @@ function medianOf(a) {
   const v = a.slice().sort((x, y) => x - y), m = v.length >> 1;
   return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
 }
+/** 同一支品項、同一個人數的批次彙總成一列。
+ *  line＝線速中位數，pp＝每人處理量中位數（剛好等於 line ÷ 人數），
+ *  fast＝線速的前 1/4（75 百分位），排程試算的「合理目標」用。 */
+function crewGroups(g) {
+  return [...g.entries()].map(([n, list]) => {
+    const r = list.map(x => x.b / x.h).sort((a, b) => a - b);
+    const pos = (r.length - 1) * 0.75, lo = Math.floor(pos);
+    return {
+      n, count: list.length,
+      hrs: list.reduce((a, x) => a + x.h, 0),
+      ph: list.reduce((a, x) => a + x.h * x.n, 0),
+      line: medianOf(r),
+      pp: medianOf(list.map(x => x.b / x.h / x.n)),
+      fast: r[lo] + ((r[lo + 1] ?? r[lo]) - r[lo]) * (pos - lo),
+    };
+  }).sort((a, b) => a.n - b.n);
+}
+/** 一支品項最近 12 個月的人數配置與最適人數。
+ *  判定不出最適人數（只有一種配置或批數不足）時 best 為 null，配置照樣回傳。
+ *  08 的人數圖與 09 的排程試算共用，兩處數字一定一致。 */
+function skuCrews(sku) {
+  const rows = baseRows().filter(x => x.s === sku);
+  const c = crewStats(rows)[0];
+  if (c) return { crews: c.crews.filter(k => k.line > 0), best: c.best };
+  const g = new Map();
+  rows.forEach(x => {
+    if (!(x.n > 0) || x.h < CREW_MIN_H || !(x.b > 0)) return;
+    if (!g.has(x.n)) g.set(x.n, []); g.get(x.n).push(x);
+  });
+  return { crews: crewGroups(g).filter(k => k.line > 0), best: null };
+}
 /** 回傳每支品項的人數配置實績與最適人數（只回有最適人數可判定的品項）。 */
 function crewStats(rows) {
   const by = new Map();
@@ -2232,13 +2357,7 @@ function crewStats(rows) {
   });
   const out = [];
   by.forEach((g, sku) => {
-    const crews = [...g.entries()].map(([n, list]) => ({
-      n, count: list.length,
-      hrs: list.reduce((a, x) => a + x.h, 0),
-      ph: list.reduce((a, x) => a + x.h * x.n, 0),
-      line: medianOf(list.map(x => x.b / x.h)),
-      pp: medianOf(list.map(x => x.b / x.h / x.n)),
-    })).sort((a, b) => a.n - b.n);
+    const crews = crewGroups(g);
     const ok = crews.filter(c => c.count >= CREW_MIN_N);
     if (!ok.length || crews.length < 2) return;
     const best = ok.reduce((a, c) => (c.pp > a.pp ? c : a));

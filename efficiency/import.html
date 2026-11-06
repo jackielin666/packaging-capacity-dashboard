@@ -127,6 +127,7 @@ tr.skip-row td { color: var(--muted); }
   <footer>匯入規則與製成率系統相同：日期支援 Excel 日期、2026/1/2、民國年與無年份的 10/14（以前後最近的完整日期推斷年份）。工時的分鐘數由資料庫依起訖時間推算（完整涵蓋 12:00–13:00 才扣 60 分；加前置）。</footer>
 </div>
 
+<script src="../idle.js"></script>
 <script src="core.js"></script>
 <script>
 'use strict';
@@ -267,11 +268,24 @@ var DROP = 0.9;     // 筆數少於原本 90% 要另外確認
 function step(n) { for (var i = 1; i <= 4; i++) { $('st' + i).classList.toggle('on', i === n); $('st' + i).classList.toggle('done', i < n); } }
 function show(id, on) { $(id).classList.toggle('hidden', !on); }
 
+/** 登入框；若剛才是因為閒置被登出，順便講原因 */
+function showLogin() {
+  show('loginBox', true); show('app', false);
+  var why = PackingIdle.takeNotice();
+  if (why) $('loginErr').textContent = why;
+}
+
 function start() {
-  if (!loadSession()) { show('loginBox', true); show('app', false); return; }
+  if (!loadSession()) { showLogin(); return; }
   whoAmI().then(function (me) {
     if (!me) throw new Error('這個帳號沒有系統角色，請洽 Jackie 哥。');
     S.me = me;
+    // 15 分鐘沒操作就登出；匯入進行中不算閒置，讀了檔還沒匯入會特別提醒
+    PackingIdle.start({
+      busy: function () { return !!S.importing; },
+      hasUnsaved: function () { return !!S.parsed && !S.imported; },
+      unsavedMsg: '已讀入檔案但還沒按「匯入」，登出後要重新選檔。',
+      onLogout: function () { location.reload(); } });
     show('loginBox', false); show('app', true);
     $('who').textContent = '登入者：' + me.display_name + '（' + ({ manager: '主管', operator: '輸入專員', viewer: '檢視者' }[me.role] || me.role) + '）';
     var mgr = me.role === 'manager';
@@ -279,7 +293,7 @@ function start() {
     if (!mgr) $('notManagerMsg').textContent = '只有主管帳號（admin000、admin001）可以匯入製成率資料。\n你可以在下方看到最近的匯入紀錄。';
     loadHistory();
   }).catch(function (e) {
-    if (e.status === 401) { clearSession(); show('loginBox', true); show('app', false); return; }
+    if (e.status === 401) { clearSession(); showLogin(); return; }
     show('loginBox', true); $('loginErr').textContent = e.message;
   });
 }
@@ -291,7 +305,7 @@ $('loginForm').addEventListener('submit', function (ev) {
     .catch(function (e) { $('loginErr').textContent = /Invalid login/i.test(e.message) ? '帳號或密碼不對' : e.message; })
     .then(function () { $('loginBtn').disabled = false; });
 });
-$('logout').onclick = function () { clearSession(); location.reload(); };
+$('logout').onclick = function () { PackingIdle.signOut(null); clearSession(); location.reload(); };
 $('themeBtn').onclick = toggleTheme;
 
 // 匯入按鈕列：檔案讀完後固定在右下角
@@ -333,7 +347,7 @@ function readFile(f) {
   rd.onload = function (e) {
     try {
       var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: false });
-      S.file = f.name; S.parsed = parseWorkbook(wb);
+      S.file = f.name; S.parsed = parseWorkbook(wb); S.imported = false;
     } catch (err) {
       $('parseErr').textContent = '檔案解析失敗：' + err.message; $('parseInfo').textContent = '';
       dropState('bad', '✕', '這個檔案讀不到', f.name + '　·　點這裡改選其他檔案'); return;
@@ -418,11 +432,12 @@ $('go').onclick = function () {
   var sel = S.months.filter(function (m) { return S.selected[m]; });
   var chunks = []; for (var i = 0; i < sel.length; i += CHUNK) chunks.push(sel.slice(i, i + CHUNK));
   $('go').disabled = true; $('importErr').textContent = ''; show('prog', true); step(3);
+  S.importing = true;
   var done = [], totals = { runs: 0, labour: 0 };
   (function next(k) {
     $('progBar').style.width = (k / chunks.length * 100) + '%';
     $('go').textContent = '匯入中… ' + k + ' / ' + chunks.length + ' 批';
-    if (k === chunks.length) { $('progTxt').textContent = '完成'; finish(done, totals); return; }
+    if (k === chunks.length) { S.importing = false; S.imported = true; $('progTxt').textContent = '完成'; finish(done, totals); return; }
     var ms = chunks[k];
     $('progTxt').textContent = '匯入中 ' + ms[0] + (ms.length > 1 ? ' ～ ' + ms[ms.length - 1] : '') + '（第 ' + (k + 1) + ' / ' + chunks.length + ' 批）';
     var inM = function (r) { return ms.indexOf(r.prod_date.slice(0, 7)) >= 0; };
@@ -432,6 +447,7 @@ $('go').onclick = function () {
       .catch(function (e) {
         $('importErr').textContent = '第 ' + (k + 1) + ' 批（' + ms.join('、') + '）失敗，這一批已全部取消、資料庫維持原樣：\n' + e.message
           + (done.length ? '\n前面已完成的月份：' + done.join('、') + '（已成功寫入）' : '');
+        S.importing = false;
         $('go').disabled = false; updateGo(); if (done.length) finish(done, totals);
       });
   })(0);
@@ -476,6 +492,7 @@ function loadHistory() {
     }).catch(function (e) { $('hist').replaceChildren(h('div', { class: 'err' }, '讀取匯入紀錄失敗：' + e.message)); });
 }
 
+PackingIdle.expireIfStale();      // 上次操作超過 15 分鐘（例如隔天才開）就先作廢登入
 start();
 </script>
 </body>

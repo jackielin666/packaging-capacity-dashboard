@@ -5,6 +5,7 @@
   ‧ 分頁：超過 1,000 列的 view 會分頁讀完
   ‧ 數字：畫面上的效率指數、損失人時，與本檔用資料庫 sku_eff／plant_month 的規則另外算的結果一致
   ‧ 五頁都畫得出來、沒有 JS 錯誤；暫定月份、物料平衡、工時待處理清單、計算說明
+  ‧ 閒置 15 分鐘自動登出（與輸入頁、儀表板共用 idle.js）
 """
 import json, base64, random
 from urllib.parse import urlparse, parse_qs
@@ -217,6 +218,41 @@ with sync_playwright() as p:
         tab(pg, p_)
         w = pg.evaluate("document.scrollingElement.scrollWidth")
         check(f"手機寬度 {p_} 沒有橫向捲動", w <= 391, w)
+    check("沒有 JS 錯誤", not errs, errs[:3])
+
+    print("── 閒置 15 分鐘自動登出 ──")
+    pg = b.new_page(viewport={"width": 1280, "height": 900})
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    route, calls = router("viewer"); pg.route("**/*", route)
+    pg.clock.install(time="2026-11-06T09:00:00+08:00")
+    pg.add_init_script("if (!sessionStorage.getItem('t')) { sessionStorage.setItem('t', 1); localStorage.setItem('packing.session', JSON.stringify({access:'%s',refresh:'r',exp:Date.now()+3600e3})); }" % JWT)
+    pg.goto(PAGE); pg.wait_for_selector("#app:not(.hidden)")
+    check("登入後開始計時", pg.evaluate("!!localStorage.getItem('packing.lastActive')"))
+    pg.clock.run_for("14:10")
+    check("登出前 1 分鐘提醒", pg.is_visible("#idleWarn") and "秒後自動登出" in pg.inner_text("#idleWarn"))
+    pg.mouse.move(300, 300); pg.mouse.move(320, 330); pg.clock.run_for(1500)
+    check("動一下滑鼠就繼續", not pg.is_visible("#idleWarn"))
+    pg.clock.run_for("15:10")
+    pg.wait_for_selector("#loginBox:not(.hidden)", timeout=5000)
+    check("15 分鐘沒動就回到登入框", pg.is_visible("#loginBox") and not pg.is_visible("#app"))
+    check("登入框說明是閒置登出", "閒置超過 15 分鐘" in pg.inner_text("#loginErr"), pg.inner_text("#loginErr"))
+    check("登入狀態已清掉", pg.evaluate("localStorage.getItem('packing.session')") is None)
+    pg.evaluate("""() => { localStorage.setItem('packing.session', JSON.stringify({access:'x.e30.y', refresh:'r', exp: Date.now()+3600e3}));
+                           localStorage.setItem('packing.lastActive', String(Date.now() - 20*60*1000)); }""")
+    for page in ("index.html", "import.html"):
+        pg.goto(PAGE.replace("index.html", page)); pg.wait_for_selector("#loginBox:not(.hidden)", timeout=5000)
+        check(f"{page}：超過 15 分鐘才打開，直接要求重新登入", "請重新登入" in pg.inner_text("#loginErr"), pg.inner_text("#loginErr"))
+        pg.evaluate("""() => { localStorage.setItem('packing.session', JSON.stringify({access:'x.e30.y', refresh:'r', exp: Date.now()+3600e3}));
+                               localStorage.setItem('packing.lastActive', String(Date.now() - 20*60*1000)); }""")
+    pg.evaluate("""() => { localStorage.setItem('packing.session', JSON.stringify({access:'%s', refresh:'r', exp: Date.now()+3600e3}));
+                           localStorage.setItem('packing.lastActive', String(Date.now())); }""" % JWT)
+    pg.goto(PAGE.replace("index.html", "import.html")); pg.wait_for_selector("#app:not(.hidden)")
+    pg.evaluate("S.importing = true"); pg.clock.run_for("16:00")
+    check("import.html：匯入進行中不算閒置", pg.is_visible("#app") and not pg.is_visible("#idleWarn"))
+    pg.evaluate("S.importing = false; S.parsed = {}; S.imported = false"); pg.clock.run_for("14:10")
+    check("import.html：讀了檔還沒匯入會提醒", "還沒按「匯入」" in pg.inner_text("#idleWarn"), pg.inner_text("#idleWarn"))
+    pg.clock.run_for("01:10"); pg.wait_for_selector("#loginBox:not(.hidden)", timeout=5000)
+    check("import.html：匯入結束後照常計時登出", pg.is_visible("#loginBox"))
     check("沒有 JS 錯誤", not errs, errs[:3])
 
     b.close()

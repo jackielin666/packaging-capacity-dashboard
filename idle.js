@@ -1,4 +1,4 @@
-/* 閒置 15 分鐘自動登出 —— entry.html 與 dashboard.html 共用。
+/* 閒置 15 分鐘自動登出 —— entry.html、dashboard.html、efficiency/ 兩頁共用。
  *
  * 現場電腦是共用的，登入狀態存在瀏覽器裡、隔天打開還在。
  * 有人離開座位，下一個人就能用他的帳號改資料。所以：
@@ -11,7 +11,9 @@
  *
  * 頁面用法：
  *   PackingIdle.expireIfStale()   載入時、讀取登入狀態之前呼叫：過期就先清掉
- *   PackingIdle.start({ hasUnsaved, onLogout })   登入後呼叫
+ *   PackingIdle.start({ hasUnsaved, unsavedMsg, busy, onLogout })   登入後呼叫
+ *       hasUnsaved()  有沒存的資料 → 提醒時多講一句（unsavedMsg 可換成該頁的說法）
+ *       busy()        正在跑不能中斷的工作（例如匯入中）→ 這段時間不算閒置
  *   PackingIdle.takeNotice()      登入畫面呼叫：剛才是不是因為閒置被登出（回傳說明文字或 null）
  */
 (function () {
@@ -79,7 +81,7 @@
     t.textContent = '閒置太久，' + secs + ' 秒後自動登出。';
     b.appendChild(t);
     b.appendChild(document.createTextNode(unsaved
-      ? '　這一頁有尚未儲存的資料，請先按「儲存本日」。動一下滑鼠或按任意鍵即可繼續。'
+      ? '　' + ((opts && opts.unsavedMsg) || '這一頁有尚未儲存的資料，請先按「儲存本日」。') + '動一下滑鼠或按任意鍵即可繼續。'
       : '　動一下滑鼠或按任意鍵即可繼續使用。'));
     b.hidden = false;
   }
@@ -87,6 +89,7 @@
 
   function check() {
     if (!get(SS)) { logout(null); return; }        // 別的分頁已經登出了
+    if (opts && opts.busy && opts.busy()) { set(LAST, String(Date.now())); hideWarning(); return; }
     var idle = Date.now() - (lastActive() || Date.now());
     if (idle >= LIMIT) { logout('閒置超過 15 分鐘，已自動登出，請重新登入。'); return; }
     if (idle >= LIMIT - WARN) showWarning(Math.ceil((LIMIT - idle) / 1000));
