@@ -99,7 +99,7 @@ design/entry-mockup.html      靜態設計稿（填好示範資料、沒有程�
 entry.html                    輸入介面（部署在 GitHub Pages）
 index.html                    首頁：自動轉到 entry.html（帶 ?sku= 的舊儀表板連結轉到 dashboard.html）
 dashboard.html                儀表板
-idle.js                       兩頁共用：閒置 15 分鐘自動登出（登出前 1 分鐘提醒）
+idle.js                       共用：閒置 15 分鐘自動登出（登出前 1 分鐘提醒）。輸入頁、儀表板、efficiency/ 兩頁都有
 ```
 
 **版控裡只放「結構」，不放「資料」。** 歷史批次與品項主檔放在
@@ -130,6 +130,7 @@ Supabase Auth 底層一定要用信箱格式，所以前端會自動把 `admin00
 | `admin000` | manager 主管 | Jackie 哥，不限月份可改 |
 | `admin001` | manager 主管 | Tommy，不限月份可改 |
 | `247` | operator 輸入專員 | 林圓妮，新增不限日期、修改只限當月 |
+| `140` | viewer 唯讀 | 彭國榮（廠長），2026-11-06 建立。看儀表板與全流程工時成本，不能改資料 |
 | `backup` | viewer 唯讀 | 每月備份程式專用，只能讀。**不可刪除**，刪了備份就停 |
 | ~~`pack01`~~ | 已停用 | 2026-10-06 停用：取消角色並禁止登入 |
 

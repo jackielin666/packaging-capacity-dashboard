@@ -345,6 +345,38 @@ with sync_playwright() as p:
     pg2.select_option("#selMain", "D0310"); pg2.wait_for_timeout(400)
     check("單一品項有人數與每人處理量圖", pg2.locator("#cCrew svg, #cCrew .rep-empty").count() == 1)
     check("圖的標題帶品號", "D0310" in pg2.inner_text("#crewTitle"), pg2.inner_text("#crewTitle"))
+
+    print("\n── 09 排程試算：依人數 ──")
+    # B2011：3 人 39 批（最適）、2 人與 8 人各 1 批（樣本不足）
+    pg2.select_option("#selCalc", "B2011"); pg2.wait_for_timeout(200)
+    pg2.evaluate("() => { const e = $('qtySlider'); e.value = 10000; e.dispatchEvent(new Event('input')); }")
+    opts = pg2.eval_on_selector_all("#selCrew option", "o => o.map(x => x.textContent)")
+    check("人數選單列出做過的人數", opts == ["2 人（樣本少）", "3 人（最適）", "8 人（樣本少）"], opts)
+    check("預設選最適人數", pg2.input_value("#selCrew") == "3", pg2.input_value("#selCrew"))
+    exp = pg2.evaluate("""() => skuCrews('B2011').crews.map(c => ({ n: c.n,
+        h: +(10000 / c.line).toFixed(1), ph: +(10000 / c.line * c.n).toFixed(1) }))""")
+    e3 = next(x for x in exp if x["n"] == 3); e8 = next(x for x in exp if x["n"] == 8)
+    out = pg2.inner_text("#calcOut")
+    check("工時＝計畫量 ÷ 該人數線速", ("%.1f" % e3["h"]) in out, (e3, out))
+    check("人時＝工時 × 人數", ("%.1f" % e3["ph"]) in out, (e3, out))
+    check("最適人數顯示「最適」", "最適" in out, out)
+    trs = pg2.locator("#calcCrew tbody tr")
+    check("比較表每個人數一列", trs.count() == 3, trs.count())
+    check("批數不足標「僅供參考」", "樣本不足，僅供參考" in trs.nth(0).inner_text(), trs.nth(0).inner_text())
+    pg2.select_option("#selCrew", "8"); pg2.wait_for_timeout(150)
+    out = pg2.inner_text("#calcOut")
+    check("非最適人數算出多用的人時", "比最適人數多用" in out and ("+%.1f" % (e8["ph"] - e3["ph"])) in out, out)
+    check("人數不足 10 批時警告", "樣本不足（1 批）" in out, out)
+    trs.nth(1).click(); pg2.wait_for_timeout(150)
+    check("點比較表的一列就換人數", pg2.input_value("#selCrew") == "3", pg2.input_value("#selCrew"))
+    check("沒做過的人數不估", "沒有 4、5、6 人的實績" in pg2.inner_text("#calcNote"), pg2.inner_text("#calcNote"))
+    pg2.locator("section.appx").last.screenshot(path="/tmp/claude-0/-home-user-packaging-capacity-dashboard/"
+                        "0826f280-fd07-5156-92d0-2773c273e079/scratchpad/calc09.png")
+    pg2.evaluate("() => { state.R.batches.forEach(x => { if (x.s === 'C1010') x.n = 0; }); }")
+    pg2.select_option("#selCalc", "C1010"); pg2.wait_for_timeout(150)
+    check("沒有人數資料：人數選單停用", pg2.is_disabled("#selCrew"))
+    check("沒有人數資料：退回只算工時", "常態水準" in pg2.inner_text("#calcOut") and "估不出" in pg2.inner_text("#calcCrew"),
+          pg2.inner_text("#calcCrew"))
     ctx2.close()
 
     print("\n── 閒置 15 分鐘自動登出 ──")

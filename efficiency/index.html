@@ -242,6 +242,7 @@
   </div>
 </dialog>
 
+<script src="../idle.js"></script>
 <script src="core.js"></script>
 <script>
 /* 品項全流程工時成本：儀表板。版面與圖表沿用設計稿第 3 版；數字由 production 的 view 即時計算。 */
@@ -1039,13 +1040,22 @@ async function loadData() {
 
 function show(id, on) { $(id).classList.toggle('hidden', !on); }
 
+/** 登入框；若剛才是因為閒置被登出，順便講原因 */
+function showLogin() {
+  show('loading', false); show('loginBox', true);
+  const why = PackingIdle.takeNotice();
+  if (why) $('loginErr').textContent = why;
+}
+
 async function start() {
-  if (!loadSession()) { show('loginBox', true); show('loading', false); return; }
+  if (!loadSession()) { showLogin(); return; }
   show('loginBox', false); show('loading', true); $('loadMsg').textContent = '載入中…';
   try {
     const me = await whoAmI();
     if (!me) throw new Error('這個帳號沒有系統角色，請洽 Jackie 哥。');
     $('who').textContent = '登入者：' + me.display_name;
+    // 與輸入頁、儀表板同一套：15 分鐘沒操作就登出（各頁共用最後操作時間）
+    PackingIdle.start({ onLogout: () => location.reload() });
     show('importLink', me.role === 'manager'); show('logout', true);
     const { d, months } = await loadData();
     D = d; M = months; allSku = Object.keys(D.sku);
@@ -1063,7 +1073,7 @@ async function start() {
     show('loading', false); show('app', true);
     render();
   } catch (e) {
-    if (e.status === 401) { clearSession(); show('loading', false); show('loginBox', true); return; }
+    if (e.status === 401) { clearSession(); showLogin(); return; }
     $('loadMsg').textContent = e.message;
   }
 }
@@ -1075,7 +1085,8 @@ $('loginForm').addEventListener('submit', ev => {
     .catch(e => { $('loginErr').textContent = /Invalid login/i.test(e.message) ? '帳號或密碼不對' : e.message; })
     .then(() => { $('loginBtn').disabled = false; });
 });
-$('logout').onclick = () => { clearSession(); location.reload(); };
+$('logout').onclick = () => { PackingIdle.signOut(null); clearSession(); location.reload(); };
+PackingIdle.expireIfStale();      // 上次操作超過 15 分鐘（例如隔天才開）就先作廢登入
 start();
 </script>
 </body>
